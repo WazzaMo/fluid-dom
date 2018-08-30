@@ -1,0 +1,24 @@
+{
+  "name": "fluid-dom",
+  "version": "1.0.0",
+  "description": "A fluid DOM (DSL style) library.",
+  "main": "fluid-dom.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js fluid-dom.js",
+    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js fluid-dom.js"
+  },
+  "files":[
+    "*.js"
+  ],
+  "keywords": [
+    "DOM",
+    "web",
+    "html"
+  ],
+  "author": "Warwick Molloy",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.9.7"
+  }
+}
