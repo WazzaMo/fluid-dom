@@ -73,7 +73,7 @@ export class ElementList {
     }
 
     this.elementList = convertToListOfElements(elementList)
-    this.parent = parent
+    this.parent = !! parent ? new Element(parent) : undefined
     this.docKey = keyType
     this.isSingle = false
     this.docMatcher = matcher

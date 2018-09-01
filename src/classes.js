@@ -40,6 +40,7 @@ export class Classes {
 
   remove(_class) {
     this.element.classList.remove(_class)
+    return this
   }
 
   set(_class) {

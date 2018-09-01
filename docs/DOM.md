@@ -13,7 +13,7 @@ Generally harmless.
 
 If no match, a console.warn message will inform you.
 
-## findAll(arg) {
+## findAll(arg)
 |Direction|Description|
 |-----|--------|
 |  Takes In  | Takes an object with ONE key from `selector`, `class` or `tagName` |
@@ -28,3 +28,6 @@ If no match, a console.warn message will inform you.
 
 Only works on BUTTON tags and is a convenience method
 on the DOM class. An alternative is to use Element.on()
+
+----
+[Back to README](./README.md) - Fluid DOM (c) Copyright 2018 Warwick Molloy
