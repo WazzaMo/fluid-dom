@@ -34,6 +34,15 @@
             <h2 class="hidable">Also can be hidden</h2>
         </div>
     </section>
+
+    <section id="iteration">
+        <h1>Iteration Demo</h1>
+        <ul>
+            <li>An item</li>
+            <li>Second item yay</li>
+            <li>Third item yay</li>
+        </ul>
+    </section>
 </body>
     <script>
         var dom = new fluid.DOM()
@@ -46,7 +55,7 @@
         function setupAttribDemo() {
             var attrib_demo = dom.findElement({id: 'attrib_demo'})
             var button = attrib_demo.selectFirst('button')
-            var hidables = attrib_demo.selectAll('.hidable')
+            var hidables = attrib_demo.findAll({selector:'.hidable'})
             button.on({
                 event: dom.events.CLICK,
                 handler: function() {
@@ -59,6 +68,33 @@
                     })
                 }
             })
+        }
+
+        function iterationDemoAddClass() {
+            dom.findElement({id:'iteration'})
+                .findAll({selector:'ul>li'})
+                .each( li => li.classes().add('fancy') )
+        }
+
+        function iterationDemoAddMouseOverEvent() {
+            dom.findAll({selector:'#iteration>ul>li'})
+                .each(item => item.on({
+                    event: fluid.Events.MOUSEOVER,
+                    handler: () => alert('Mouse over list item')
+                }))
+        }
+
+        function summariseList() {
+            var summary = dom
+                .findAll({tagName: 'li'})
+                .map( li => li.text() )
+                .reduce( (li1, li2) => `${li1}, ${li2}` )
+            console.log(summary)
+        }
+
+        function replaceYayWithBoo() {
+            dom.findAll({tagName: 'li'})
+            .each(item => item.text( item.text().replace(/yay/,'boo') ))
         }
 
         function setup() {
