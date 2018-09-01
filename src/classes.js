@@ -12,14 +12,14 @@ export class Classes {
   }
 
   each(task) {
-    for(var _class of element.classList) {
+    for(var _class of this.element.classList) {
       task(_class)
     }
     return this
   }
   
   has(name) {
-    return element.classList.contains(name)
+    return this.element.classList.contains(name)
   }
 
   whenHas(name, task) {
@@ -31,7 +31,7 @@ export class Classes {
 
   add(_class) {
     if (!! _class && _class.length > 0) {
-      element.classList.add(_class)
+      this.element.classList.add(_class)
     } else {
       console.error(`Class name given was "${_class}" - it must not be empty!`)
     }
@@ -39,7 +39,7 @@ export class Classes {
   }
 
   remove(_class) {
-    element.classList.remove(_class)
+    this.element.classList.remove(_class)
   }
 
   set(_class) {

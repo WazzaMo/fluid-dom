@@ -11,33 +11,33 @@ import { ElementList } from './src/element-list'
 import * as CONST from './src/constants'
 
 
+const eventlist = [
+  'abort', 'afterscriptexecute',
+  'animationcancel', 'animationend', 'animationiteration',
+  'auxclick',
+  'beforescriptexecute', 'blur',
+  'change', 'click', 'close', 'contextmenu',
+  'dblclick',
+  'error',
+  'focus', 'fullscreenchange', 'fullscreenerror',
+  'gotpointercapture',
+  'input',
+  'keydown', 'keypress', 'keyup',
+  'load', 'loadend', 'loadstart', 'lostpointercapture',
+  'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
+  'offline', 'online',
+  'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave',
+  'pointermove', 'pointerout', 'pointerover', 'pointerup', 
+  'reset', 'resize',
+  'scroll', 'select', 'selectionchange', 'selectionchange',
+  'selectstart', 'submit', 
+  'touchcancel', 'touchmove', 'touchstart',
+  'transitioncancel', 'transitionend',
+  'visibilitychange',
+  'wheel'
+]
+
 function createEventHash() {
-  const eventlist = [
-    'abort', 'afterscriptexecute',
-    'animationcancel', 'animationend', 'animationiteration',
-    'auxclick',
-    'beforescriptexecute', 'blur',
-    'change', 'click', 'close', 'contextmenu',
-    'dblclick',
-    'error',
-    'focus', 'fullscreenchange', 'fullscreenerror',
-    'gotpointercapture',
-    'input',
-    'keydown', 'keypress', 'keyup',
-    'load', 'loadend', 'loadstart', 'lostpointercapture',
-    'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
-    'offline', 'online',
-    'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave',
-    'pointermove', 'pointerout', 'pointerover', 'pointerup', 
-    'reset', 'resize',
-    'scroll', 'select', 'selectionchange', 'selectionchange',
-    'selectstart', 'submit', 
-    'touchcancel', 'touchmove', 'touchstart',
-    'transitioncancel', 'transitionend',
-    'visibilitychange',
-    'wheel'
-  ]
-  
   var events = {}
   for(var ev of eventlist) {
     var key = ev.toUpperCase()
@@ -55,7 +55,7 @@ export class DOM {
     return new Element(arg)
   }
 
-  selectAll(arg) {
+  findAll(arg) {
     return new ElementList(arg)
   }
 
@@ -68,5 +68,8 @@ export class DOM {
   }
 }
 
+export const Events = {}
 
-
+for(var event of eventlist) {
+  Events[event.toUpperCase()] = event
+}

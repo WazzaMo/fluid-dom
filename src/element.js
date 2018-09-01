@@ -4,7 +4,7 @@
  * Available under the MIT License
  */
 
-import { providesOne, providesAll } from './util'
+import { providesOne, providesAll, logWarning } from './util'
 import { Attributes } from './attributes'
 import { Classes } from './classes'
 import { ElementList } from './element-list'
@@ -45,6 +45,9 @@ export class Element {
         innerText: undefined
       }
     }
+    if (!isValid) {
+      logWarning(`Element to be matched by ${keyType} '${matcher}' was not valid`)
+    }
     this.docKey   = keyType
     this.docMatcher = matcher
     this.element  = element
@@ -60,6 +63,14 @@ export class Element {
       children: this.element.children,
       parent: this.element
     })
+  }
+
+  eachChild(doWith) {
+    for(var child of this.element.children) {
+      var childElement = new Element({element: child})
+      doWith(childElement)
+    }
+    return this
   }
 
   expect(tagName) {
@@ -86,9 +97,8 @@ export class Element {
     return isValid
   }
 
-  selectAll(selector) {
-    var elementList = this.element.querySelectorAll(selector)
-    return new ElementList({children: elementList, parent: this.element})
+  findAll(arg) {
+    return new ElementList(arg)
   }
 
   selectFirst(selector) {

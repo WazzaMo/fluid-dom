@@ -1,6 +1,6 @@
 
 
-function providesAll(list, args) {
+export function providesAll(list, args) {
   var message = ''
   for(var expectedArg of list) {
     var value = args[expectedArg]
@@ -15,7 +15,7 @@ function providesAll(list, args) {
   return true
 }
 
-function providesOne(list, args) {
+export function providesOne(list, args) {
   var valuesOfArgs = list.map( expectedWord => args[expectedWord] )
   var isAnyNotUndefined = valuesOfArgs.find( x => x != undefined )
   if (!isAnyNotUndefined) {
@@ -25,7 +25,6 @@ function providesOne(list, args) {
   return !!isAnyNotUndefined
 }
 
-module.exports = {
-  providesAll: providesAll,
-  providesOne: providesOne
+export function logWarning(message) {
+  console.warn("FluidDOM: " + message)
 }
