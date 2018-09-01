@@ -18,28 +18,28 @@ in the Fluid DOM, this is the type of object returned.
 
 ## Methods
 |  Method   | Parameters    | Description       |
-|-----------|---------------|-------------------|
-| children  | None          | Provides children of the element as an ElementList |
+|-----------|---------------|-------------------------------------|
+| children  | None          | Returns element's children as an ElementList |
 | eachChild | function(element) | Visits each child element. Returns self. |
 | expect    | string tagName | Checks expected tag. Returns self. |
 | getId     | None          | Returns elements ID |
 | getParent | None          | Returns parent as Element object  |
 | hasId     | None          | Returns true if element has an ID.|
 | exists    | None          | Returns true if element is valid. |
-| findAll   | [ElementList Option](ElementListOptions.md) | Get all matches as an ElementList object |
+| findAll   | Location option | Get matches as an ElementList object (see below). |
 | selectFirst | string selector | Returns the first match Element object |
-| selectorPath | None | Returns a string path to identify that element in the hierachiy of the document. |
+| selectorPath | None | Returns a selector path string. |
 | tagName   | None          | Returns tag name string. |
 | text      | None          | Returns text in element |
-| text      | string _text  | Replaces element's text with given value and returns self. |
-| html      | None | Returns sub-document, child of the element, as HTML source |
+| text      | string _text  | Replaces element's text. Returns self. |
+| html      | None | Returns sub-document as HTML source string. |
 | html      | string _html  | Replaces the sub-document and returns self. |
 | append    | string _html  | Appends new HTML source after existing child-document and returns self. |
 | prepend   | string _html  | Prepends new HTML source before existing child-document and returns self. |
 | remove    | None          | Destroys the element. |
 | attributes | None         | Returns an Attributes object |
 | classes   | None          | Returns a Classes object |
-| on        | [Event Handler Hash](./EventHandlerArg.md) | Registers an event handler.  |
+| on        | Event Handler Hash | Registers an event handler (see below) |
 
 ### eachChild
 
