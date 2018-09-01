@@ -19,10 +19,10 @@ in the Fluid DOM, this is the type of object returned.
 ## Methods
 |  Method   | Parameters    | Description       |
 |-----------|---------------|-------------------|
-| children  | None          | Provides any children of the element, returned as an ElementList |
-| eachChild | function(element) | Visits each child element (if any) and applies the supplied function to each. Returns self. |
-| expect    | string tagName | An assertion to cause error logging when element is not of the expected tag. Returns self.          |
-| getId     | None          | Returns elements ID               |
+| children  | None          | Provides children of the element as an ElementList |
+| eachChild | function(element) | Visits each child element. Returns self. |
+| expect    | string tagName | Checks expected tag. Returns self. |
+| getId     | None          | Returns elements ID |
 | getParent | None          | Returns parent as Element object  |
 | hasId     | None          | Returns true if element has an ID.|
 | exists    | None          | Returns true if element is valid. |
@@ -33,13 +33,46 @@ in the Fluid DOM, this is the type of object returned.
 | text      | None          | Returns text in element |
 | text      | string _text  | Replaces element's text with given value and returns self. |
 | html      | None | Returns sub-document, child of the element, as HTML source |
-| html      | string _html  | Replaces the sub-document, child of the element with given source string and returns self. |
+| html      | string _html  | Replaces the sub-document and returns self. |
 | append    | string _html  | Appends new HTML source after existing child-document and returns self. |
 | prepend   | string _html  | Prepends new HTML source before existing child-document and returns self. |
 | remove    | None          | Destroys the element. |
 | attributes | None         | Returns an Attributes object |
 | classes   | None          | Returns a Classes object |
-| on        | [Event Handler Hash](./EventHandlerArg.md) | Registers an event handler and prevents default handling unless overridden. |
+| on        | [Event Handler Hash](./EventHandlerArg.md) | Registers an event handler.  |
+
+### eachChild
+
+Visits each child element (if any) and applies the supplied function to each. Returns self.
+
+### expect
+
+An assertion to cause error logging when element is not of the expected tag. Returns self.
+
+### findAll
+Takes an [ElementList Location Option](ElementListOptions.md) and
+gets all matches as an ElementList object.
+
+### selectorPath
+Returns a string path to identify that element in the hierachiy of the document.
+
+### text
+Can be called with or without an argument - the behaviour and returned value differs accordingly.
+
+`text()` Returns text in element.
+
+`text(_text)`  Replaces element's text with given value and returns self.
+
+### html
+Can be called with or without HTML source string - the behaviour differs.
+
+`html()`  Returns sub-document, child of the element, as HTML source.
+
+`html(_html)`  Replaces the sub-document, child of the element with given source string and returns self.
+
+### on Event Handler
+`on(hash)` Takes an [Event Handler Hash](./EventHandlerArg.md) and registers an event handler and prevents default handling unless overridden by suppling `keepDefault: true` in the hash.
+
 
 ----
 [Back to README](./README.md) - Fluid DOM (c) Copyright 2018 Warwick Molloy
