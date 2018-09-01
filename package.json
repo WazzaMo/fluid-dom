@@ -2,7 +2,7 @@
   "name": "fluid-dom",
   "version": "1.0.0",
   "description": "A fluid DOM (DSL style) library.",
-  "main": "fluid-dom.js",
+  "main": "dist/fluid-dom.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js fluid-dom.js",
