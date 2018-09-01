@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Fluid DOM - DOM Test</title>
+    <style>
+        .byclick {
+            background-color: black;
+            color: white;
+        }
+    </style>
+    <link rel="stylesheet" href="./spec.css">
+
+    <script src="./spec.js"></script>
+    <script src="../dist/fluid-dom.js"></script>
+</head>
+<body>
+    <h1>A Test Document</h1>
+    <p>
+        If the DOM Object method names (below) are all green
+        then all tests passed!
+    </p>
+    <button id="me">A Button</button>
+    <p id="single" class="class-target">This gets styled by button click</p>
+    <ul class="class-target">
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+    <p id="findElement_id">findElement({id: xxx})</p>
+    <p id="findElement_selector">findElement({selector: xxx})</p>
+    <p id="findAll_selector">findAll({selector: xxx})</p>
+    <p id="findAll_class">findAll({class: xxx})</p>
+    <p id="findAll_tagName">findAll({tagName: xxx})</p>
+    <p id="buttonOn">buttonOn({id: xxx, event: yyy, handler: zzz})</p>
+</body>
+    <script>
+        var dom = new fluid.DOM()
+
+        function findElement_id() {
+            var test = new Test('findElement_id')
+            test.for_target('#single')
+            try {
+                var single = dom.findElement({id: 'single'}).element.setAttribute('found', true)
+                test.expectAttribute('found')
+            } catch  {
+                failed('findElement_id')
+            }
+        }
+
+        function findElement_selector() {
+            var test = new Test('findElement_selector')
+            test.for_target('body>ul')
+            test.execute( () => {
+                var body_ul = dom.findElement({selector: 'html>body>ul'}).element.setAttribute('ul_found',true)
+                test.expectAttribute('ul_found')
+            })
+        }
+
+        function findAll_selector() {
+            var test = new Test('findAll_selector')
+            test.for_all_targets('ul>li')
+            test.execute( () => {
+                var list_li = dom.findAll({selector: 'ul>li'})
+                markAllElementsWith(list_li, 'li_list')
+                test.expectAttribute('li_list')
+            })
+        }
+
+        function findAll_class() {
+            var test = new Test('findAll_class')
+            test.for_all_targets('.class-target')
+            test.execute( () => {
+                var list_class = dom.findAll({class: 'class-target'}).elementList
+                markAllElementsWith(list_class, 'class-found')
+                test.expectAttribute('class-found')
+            })
+        }
+
+        function findAll_tagName() {
+            var test = new Test('findAll_tagName')
+            test.for_all_targets('ul>li')
+            test.execute(() => {
+                var list_tag = dom.findAll({tagName: 'li'}).elementList
+                markAllElementsWith(list_tag, 'tag-found')
+                test.expectAttribute('tag-found')
+            })
+        }
+
+        function buttonOn() {
+            var test = new Test('buttonOn')
+            test.for_target('#me')
+            test.execute(()=>{
+                dom.buttonOn({
+                    id: 'me',
+                    event: 'click',
+                    handler: test.getHandler(document.getElementById('me'))
+                })
+                test.expectHandler('click')
+            })
+        }
+
+        window.onload = function() {
+            findElement_id()
+            findElement_selector()
+            findAll_selector()
+            findAll_class()
+            findAll_tagName()
+            buttonOn()
+        }
+    </script>
+</html>
