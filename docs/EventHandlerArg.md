@@ -1,12 +1,9 @@
-# Button Event Handler Argument
+# Element On Event Handler Argument
 
 Provides mandatory and optional arguments to the convenience 
 buttonOn method in the DOM class.  These arguments are named 
 through this hash JS object to make the process more
 self-describing.
-
-Note: buttonOn will ensure that the element found using
-the `id` is a BUTTON tag and will show console errrors if otherwise.
 
 ## Properties
 An element location option object should have one value, of:

@@ -23,10 +23,10 @@ in the Fluid DOM, this is the type of object returned.
 | eachChild | function(element) | Visits each child element (if any) and applies the supplied function to each. Returns self. |
 | expect    | string tagName | An assertion to cause error logging when element is not of the expected tag. Returns self.          |
 | getId     | None          | Returns elements ID               |
-| getParent | None          | Returns parent as Element object  | 
+| getParent | None          | Returns parent as Element object  |
 | hasId     | None          | Returns true if element has an ID.|
 | exists    | None          | Returns true if element is valid. |
-| findAll   | [ElementList Option](ElementListOptions.md) | Get all matches as an ElementList object | 
+| findAll   | [ElementList Option](ElementListOptions.md) | Get all matches as an ElementList object |
 | selectFirst | string selector | Returns the first match Element object |
 | selectorPath | None | Returns a string path to identify that element in the hierachiy of the document. |
 | tagName   | None          | Returns tag name string. |
@@ -39,7 +39,7 @@ in the Fluid DOM, this is the type of object returned.
 | remove    | None          | Destroys the element. |
 | attributes | None         | Returns an Attributes object |
 | classes   | None          | Returns a Classes object |
-| on(args)
+| on        | [Event Handler Hash](./EventHandlerArg.md) | Registers an event handler and prevents default handling unless overridden. |
 
 ----
 [Back to README](./README.md) - Fluid DOM (c) Copyright 2018 Warwick Molloy
