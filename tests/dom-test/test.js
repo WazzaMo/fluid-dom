@@ -1,7 +1,6 @@
 define(['spec', 'fluid-dom'], function(spec, fluid){
 
   var dom = new fluid.DOM()
-  console.log("test running: " )
 
 
   function findElement_id() {

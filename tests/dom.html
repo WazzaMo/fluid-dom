@@ -11,7 +11,7 @@
         }
     </style>
     <link rel="stylesheet" href="./spec.css">
-    <script src="../lib/require.js"></script>
+    <script src="./require.js"></script>
 </head>
 <body>
     <h1>A Test Document</h1>
@@ -36,7 +36,6 @@
     <script>
     require(['./dom-test-config'], function() {
         require(['test'], function(test) {
-            console.log(test)
             test.run_tests()
         });
     });
