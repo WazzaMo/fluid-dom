@@ -11,7 +11,9 @@
         }
     </style>
     <link rel="stylesheet" href="./spec.css">
-    <script src="./require.js"></script>
+    <script src="../dist/fluid-dom-dev.js"></script>
+    <script src="./spec.js"></script>
+    <script src="dom-test/test.js"></script>
 </head>
 <body>
     <h1>A Test Document</h1>
@@ -34,10 +36,6 @@
     <p id="buttonOn">buttonOn({id: xxx, event: yyy, handler: zzz})</p>
 </body>
     <script>
-    require(['./dom-test-config'], function() {
-        require(['test'], function(test) {
-            test.run_tests()
-        });
-    });
+        run_tests()
     </script>
 </html>

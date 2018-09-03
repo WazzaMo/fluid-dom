@@ -2,18 +2,20 @@
   "name": "fluid-dom",
   "version": "1.1.0",
   "description": "A fluid DOM (DSL style) library.",
-  "main": "./lib/fluid-dom.js",
+  "browser": "./dist/fluid-dom.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dist": "run-s build-amd build-commonjs",
-    "build-amd": "tsc -m amd --outFile fluid-dom/fluid-dom-amd.js",
-    "build-commonjs": "tsc -m commonjs --outDir fluid-dom/commonjs",
+    "test": "run-s dist test-message",
+    "test-message": "echo \"Open the HTML files in the tests directory to run the tests.\" ",
+    "dist": "run-s typescript build-dev build",
     "typescript": "tsc",
-    "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js lib/fluid-dom.js",
-    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js lib/fluid-dom.js"
+    "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js lib/fluid-dom-dev.js",
+    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js"
   },
   "files": [
-    "*.js"
+    "dist/*.js"
+  ],
+  "types": [
+    "lib/*.ts"
   ],
   "keywords": [
     "DOM",
@@ -32,7 +34,5 @@
     "parcel-bundler": "^1.9.7",
     "typescript": "^3.0.3"
   },
-  "dependencies": {
-    "requirejs": "^2.3.6"
-  }
+  "dependencies": {}
 }
