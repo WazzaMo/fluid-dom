@@ -101,6 +101,7 @@ Returns an ElementList object.
 Returns the first matching element as an Element (fluid) object.
 
 ### selectorPath()
+
 | Parameters    | Description    |
 |---------------|----------------|
 | None | N/A |
@@ -108,6 +109,7 @@ Returns the first matching element as an Element (fluid) object.
 Returns a selector path string.
 
 ### tagName()
+
 | Parameters    | Description    |
 |---------------|----------------|
 | None          | N/A |
@@ -115,6 +117,7 @@ Returns a selector path string.
 Returns tag name string.
 
 ### text()
+
 | Parameters    | Description    |
 |---------------|----------------|
 | None | N/A |
@@ -123,6 +126,7 @@ Returns current element text value. For example, if the element
 is `<b>Hi there</b>` then "Hi there" would be returned.
 
 ### text(newText)
+
 | Parameters    | Description    |
 |---------------|----------------|
 | newText       | New text to insert in-place of current text. |
@@ -131,6 +135,7 @@ Overwrites the element's current text with the new, provided
 text string. Returns self.
 
 ### html()
+
 | Parameters    | Description    |
 |---------------|----------------|
 | None | N/A |
@@ -138,6 +143,7 @@ text string. Returns self.
 Returns sub-document as an HTML source string.
 
 ### html(newHtml)
+
 | Parameters    | Description    |
 |---------------|----------------|
 | newHtml  | String of HTML source. |
@@ -168,6 +174,7 @@ Yields...
 ```
 
 ### append(addedHtml)
+
 | Parameters    | Description    |
 |---------------|----------------|
 | addedHtml | String with HTML to append. |
@@ -176,6 +183,7 @@ Appends new HTML source after existing
 child-document and returns self.
 
 ### prepend(preHtml)
+
 | Parameters    | Description    |
 |---------------|----------------|
 | preHtml  | String with HTML to prepend. |
@@ -183,6 +191,7 @@ child-document and returns self.
 Prepends new HTML source before existing child-document and returns self.
 
 ### remove()
+
 | Parameters    | Description    |
 |---------------|----------------|
 | None          | N/A |
@@ -190,6 +199,7 @@ Prepends new HTML source before existing child-document and returns self.
 Destroys the element.
 
 ### attributes()
+
 | Parameters    | Description    |
 |---------------|----------------|
 | None         | N/A |
@@ -198,6 +208,7 @@ Returns an Attributes object to enable operations to be
 performed on the element's attributes.
 
 ### classes()
+
 | Parameters    | Description    |
 |---------------|----------------|
 | None          | N/A |
@@ -206,6 +217,7 @@ Returns a Classes object for an element so the class list
 of an element can be manipulated.
 
 ### on(eventHandlerInfo)
+
 | Parameters    | Description    |
 |---------------|----------------|
 | [Event Handler Info](./EventHandlerInfo.md) | Parameters required to register a handler. |
