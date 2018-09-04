@@ -8,19 +8,23 @@
     "test-message": "echo \"Open the HTML files in the tests directory to run the tests.\" ",
     "dist": "run-s typescript build-dev build",
     "typescript": "tsc",
-    "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js lib/fluid-dom-dev.js",
-    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js"
+    "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js lib/fluid-dom.js",
+    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js lib/fluid-dom.js"
   },
   "files": [
-    "dist/*.js"
+    "dist/*.js",
+    "dist/*.map"
   ],
   "types": [
-    "lib/*.ts"
+    "lib/*.ts",
+    "lib/*.ts.map"
   ],
   "keywords": [
     "DOM",
     "web",
-    "html"
+    "html",
+    "functional",
+    "LINQ"
   ],
   "author": "Warwick Molloy",
   "license": "MIT",

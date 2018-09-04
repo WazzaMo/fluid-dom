@@ -5,6 +5,16 @@ wraps around the native DOM element.  Whenever a call
 results in the selection or return of a single element
 in the Fluid DOM, this is the type of object returned.
 
+Many of the methods return "self" meaning the element object.
+This allows calls to be chained.
+
+```js
+var dom = new fluid.DOM()
+dom.findElement({id: 'MegaButton'})
+    .text("Mega Button - Click me")
+    .classes().add("mega")
+```
+
 ## Properties
 
 | Property | Description |
@@ -17,62 +27,179 @@ in the Fluid DOM, this is the type of object returned.
 | type     | 'Element' a marker to identify an Element object |
 
 ## Methods
-|  Method   | Parameters    | Description       |
-|-----------|---------------|-------------------------------------|
-| children  | None          | Returns element's children as an ElementList |
-| eachChild | function(element) | Visits each child element. Returns self. |
-| expect    | string tagName | Checks expected tag. Returns self. |
-| getId     | None          | Returns elements ID |
-| getParent | None          | Returns parent as Element object  |
-| hasId     | None          | Returns true if element has an ID.|
-| exists    | None          | Returns true if element is valid. |
-| findAll   | Location option | Get matches as an ElementList object (see below). |
-| selectFirst | string selector | Returns the first match Element object |
-| selectorPath | None | Returns a selector path string. |
-| tagName   | None          | Returns tag name string. |
-| text      | None          | Returns text in element |
-| text      | string _text  | Replaces element's text. Returns self. |
-| html      | None | Returns sub-document as HTML source string. |
-| html      | string _html  | Replaces the sub-document and returns self. |
-| append    | string _html  | Appends new HTML source after existing child-document and returns self. |
-| prepend   | string _html  | Prepends new HTML source before existing child-document and returns self. |
-| remove    | None          | Destroys the element. |
-| attributes | None         | Returns an Attributes object |
-| classes   | None          | Returns a Classes object |
-| on        | Event Handler Hash | Registers an event handler (see below) |
 
-### eachChild
+### children()
+| Parameters    | Description    |
+|---------------|----------------|
+| None          | N/A |
 
-Visits each child element (if any) and applies the supplied function to each. Returns self.
+Returns element's children as an ElementList.
 
-### expect
+### eachChild(func)
+| Parameters    | Description    |
+|---------------|----------------|
+|function(element) |
 
-An assertion to cause error logging when element is not of the expected tag. Returns self.
+Visits each child element. Returns self.
 
-### findAll
-Takes an [ElementList Location Option](ElementListOptions.md) and
-gets all matches as an ElementList object.
+### expect(tagName)
+| Parameters    | Description    |
+|---------------|----------------|
+| string tagName | Checks expected tag. Returns self. |
 
-### selectorPath
-Returns a string path to identify that element in the hierachiy of the document.
+### getId()
+| Parameters    | Description    |
+|---------------|----------------|
+| None          |
 
-### text
-Can be called with or without an argument - the behaviour and returned value differs accordingly.
+Returns elements ID if it has one.
 
-`text()` Returns text in element.
+### getParent()
+| Parameters    | Description    |
+|---------------|----------------|
+| None          |
 
-`text(_text)`  Replaces element's text with given value and returns self.
+Returns parent as Element object  |
 
-### html
-Can be called with or without HTML source string - the behaviour differs.
+### hasId()
+| Parameters    | Description    |
+|---------------|----------------|
+| None          |
 
-`html()`  Returns sub-document, child of the element, as HTML source.
+Returns true if element has an ID.|
 
-`html(_html)`  Replaces the sub-document, child of the element with given source string and returns self.
+### exists()
+| Parameters    | Description    |
+|---------------|----------------|
+| None          | Returns true if element is valid. |
 
-### on Event Handler
-`on(hash)` Takes an [Event Handler Hash](./EventHandlerArg.md) and registers an event handler and prevents default handling unless overridden by suppling `keepDefault: true` in the hash.
+### findAll(elementListLocation)
+| Parameters    | Description    |
+|---------------|----------------|
+| [elementListLocation](./ElementListLocation.md) | Ways to identify a list of elements - selector, tagName, class name. |
 
+Get matches as an ElementList object.
+
+### selectFirst(selector)
+| Parameters    | Description    |
+|---------------|----------------|
+| selector | String to select an element. |
+
+Returns the first matching element as an Element (fluid) object.
+
+### selectorPath()
+| Parameters    | Description    |
+|---------------|----------------|
+| None | N/A |
+
+Returns a selector path string.
+
+### tagName()
+| Parameters    | Description    |
+|---------------|----------------|
+| None          | N/A |
+
+Returns tag name string.
+
+### text()
+| Parameters    | Description    |
+|---------------|----------------|
+| None | N/A |
+
+Returns current element text value. For example, if the element
+is `<b>Hi there</b>` then "Hi there" would be returned.
+
+### text(newText)
+| Parameters    | Description    |
+|---------------|----------------|
+| newText       | New text to insert in-place of current text. |
+
+Overwrites the element's current text with the new, provided
+text string. Returns self.
+
+### html()
+| Parameters    | Description    |
+|---------------|----------------|
+| None | N/A |
+
+Returns sub-document as an HTML source string.
+
+### html(newHtml)
+| Parameters    | Description    |
+|---------------|----------------|
+| newHtml  | String of HTML source. |
+
+Replaces the sub-document and returns self.
+
+*Example*
+The document...
+```html
+<body>
+    <div id="fred"></div>
+</body>
+```
+With JavsScript...
+```js
+var dom = new fluid.DOM()
+dom.findElement({id:"fred"})
+    .html("<p>New Message</p>")
+    .classes().add("highlight")
+```
+Yields...
+```html
+<body>
+    <div id="fred">
+        <p class="highlight">New Message</p>
+    </div>
+</body>
+```
+
+### append(addedHtml)
+| Parameters    | Description    |
+|---------------|----------------|
+| addedHtml | String with HTML to append. |
+
+Appends new HTML source after existing 
+child-document and returns self.
+
+### prepend(preHtml)
+| Parameters    | Description    |
+|---------------|----------------|
+| preHtml  | String with HTML to prepend. |
+
+Prepends new HTML source before existing child-document and returns self.
+
+### remove()
+| Parameters    | Description    |
+|---------------|----------------|
+| None          | N/A |
+
+Destroys the element.
+
+### attributes()
+| Parameters    | Description    |
+|---------------|----------------|
+| None         | N/A |
+
+Returns an Attributes object to enable operations to be
+performed on the element's attributes.
+
+### classes()
+| Parameters    | Description    |
+|---------------|----------------|
+| None          | N/A |
+
+Returns a Classes object for an element so the class list
+of an element can be manipulated.
+
+### on(eventHandlerInfo)
+| Parameters    | Description    |
+|---------------|----------------|
+| [Event Handler Info](./EventHandlerInfo.md) | Parameters required to register a handler. |
+
+Registers an event handler on the element using the named parameters of id, event name and handler function.
+
+Takes an  and registers an event handler and prevents default handling unless overridden by suppling `keepDefault: true` in the info object.
 
 ----
 [Back to README](./README.md) - Fluid DOM (c) Copyright 2018 Warwick Molloy
