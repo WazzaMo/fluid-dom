@@ -21,7 +21,7 @@ export class Attributes {
   attributeNames() : Array<string> {
     var list = new Array<string>()
 
-    for(var name of this.domElement.attributeNames) {
+    for(var name of this.domElement.attributes) {
       list.push(name)
     }
     return list
