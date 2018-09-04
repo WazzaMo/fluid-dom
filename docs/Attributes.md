@@ -4,18 +4,60 @@
 
 | Property | Description |
 |----------|-------------|
-| element  | Raw DOM element behind the Attributes object. |
+| domElement | Raw DOM element behind the Attributes object. |
 
 ## Methods
-|  Method   | Parameters    | Description       |
-|-----------|---------------|-------------------|
-| each      | func(attribute)-> undefined | Iterates through list of attributes, calling given function with each in turn. Returns self. |
-| attributeNames | None     | Returns list of attribute name strings. |
-| set       | string name, value | Sets (or adds) an attribute with given value to the element. Returns self. |
-| with      | string name, task func(value)-> undefined | Gets the value for the named attribute and calls the supplied function with this value. Returns self. |
-| get       | string name   | Returns the value of the named attribute. |
-| has       | string name   | Returns true/false indicating if attribute is present. |
-| remove    | string name   | Removes named attribute and returns self. |
+
+### each( func )
+| Parameters    | Description             |
+|---------------|-------------------------|
+| func          | A function taking an attribute name and value; no return value needed |
+
+Iterates through the element's attributes, calling the given function with each name and value, in turn. Returns self.
+
+### attributeNames()
+| Parameters    | Description             |
+|---------------|-------------------------|
+| None          |  |
+
+Returns list of attribute name strings.
+
+### set(name, value)
+| Parameters    | Description             |
+|---------------|-------------------------|
+| name          | The attribute name.     |
+| value         | The value to set.       |
+    
+Sets (or adds) an attribute with given value to the element. Returns self.
+
+###  with(name, func)
+| Parameters    | Description             |
+|---------------|-------------------------|
+| name          | Attribute name          |
+| func(value)   | A function that will handle the value. |
+
+Gets the value for the named attribute and calls the supplied function with this value. Returns self.
+
+### get(name)
+| Parameters    | Description             |
+|---------------|-------------------------|
+| name   | Attribute name. |
+
+Returns the value of the named attribute.
+
+### has(name)
+| Parameters    | Description             |
+|---------------|-------------------------|
+| name   | Attribute name. |
+
+Returns true/false indicating if attribute is present. |
+
+### remove(name)
+| Parameters    | Description             |
+|---------------|-------------------------|
+| name   | Attribute name |
+
+Removes named attribute and returns self.
 
 
 ----

@@ -1,20 +1,30 @@
 {
   "name": "fluid-dom",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A fluid DOM (DSL style) library.",
-  "main": "dist/fluid-dom.js",
+  "browser": "./dist/fluid-dom.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js fluid-dom.js",
-    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js fluid-dom.js"
+    "test": "run-s dist test-message",
+    "test-message": "echo \"Open the HTML files in the tests directory to run the tests.\" ",
+    "dist": "run-s typescript build-dev build",
+    "typescript": "tsc",
+    "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js lib/fluid-dom.js",
+    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js lib/fluid-dom.js"
   },
-  "files":[
-    "*.js"
+  "files": [
+    "dist/*.js",
+    "dist/*.map"
+  ],
+  "types": [
+    "lib/*.ts",
+    "lib/*.ts.map"
   ],
   "keywords": [
     "DOM",
     "web",
-    "html"
+    "html",
+    "functional",
+    "LINQ"
   ],
   "author": "Warwick Molloy",
   "license": "MIT",
@@ -24,6 +34,9 @@
   },
   "homepage": "https://wazzamo.github.io/fluid-dom/",
   "devDependencies": {
-    "parcel-bundler": "^1.9.7"
-  }
+    "npm-run-all": "^4.1.3",
+    "parcel-bundler": "^1.9.7",
+    "typescript": "^3.0.3"
+  },
+  "dependencies": {}
 }

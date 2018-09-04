@@ -5,13 +5,15 @@
  */
 
 
-import { providesOne, providesAll } from './src/util'
-import { Element } from './src/element'
-import { ElementList } from './src/element-list'
-import * as CONST from './src/constants'
+import { providesOne, providesAll } from './util'
+import { Element } from './element'
+import { ElementList } from './element-list'
+import { LocatedBy, Tag } from './constants'
+import { ElementLocation } from './element-location'
+import { ElementListLocation } from './element-list-location'
+import { EventHandlerInfo } from './event-handler-info';
 
-
-const eventlist = [
+const EVENT_LIST = [
   'abort', 'afterscriptexecute',
   'animationcancel', 'animationend', 'animationiteration',
   'auxclick',
@@ -38,8 +40,8 @@ const eventlist = [
 ]
 
 function createEventHash() {
-  var events = {}
-  for(var ev of eventlist) {
+  var events : any = {}
+  for(var ev of EVENT_LIST) {
     var key = ev.toUpperCase()
     events[key] = ev
   }
@@ -47,29 +49,31 @@ function createEventHash() {
 }
 
 export class DOM {
+  events: any;
+
   constructor() {
     this.events = createEventHash()
   }
 
-  findElement(arg) {
+  findElement(arg: ElementLocation) {
     return new Element(arg)
   }
 
-  findAll(arg) {
+  findAll(arg: ElementListLocation) {
     return new ElementList(arg)
   }
 
-  buttonOn(arg) {
-    if (providesAll(['id', 'event', 'handler'],arg)) {
-      var id = arg.id
-      var button = this.findElement({id: id}).expect(CONST.TAG_BUTTON)
-      button.on(arg)
+  buttonOn(eventInfo: EventHandlerInfo) {
+    if (providesAll(['id', 'event', 'handler'],eventInfo)) {
+      var id = eventInfo.id
+      var button = this.findElement({id: id}).expect(Tag.Button)
+      button.on(eventInfo)
     }
   }
 }
 
-export const Events = {}
+export const Events : any = {}
 
-for(var event of eventlist) {
+for(var event of EVENT_LIST) {
   Events[event.toUpperCase()] = event
 }

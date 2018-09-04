@@ -1,4 +1,6 @@
 
 dist/
+lib/
+fluid-dom/
 .cache/
 node_modules/

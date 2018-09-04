@@ -1,3 +1,9 @@
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
+
 
 function failed(id) {
   document.getElementById(id).className = 'fail'
@@ -17,7 +23,7 @@ function isElement(element) {
 
 function markElementWith(element, attrib) {
   if (isElement(element)) {
-    element.element.setAttribute(attrib, true)
+    element.domElement.setAttribute(attrib, true)
   } else {
     element.setAttribute(attrib, true)
   }
@@ -39,19 +45,19 @@ function makeHandlerName(domElement) {
   return `handler-${domElement.tagName}`
 }
 
-function Test(id) {
+const Test = function(id) {
   this.id = id
-
+  var that = this
   this.for_target = function(targetSelector) {
-    this.target = document.querySelector(targetSelector)
+    that.target = document.querySelector(targetSelector)
   }
 
   this.for_all_targets = function(selector) {
-    this.all_targets = document.querySelectorAll(selector)
+    that.all_targets = document.querySelectorAll(selector)
   }
 
   this.expectAttribute = function(name) {
-    this.checkTargets( element => element.hasAttribute(name))
+    that.checkTargets( domElement => domElement.hasAttribute(name))
   }
 
   this.getHandler = function(domElement) {
@@ -63,11 +69,11 @@ function Test(id) {
   }
 
   this.expectHandler = function(eventName) {
-    function testEvent(element) {
-      var handlerToFire = makeHandlerName(element)
+    function testEvent(domElement) {
+      var handlerToFire = makeHandlerName(domElement)
       var event = new Event(eventName)
-      element.dispatchEvent(event)
-      return element.getAttribute(handlerToFire) === "true"
+      domElement.dispatchEvent(event)
+      return domElement.getAttribute(handlerToFire) === "true"
     }
     this.checkTargets(testEvent)
   }
@@ -100,4 +106,15 @@ function Test(id) {
       console.error("Failed with exception! " + error)
     }
   }
+}
+
+const spec = {
+  failed:               failed,
+  passed:               passed,
+  isElementList:        isElementList,
+  isElement:            isElement,
+  markElementWith:      markElementWith,
+  markAllElementsWith:  markAllElementsWith,
+  makeHandlerName:      makeHandlerName,
+  Test:                 Test
 }
