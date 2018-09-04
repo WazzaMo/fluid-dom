@@ -29,16 +29,16 @@ dom.findElement({id: 'MegaButton'})
 ## Methods
 
 ### children()
-| Parameters    | Description    |
-|---------------|----------------|
-| None          | N/A |
+| Parameters | Description |
+|------------|-------------|
+| None       | N/A         |
 
 Returns element's children as an ElementList.
 
 ### eachChild(func)
 | Parameters    | Description    |
 |---------------|----------------|
-|function(element) |
+|function(element) | Function called with each child element. |
 
 Visits each child element. Returns self.
 
@@ -50,35 +50,39 @@ Visits each child element. Returns self.
 ### getId()
 | Parameters    | Description    |
 |---------------|----------------|
-| None          |
+| None          | N/A |
 
 Returns elements ID if it has one.
 
 ### getParent()
 | Parameters    | Description    |
 |---------------|----------------|
-| None          |
+| None          | N/A |
 
 Returns parent as Element object  |
 
 ### hasId()
 | Parameters    | Description    |
 |---------------|----------------|
-| None          |
+| None          | N/A |
 
-Returns true if element has an ID.|
+Returns true if element has an ID.
 
 ### exists()
 | Parameters    | Description    |
 |---------------|----------------|
-| None          | Returns true if element is valid. |
+| None          | N/A |
+
+Returns true if element is valid.
+
 
 ### findAll(elementListLocation)
 | Parameters    | Description    |
 |---------------|----------------|
-| [elementListLocation](./ElementListLocation.md) | Ways to identify a list of elements - selector, tagName, class name. |
+| [elementListLocation](./ElementListLocation.md) | Locator for multiple elements. |
 
-Get matches as an ElementList object.
+Identify a list of elements by selector, tagName or class name.
+Returns an ElementList object.
 
 ### selectFirst(selector)
 | Parameters    | Description    |
