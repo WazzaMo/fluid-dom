@@ -31,33 +31,33 @@ dom.findElement({id: 'MegaButton'})
 ### children()
 | Parameters | Description |
 |------------|-------------|
-| None       | N/A         |
+| None | N/A |
 
 Returns element's children as an ElementList.
 
 ### eachChild(func)
 | Parameters    | Description    |
 |---------------|----------------|
-|function(element) | Function called with each child element. |
+|function(element) | Function called with each child element.|
 
 Visits each child element. Returns self.
 
 ### expect(tagName)
-| Parameters    | Description    |
+| Parameters | Description |
 |---------------|----------------|
 | string tagName | Checks expected tag. Returns self. |
 
 ### getId()
-| Parameters    | Description    |
+| Parameters | Description |
 |---------------|----------------|
 | None          | N/A |
 
 Returns elements ID if it has one.
 
 ### getParent()
-| Parameters    | Description    |
-|---------------|----------------|
-| None          | N/A |
+| Parameters | Description |
+|---------------|----------|
+| None | N/A |
 
 Returns parent as Element object  |
 
@@ -77,7 +77,7 @@ Returns true if element is valid.
 
 
 ### findAll(elementListLocation)
-| Parameters    | Description    |
+| Parameters | Description |
 |---------------|----------------|
 | [elementListLocation](./ElementListLocation.md) | Locator for multiple elements. |
 
@@ -85,7 +85,7 @@ Identify a list of elements by selector, tagName or class name.
 Returns an ElementList object.
 
 ### selectFirst(selector)
-| Parameters    | Description    |
+| Parameters | Description |
 |---------------|----------------|
 | selector | String to select an element. |
 
