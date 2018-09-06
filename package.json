@@ -1,20 +1,26 @@
 {
   "name": "fluid-dom",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A fluid DOM (DSL style) library.",
   "browser": "./dist/fluid-dom.js",
   "scripts": {
     "test": "run-s dist test-message",
     "test-message": "echo \"Open the HTML files in the tests directory to run the tests.\" ",
-    "dist": "run-s typescript build-dev build",
+    "dist": "run-s typescript build-dev build build-electron post-dist",
     "typescript": "tsc",
     "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js lib/fluid-dom.js",
-    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js lib/fluid-dom.js"
+    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js lib/fluid-dom.js",
+    "build-electron": "parcel build -d dist --target electron -o electron-fluid-dom.js lib/fluid-dom.js",
+    "post-dist": "node post-dist.js"
   },
   "files": [
     "dist/*.js",
     "dist/*.map"
   ],
+  "directories": {
+    "doc": "docs",
+    "live": "docs/live"
+  },
   "types": [
     "lib/*.ts",
     "lib/*.ts.map"
