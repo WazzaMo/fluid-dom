@@ -12,6 +12,7 @@ Inspired partly by .NET's LINQ, the Fluid DOM is a fluid
 or functional DSL styled API for the HTML JavaScript DOM.
 
 ## Why Use It?
+
 Convenience!
 
 The standard DOM APIs are a bit clunky in that some things
@@ -22,6 +23,22 @@ Instead, this library is more of a convenience wrapper to
 bring the standard APIs into a more functional way of thinking
 about things. That said, it's more about convenience than true
 functional programming. Let's face it, we're mutating the DOM.
+
+## How to Reference
+
+For simplicity, the fluid-dom library builds to a single file
+and exposes a global variable called `fluid` as a namespace object.
+
+For the browser, the use a script tag:
+```html
+    <script src="fluid-dom.js"></script>
+    <script>
+        var dom = new fluid.DOM();
+        // rest...
+    </script>
+```
+
+There is also a version built for electron.
 
 ## Examples
 Say for an HTML document...
