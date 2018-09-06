@@ -9,13 +9,11 @@ a LINQ-like query can be written.
 
 | Property | Description |
 |----------|-------------|
-| elementList | convertToListOfElements(elementList)
-| parent    | Parent as an Element object. |
-| docKey    | 'selector', 'class', 'tagName' depending on what was used in the ElementList locating option. |
-| isSingle  | Fixed to `false` to indicate that this is NOT a single element. |
-| docMatcher| The matching value (eg. class name or tag name string) |
-| arg       | [Element List Locating Option](./ElementListLocation.md) |
-| type      | Fixed to 'ElementList' - marker to detect ElementList |
+| elementListLocation | [Element List Location](./ElementListLocation.md) |
+| elementList | Array of Element objects. |
+| locatedBy | Indicates whether the list were found by selector, class or tagName. |
+| isSingle  | Fixed to `false` to indicate that this is NOT a single element. || parent    | Parent as an Element object. |
+| type      | Fixed to 'ElementList' - marker to detect ElementList.|
 
 ## Methods
 

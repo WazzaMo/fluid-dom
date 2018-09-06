@@ -9,6 +9,7 @@
 ## Methods
 
 ### each( func )
+
 | Parameters    | Description             |
 |---------------|-------------------------|
 | func          | A function taking an attribute name and value; no return value needed |
@@ -16,13 +17,15 @@
 Iterates through the element's attributes, calling the given function with each name and value, in turn. Returns self.
 
 ### attributeNames()
+
 | Parameters    | Description             |
 |---------------|-------------------------|
-| None          |  |
+| None          |  N/A |
 
 Returns list of attribute name strings.
 
 ### set(name, value)
+
 | Parameters    | Description             |
 |---------------|-------------------------|
 | name          | The attribute name.     |
@@ -31,6 +34,7 @@ Returns list of attribute name strings.
 Sets (or adds) an attribute with given value to the element. Returns self.
 
 ###  with(name, func)
+
 | Parameters    | Description             |
 |---------------|-------------------------|
 | name          | Attribute name          |
@@ -39,6 +43,7 @@ Sets (or adds) an attribute with given value to the element. Returns self.
 Gets the value for the named attribute and calls the supplied function with this value. Returns self.
 
 ### get(name)
+
 | Parameters    | Description             |
 |---------------|-------------------------|
 | name   | Attribute name. |
@@ -46,6 +51,7 @@ Gets the value for the named attribute and calls the supplied function with this
 Returns the value of the named attribute.
 
 ### has(name)
+
 | Parameters    | Description             |
 |---------------|-------------------------|
 | name   | Attribute name. |
@@ -53,6 +59,7 @@ Returns the value of the named attribute.
 Returns true/false indicating if attribute is present. |
 
 ### remove(name)
+
 | Parameters    | Description             |
 |---------------|-------------------------|
 | name   | Attribute name |

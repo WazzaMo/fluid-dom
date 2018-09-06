@@ -1,4 +1,4 @@
-# Element List Locating Options
+# Element List Location
 
 When getting a list of elements from the document, say by calling
 `new fluid.DOM().findAll(aaa)` the `aaa` is the argument
