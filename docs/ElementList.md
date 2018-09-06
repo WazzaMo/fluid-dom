@@ -12,7 +12,7 @@ a LINQ-like query can be written.
 | elementListLocation | [Element List Location](./ElementListLocation.md) |
 | elementList | Array of Element objects. |
 | locatedBy | Indicates whether the list were found by selector, class or tagName. |
-| isSingle  | Fixed to `false` to indicate that this is NOT a single element. || parent    | Parent as an Element object. |
+| isSingle  | Fixed to `false` to indicate that this is NOT a single element. |
 | type      | Fixed to 'ElementList' - marker to detect ElementList.|
 
 ## Methods
