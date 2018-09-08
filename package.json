@@ -18,8 +18,7 @@
     "post-dist": "node post-dist.js"
   },
   "files": [
-    "dist/*.js",
-    "dist/*.map"
+    "./fluid-dom*.js"
   ],
   "directories": {
     "doc": "docs",
