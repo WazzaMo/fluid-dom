@@ -1,6 +1,8 @@
-
-// import { ElementLocation } from './element-location'
-// import { ElementListLocation } from './element-list-location'
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
 
 
 export function providesAll(list: Array<string>, args:any ) {

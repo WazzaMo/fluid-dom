@@ -6,13 +6,13 @@
         "declarationMap": true,
         "strict": true,
         "module": "es6",
-        "outDir": "lib"
+        "outDir": "js"
     },
     "include": [
         "src"
     ],
     "exclude": [
         "node_modules",
-        "lib"
+        "js"
     ]
 }

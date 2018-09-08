@@ -2,15 +2,19 @@
   "name": "fluid-dom",
   "version": "1.1.1",
   "description": "A fluid DOM (DSL style) library.",
-  "browser": "./dist/fluid-dom.js",
+  "browser": "./fluid-dom.bundle.js",
+  "main": "./fluid-dom.commonjs.js",
   "scripts": {
     "test": "run-s dist test-message",
     "test-message": "echo \"Open the HTML files in the tests directory to run the tests.\" ",
-    "dist": "run-s typescript build-dev build build-electron post-dist",
+    "dist": "run-s typescript build-dev build post-dist",
     "typescript": "tsc",
-    "build-dev": "parcel build -d dist --no-minify --target browser --global fluid -o fluid-dom-dev.js lib/fluid-dom.js",
-    "build": "parcel build -d dist --target browser --global fluid -o fluid-dom.js lib/fluid-dom.js",
-    "build-electron": "parcel build -d dist --target electron -o electron-fluid-dom.js lib/fluid-dom.js",
+    "build": "run-s build-bundle build-commonjs",
+    "build-dev": "run-s build-bundle-dev build-commonjs-dev",
+    "build-bundle": "rollup -c rollup.config-minify.js --format iife --file fluid-dom.bundle.js",
+    "build-commonjs": "rollup -c rollup.config-minify.js --format cjs --file fluid-dom.commonjs.js",
+    "build-bundle-dev": "rollup -c rollup.config-dev.js --format iife --file fluid-dom.bundle.dev.js",
+    "build-commonjs-dev": "rollup -c rollup.config-dev.js --format cjs --file fluid-dom.commonjs.dev.js",
     "post-dist": "node post-dist.js"
   },
   "files": [
@@ -22,15 +26,17 @@
     "live": "docs/live"
   },
   "types": [
-    "lib/*.ts",
-    "lib/*.ts.map"
+    "js/*.ts",
+    "js/*.ts.map"
   ],
   "keywords": [
     "DOM",
     "web",
     "html",
     "functional",
-    "LINQ"
+    "LINQ",
+    "fluid",
+    "dsl"
   ],
   "author": "Warwick Molloy",
   "license": "MIT",
@@ -42,6 +48,8 @@
   "devDependencies": {
     "npm-run-all": "^4.1.3",
     "parcel-bundler": "^1.9.7",
+    "rollup": "^0.65.2",
+    "rollup-plugin-terser": "^2.0.2",
     "typescript": "^3.0.3"
   },
   "dependencies": {}

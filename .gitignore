@@ -1,8 +1,9 @@
 
-dist/
-lib/
-fluid-dom/
 .cache/
+
+dist/
+js/
+fluid-dom/
 node_modules/
 
 
