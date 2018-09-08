@@ -8,6 +8,15 @@
 
 ## Methods
 
+### add(name, value)
+
+| Parameters    | Description             |
+|---------------|-------------------------|
+| name          | The attribute name.     |
+| value         | The value to set.       |
+
+Alias for set. Sets the given attribute name and returns self.
+
 ### each( func )
 
 | Parameters    | Description             |

@@ -27,7 +27,11 @@ export class Attributes {
     return list
   }
 
-  set(name: string, value: string) : Attributes {
+  add(name: string, value: any) : Attributes {
+    return this.set(name, value)
+  }
+
+  set(name: string, value: any) : Attributes {
     this.domElement.setAttribute(name, value)
     return this
   }
