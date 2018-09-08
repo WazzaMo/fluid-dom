@@ -18,15 +18,16 @@
     "post-dist": "node post-dist.js"
   },
   "files": [
-    "./fluid-dom*.js"
+    "fluid-dom*.js",
+    "docs/**",
+    "js/*.ts"
   ],
   "directories": {
     "doc": "docs",
     "live": "docs/live"
   },
   "types": [
-    "js/*.ts",
-    "js/*.ts.map"
+    "js/*.ts"
   ],
   "keywords": [
     "DOM",
