@@ -33,6 +33,14 @@ Iterates through all elements in the list and applies the given function to each
 
 Returns the nth element in the list.
 
+### length()
+
+| Parameters | Description |
+|------|-----|
+| None | N/A |
+
+Returns the number of items in the list.
+
 ### map(func)
 
 | Parameters    | Description       |

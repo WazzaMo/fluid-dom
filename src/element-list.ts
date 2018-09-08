@@ -30,32 +30,6 @@ export class ElementList {
     return list
   }
 
-  private selectList(selector: string) {
-    this.elementList = this.convertToListOfElements(
-      document.querySelectorAll(selector)
-    )
-    this.locatedBy = LocatedBy.Selector
-  }
-
-  private tagList(tagName: string) {
-    this.elementList = this.convertToListOfElements(
-      document.getElementsByTagName(tagName)
-    )
-    this.locatedBy = LocatedBy.TagName
-  }
-
-  private childList(children: any) {
-    this.elementList = this.convertToListOfElements( children )
-    this.locatedBy = LocatedBy.ConstructedWithChildren
-  }
-
-  private classList(_class: string) {
-    this.elementList = this.convertToListOfElements(
-      document.getElementsByClassName(_class)
-    )
-    this.locatedBy = LocatedBy.Class
-  }
-
   constructor (elementListLocation : ElementListLocation ) {
     var selector = elementListLocation.selector
     var tagName = elementListLocation.tagName
@@ -104,6 +78,36 @@ export class ElementList {
 
   reduce(func: (e:Element)=> Element) {
     return this.elementList.reduce(func)
+  }
+
+  length() : number {
+    return this.elementList.length;
+  }
+
+  private selectList(selector: string) {
+    this.elementList = this.convertToListOfElements(
+      document.querySelectorAll(selector)
+    )
+    this.locatedBy = LocatedBy.Selector
+  }
+
+  private tagList(tagName: string) {
+    this.elementList = this.convertToListOfElements(
+      document.getElementsByTagName(tagName)
+    )
+    this.locatedBy = LocatedBy.TagName
+  }
+
+  private childList(children: any) {
+    this.elementList = this.convertToListOfElements( children )
+    this.locatedBy = LocatedBy.ConstructedWithChildren
+  }
+
+  private classList(_class: string) {
+    this.elementList = this.convertToListOfElements(
+      document.getElementsByClassName(_class)
+    )
+    this.locatedBy = LocatedBy.Class
   }
 }
 
