@@ -1,4 +1,4 @@
-//  Fluid-DOM v 1.1.1
+//  Fluid-DOM v 1.1.2
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });

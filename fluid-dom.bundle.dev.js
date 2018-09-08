@@ -1,4 +1,4 @@
-//  Fluid-DOM v 1.1.1
+//  Fluid-DOM v 1.1.2
 var fluid = (function (exports) {
     'use strict';
 
