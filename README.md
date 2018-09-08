@@ -26,19 +26,37 @@ functional programming. Let's face it, we're mutating the DOM.
 
 ## How to Reference
 
-For simplicity, the fluid-dom library builds to a single file
+Fluid-dom is built to a browser iife bundle and a commonjs
+library. Each is supplied in minified and developer/debug
+forms.  For example, the bundle comes as `fluid-dom.bundle.js` and
+`fluid-dom.bundle.dev.js` for convenience.
+
+### Direct Script-src
+
+For simplicity, the fluid-dom library builds to a single (iife) file
 and exposes a global variable called `fluid` as a namespace object.
 
 For the browser, the use a script tag:
 ```html
-    <script src="fluid-dom.js"></script>
+    <script src="fluid-dom.bundle.js"></script>
     <script>
         var dom = new fluid.DOM();
         // rest...
     </script>
 ```
 
-There is also a version built for electron.
+### Browserify
+
+You can use browserify to bundle your JavaScript 
+and use `require` to import the fluid-dom library into 
+your own code. That needs to use the commonjs version (also included).
+
+```js
+var fluid = require('fluid-dom.commonjs');
+
+var dom = new fluid.DOM();
+// and so on...
+```
 
 ## Examples
 Say for an HTML document...

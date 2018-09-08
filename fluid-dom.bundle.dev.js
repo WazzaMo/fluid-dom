@@ -1,3 +1,4 @@
+//  Fluid-DOM v 1.1.1
 var fluid = (function (exports) {
     'use strict';
 
@@ -54,6 +55,9 @@ var fluid = (function (exports) {
                 list.push(name);
             }
             return list;
+        }
+        add(name, value) {
+            return this.set(name, value);
         }
         set(name, value) {
             this.domElement.setAttribute(name, value);
@@ -161,22 +165,6 @@ var fluid = (function (exports) {
             }
             return list;
         }
-        selectList(selector) {
-            this.elementList = this.convertToListOfElements(document.querySelectorAll(selector));
-            this.locatedBy = LocatedBy.Selector;
-        }
-        tagList(tagName) {
-            this.elementList = this.convertToListOfElements(document.getElementsByTagName(tagName));
-            this.locatedBy = LocatedBy.TagName;
-        }
-        childList(children) {
-            this.elementList = this.convertToListOfElements(children);
-            this.locatedBy = LocatedBy.ConstructedWithChildren;
-        }
-        classList(_class) {
-            this.elementList = this.convertToListOfElements(document.getElementsByClassName(_class));
-            this.locatedBy = LocatedBy.Class;
-        }
         constructor(elementListLocation) {
             var selector = elementListLocation.selector;
             var tagName = elementListLocation.tagName;
@@ -221,6 +209,25 @@ var fluid = (function (exports) {
         }
         reduce(func) {
             return this.elementList.reduce(func);
+        }
+        length() {
+            return this.elementList.length;
+        }
+        selectList(selector) {
+            this.elementList = this.convertToListOfElements(document.querySelectorAll(selector));
+            this.locatedBy = LocatedBy.Selector;
+        }
+        tagList(tagName) {
+            this.elementList = this.convertToListOfElements(document.getElementsByTagName(tagName));
+            this.locatedBy = LocatedBy.TagName;
+        }
+        childList(children) {
+            this.elementList = this.convertToListOfElements(children);
+            this.locatedBy = LocatedBy.ConstructedWithChildren;
+        }
+        classList(_class) {
+            this.elementList = this.convertToListOfElements(document.getElementsByClassName(_class));
+            this.locatedBy = LocatedBy.Class;
         }
     }
 
@@ -478,3 +485,4 @@ var fluid = (function (exports) {
     return exports;
 
 }({}));
+

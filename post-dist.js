@@ -15,7 +15,13 @@ function copyBrowserFileToLiveDocDir() {
   let filename = path.basename(fileToCopy)
   let destination = path.join(destinationPath, filename)
 
-  fs.copyFileSync(fileToCopy, destination)
+  fs.copyFile(fileToCopy, destination, err => {
+    if (err) {
+      console.error(`Could not copy ${filename} to ${destination} !!`)
+    } else {
+      console.log(`Installed ${filename} in ${destination}`)
+    }
+  })
 }
 
 function prefixVersion(content) {
@@ -40,12 +46,12 @@ function asyncRead(fname) {
 function asyncWrite(fname, data) {
   return new Promise( (resolve, reject) => {
     fs.writeFile(fname, data, (err) => reject(err))
-    resolve()
+    resolve(true)
   })
 }
 
 function addVersionComment(fname) {
-  asyncRead(fname)
+  return asyncRead(fname)
   .then( x=> prefixVersion(x) )
   .then( last => 
     asyncWrite(fname, last)

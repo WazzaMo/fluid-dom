@@ -1,3 +1,4 @@
+//  Fluid-DOM v 1.1.1
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -55,6 +56,9 @@ class Attributes {
             list.push(name);
         }
         return list;
+    }
+    add(name, value) {
+        return this.set(name, value);
     }
     set(name, value) {
         this.domElement.setAttribute(name, value);
@@ -162,22 +166,6 @@ class ElementList {
         }
         return list;
     }
-    selectList(selector) {
-        this.elementList = this.convertToListOfElements(document.querySelectorAll(selector));
-        this.locatedBy = LocatedBy.Selector;
-    }
-    tagList(tagName) {
-        this.elementList = this.convertToListOfElements(document.getElementsByTagName(tagName));
-        this.locatedBy = LocatedBy.TagName;
-    }
-    childList(children) {
-        this.elementList = this.convertToListOfElements(children);
-        this.locatedBy = LocatedBy.ConstructedWithChildren;
-    }
-    classList(_class) {
-        this.elementList = this.convertToListOfElements(document.getElementsByClassName(_class));
-        this.locatedBy = LocatedBy.Class;
-    }
     constructor(elementListLocation) {
         var selector = elementListLocation.selector;
         var tagName = elementListLocation.tagName;
@@ -222,6 +210,25 @@ class ElementList {
     }
     reduce(func) {
         return this.elementList.reduce(func);
+    }
+    length() {
+        return this.elementList.length;
+    }
+    selectList(selector) {
+        this.elementList = this.convertToListOfElements(document.querySelectorAll(selector));
+        this.locatedBy = LocatedBy.Selector;
+    }
+    tagList(tagName) {
+        this.elementList = this.convertToListOfElements(document.getElementsByTagName(tagName));
+        this.locatedBy = LocatedBy.TagName;
+    }
+    childList(children) {
+        this.elementList = this.convertToListOfElements(children);
+        this.locatedBy = LocatedBy.ConstructedWithChildren;
+    }
+    classList(_class) {
+        this.elementList = this.convertToListOfElements(document.getElementsByClassName(_class));
+        this.locatedBy = LocatedBy.Class;
     }
 }
 
@@ -475,3 +482,4 @@ for (var event of EVENT_LIST) {
 
 exports.DOM = DOM;
 exports.Events = Events;
+
