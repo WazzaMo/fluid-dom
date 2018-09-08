@@ -52,7 +52,7 @@ and use `require` to import the fluid-dom library into
 your own code. That needs to use the commonjs version (also included).
 
 ```js
-var fluid = require('fluid-dom.commonjs');
+var fluid = require('fluid-dom/fluid-dom.commonjs');
 
 var dom = new fluid.DOM();
 // and so on...
