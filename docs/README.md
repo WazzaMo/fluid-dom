@@ -1,37 +1,39 @@
-# Fluid DOM Documentation
+# Fluid DOM
 
-## Introduction
+Inspired partly by .NET's LINQ, the Fluid DOM is a fluid
+or functional DSL styled API for the HTML JavaScript DOM.
 
-Fluid DOM attempts to wrap the standard DOM API with
-a more modern-feeling style.
+## Contents
 
-The fluid global variable hash is used as a namespace.
+1. [Fluid DOM API](./API.md)
+2. [How to Reference](./How-to-reference.md)
+3. [Live Running Example](./live/example-01.html)
+4. Why use it? (this page)
+5. [Quick Examples](./Quick-Examples.md)
 
-The DOM object is a gateway to either an Element object
-or an ElementList object. An ElementList object is just
-a container for Element objects and help represent the
-document hierarchy and support iteration, filter, map and reduce operations.
+## Why Use It?
 
-The Element object provides access to the Attributes object
-or the Classes object and these three types are the core
-for document manipulation.
+Convenience AND Security!
+Fluid DOM has NO RUNTIME DEPENDENCIES and is very small!
 
-## Object Types
-- [fluid root object](./fluid.md)
-- [DOM Object](./DOM.md)
-- [Element Object](./Element.md)
-- [ElementList Object](./ElementList.md)
-- [Attributes Object](./Attributes.md)
-- [Classes Object](./Classes.md)
+It can be dangerous to use too many packages and even more
+dangerous to rely on packages with many cascading dependencies.
 
-## Locating Options
+The developer, non-minified version of fluid-dom is under 500 lines
+long and fairly easy to read so you can confirm for yourself that
+it does what it said on the the tin and there's no malicious code.
 
-There are two types of locating options. One is for
-identifying a single element in a document. The other
-is to identify zero or more elements from a document.
+## That's Great by Why Use It?
 
-- [Element Locating Options](./ElementOptions.md)
-- [Element List Locating Options](./ElementListOptions.md)
+... oh.. "you mean what's in it for me?"
 
-----
-Fluid DOM (c) Copyright 2018 Warwick Molloy
+The standard DOM APIs are a bit clunky in that some things
+are done with properties and some with methods.
+
+For you, as a programmer, you'll find that 
+Fluid-DOM is very small and doesn't get away of the standard DOM APIs.
+Instead, this library is more of a convenience wrapper to
+bring the standard APIs into a more functional way of thinking
+about things. That said, it's more about convenience than true
+functional programming. Let's face it, we're mutating the DOM.
+

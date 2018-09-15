@@ -423,6 +423,66 @@ var fluid = (function (exports) {
      * (c) Copyright 2018 Warwick Molloy
      * Available under the MIT License
      */
+    (function (HttpMethod) {
+        HttpMethod["CONNECT"] = "CONNECT";
+        HttpMethod["DELETE"] = "DELETE";
+        HttpMethod["GET"] = "GET";
+        HttpMethod["HEAD"] = "HEAD";
+        HttpMethod["OPTIONS"] = "OPTIONS";
+        HttpMethod["PATCH"] = "PATCH";
+        HttpMethod["POST"] = "POST";
+        HttpMethod["PUT"] = "PUT";
+        HttpMethod["TRACE"] = "TRACE";
+    })(exports.HttpMethod || (exports.HttpMethod = {}));
+    function request(method, url, headers, user, password) {
+        let xhr = new XMLHttpRequest();
+        let promise;
+        xhr.open(method, url, true, user, password);
+        if (!!headers) {
+            let header_list = headers;
+            for (var header of header_list) {
+                xhr.setRequestHeader(header.name, header.value);
+            }
+        }
+        promise = new Promise((resolve, reject) => {
+            xhr.onabort = () => {
+                reject('Request Aborted');
+            };
+            xhr.ontimeout = () => {
+                reject('Timed out');
+            };
+            xhr.onerror = () => {
+                reject('Error occurred.');
+            };
+            xhr.onreadystatechange = () => {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        let res = {
+                            status: xhr.status,
+                            type: xhr.responseType,
+                            body: xhr.response,
+                            timeout: !!xhr.timeout
+                        };
+                        resolve(res);
+                    }
+                    else {
+                        reject(`Returned HTTP ${xhr.status}`);
+                    }
+                }
+            };
+        });
+        xhr.send();
+        return promise;
+    }
+    const Http = {
+        request: request
+    };
+
+    /*
+     * Fluid DOM for JavaScript
+     * (c) Copyright 2018 Warwick Molloy
+     * Available under the MIT License
+     */
     const EVENT_LIST = [
         'abort', 'afterscriptexecute',
         'animationcancel', 'animationend', 'animationiteration',
@@ -481,6 +541,7 @@ var fluid = (function (exports) {
 
     exports.DOM = DOM;
     exports.Events = Events;
+    exports.Http = Http;
 
     return exports;
 

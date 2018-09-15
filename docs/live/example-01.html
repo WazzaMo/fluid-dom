@@ -5,77 +5,29 @@
     <title>Fluid-DOM : Example 01</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        body {
-            display: grid;
-            background-color: #336;
-            grid-template:
-                "intro intro " auto
-                "replace_demo source" auto
-                "attrib_demo source" auto
-                "iteration_demo source" auto
-                ". source" auto
-                / 1fr 2fr
-                ;
-        }
-
-        #intro { grid-area: intro; }
-        #replace_demo { grid-area: replace_demo; }
-        #attrib_demo { grid-area: attrib_demo; }
-        #iteration_demo { grid-area: iteration_demo; }
-
-        #source {
-            grid-area: source;
-            background-color: #222;
-        }
-
-        div {
-            background-color: #55A;
-            border-radius: 2px;
-            color: white;
-            padding: 3px;
-            margin: 10px 5px;
-        }
-
-        #intro {
-            text-align: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 1.5em;
-            background-color: #222;
-            padding: 5px 2px;
-        }
-
-        h1 {
-            padding: 0;
-            margin: 10px 0;
-        }
-
-        #summary_text { background-color: #333; color: white; }
-
-        .fancy {
-            font-family: cursive, 'Times New Roman', Times, serif;
-            background-color: black;
-            color: white;
-            border: 1px solid orange;
-        }
-
-        li {
-            height: 30px;
-            margin: 2px 0;
-        }
-
-        pre { margin: 0 5px;}
-
-        button {
-            width: 100%;
-            padding: 3px;
-        }
-    </style>
+    <link rel="stylesheet" href="example.css">
 </head>
 <body>
-    <div id="intro"><h1>A Simple Set of Demos</h1></div>
-    <div id="replace_demo">
+    <div id="intro">
+        <h1>A Simple Set of Demos</h1>
+        <p>
+            The demos include text substitution, manipulating
+            attributes and iterating through a list.
+            The headings of each demo are inserted by taking the
+            id from the div of each demo, normalising it and
+            creating a heading - so the way this page works is
+            also a demonstration.
+        </p>
     </div>
+
+    <div class="heading-left">Example</div>
+    <div class="heading-right">Code that Makes it Happen</div>
+
+    <div class="setup">Create a 'dom' object.</div>
+    <div class="source" data-source="setup-dom"></div>
+
+    <div id="replace_demo"> </div>
+    <div class="source" data-source="replace"></div>
 
     <div id="attrib_demo">
         <p>The text below can be hidden / revealed by clicking this button.</p>
@@ -83,6 +35,7 @@
         <p class="hidable">I can be hidden</p>
         <h2 class="hidable">Also can be hidden</h2>
     </div>
+    <div class="source" data-source="attrib"></div>
 
     <div id="iteration_demo">
         <ul>
@@ -93,21 +46,26 @@
         <button data-setup="setupToggleFancy">Make Fancy</button>
         <button data-setup="setupReplaceText">Swap 'yay' with 'boo'</button>
     </div>
+    <div class="source" data-source="iteration"></div>
 
-    <div id="source">
+    <div class="setup">Setup on Window Load</div>
+    <div class="source" data-source="setup-window"></div>
 
-    </div>
 </body>
-    <script src="./fluid-dom.bundle.js"></script>
-    <script>
-    var dom = new fluid.DOM()
 
+<script src="./fluid-dom.bundle.js"></script>
+
+<script data-source="setup-dom">
+    var dom = new fluid.DOM()
+</script>
+<script data-source="replace">
     // -- Replace Demo --
     function performReplace() {
         var replace_demo = dom.findElement({id: 'replace_demo'})
         replace_demo.html('<b>This is the life!</b>')
     }
-
+</script>
+<script data-source="attrib">
     // -- Attrib Demo --
     function setupAttribDemo() {
         var attrib_demo = dom.findElement({id: 'attrib_demo'})
@@ -126,7 +84,8 @@
             }
         })
     }
-
+</script>
+<script data-source="iteration">
     // -- Iteration Demo --
     function iterationDemoAddClass() {
         dom.findElement({id:'iteration_demo'})
@@ -179,7 +138,8 @@
                     button.attributes().with('data-setup', func => window[func](button) )
             )
     }
-
+</script>
+<script data-source="setup-window">
     // -- Headings from IDs --
     function setupHeadings() {
         var toName = (val) => val.charAt(0).toUpperCase() + val.substr(1)
@@ -200,15 +160,18 @@
     }
 
     window.onload = setup
-    </script>
+</script>
 
-    <script>
-        var source = dom.findElement({id: "source"})
-        var js = dom.findAll({tagName: "script"}).elementList[1]
-        source.html(`
-            <pre>
-                ${js.text().replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-            </pre>
+<script>
+    dom.findAll({selector: 'div.source[data-source]'})
+    .each(div => {
+        let source = div.attributes().get('data-source');
+        let script = dom.findElement({selector: `script[data-source="${source}"]`});
+        let srcCode = script.text().replace(/>/g,'&gt;').replace(/</g,'&lt;');
+        div.html(`
+        <pre>${srcCode}</pre>
         `)
-    </script>
+    })
+</script>
+
 </html>

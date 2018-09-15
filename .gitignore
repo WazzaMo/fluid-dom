@@ -1,6 +1,8 @@
 
 .cache/
 
+.vscode/
+
 dist/
 js/
 fluid-dom/

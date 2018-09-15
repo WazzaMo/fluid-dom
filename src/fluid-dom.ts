@@ -13,6 +13,11 @@ import { ElementLocation } from './element-location'
 import { ElementListLocation } from './element-list-location'
 import { EventHandlerInfo } from './event-handler-info';
 
+export {
+  Http,
+  HttpMethod
+} from './http';
+
 const EVENT_LIST = [
   'abort', 'afterscriptexecute',
   'animationcancel', 'animationend', 'animationiteration',
@@ -70,6 +75,7 @@ export class DOM {
       button.on(eventInfo)
     }
   }
+
 }
 
 export const Events : any = {}
@@ -77,3 +83,4 @@ export const Events : any = {}
 for(var event of EVENT_LIST) {
   Events[event.toUpperCase()] = event
 }
+

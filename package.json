@@ -27,11 +27,11 @@
     "live": "docs/live"
   },
   "types": [
-    "js/*.ts"
+    "js/index.d.ts"
   ],
   "keywords": [
     "DOM",
-    "web",
+    "browser",
     "html",
     "functional",
     "LINQ",

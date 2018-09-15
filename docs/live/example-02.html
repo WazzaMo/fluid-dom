@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fluid DOM: Example 02</title>
+    <link rel="stylesheet" href="example.css">
+</head>
+<body>
+    <div id="intro">
+        <h1>Example 2 - Http</h1>
+        <p>
+            Demonstrate the ability to fetch a document
+            or call a web API asynchronously.
+        </p>
+    </div>
+
+    <div class="heading-left">Example</div>
+    <div class="heading-right">Code that Makes it Happen</div>
+
+    <div class="insert-here" data-http="1"></div>
+    <div class="source" data-http="1"></div>
+
+    <div class="insert-here" data-http="2"></div>
+    <div class="source" data-http="2"></div>
+
+</body>
+
+<script src="./fluid-dom.bundle.js"></script>
+
+<script data-http="1">
+let dom = new fluid.DOM();
+let insertionSpot1 = 
+    dom.findElement({selector: 'div.insert-here[data-http="1"]'});
+
+insertionSpot1.html('<b>fetching...</b>');
+
+fluid.Http.request(
+    fluid.HttpMethod.GET,
+    'https://server.test-cors.org/server?id=5096911&enable=true'
+).then( response => insertionSpot1.text(JSON.stringify(response)) )
+.catch(err => console.error(`Http.request failed -> ${err}`));
+</script>
+
+<script data-http="2">
+let insertionSpot2 = 
+    dom.findElement({selector: 'div.insert-here[data-http="2"]'});
+
+insertionSpot2.html('<b>fetching...</b>');
+
+fluid.Http.request(
+    fluid.HttpMethod.GET,
+    'https://server.test-cors.org/server?id=5096911&enable=true',
+    [{name:'Accept', value: 'text/floppybunny'}]
+).then( response => {
+    insertionSpot2.html(`
+        <p><b>status:</b> ${response.status}</p>
+        <p><b>responseType:</b> ${response.type}<br></p>
+        <p><b>body:</b> ${response.body}<br></p>
+        <p><b>timeout:</b> ${response.timeout}<br></p>
+    `)
+})
+.catch(err => console.error(`Http.request failed -> ${err}`));
+</script>
+
+
+<script>
+    dom.findAll({selector: 'div.source[data-http]'})
+        .each(div => {
+            let index = div.attributes().get('data-http');
+            let script = dom.findElement({selector: `script[data-http="${index}"]`});
+            let srcCode = script.text().replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            div.html(`
+<pre>${srcCode}</pre>
+            `)
+        })
+</script>
+
+</html>
