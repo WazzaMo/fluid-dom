@@ -52,7 +52,8 @@ fluid.Http.request(
     fluid.HttpMethod.GET,
     'https://server.test-cors.org/server?id=5096911&enable=true',
     [{name:'Accept', value: 'text/floppybunny'}]
-).then( response => {
+)
+.then( response => {
     insertionSpot2.html(`
         <p><b>status:</b> ${response.status}</p>
         <p><b>responseType:</b> ${response.type}<br></p>

@@ -13,10 +13,7 @@ import { ElementLocation } from './element-location'
 import { ElementListLocation } from './element-list-location'
 import { EventHandlerInfo } from './event-handler-info';
 
-export {
-  Http,
-  HttpMethod
-} from './http';
+
 
 const EVENT_LIST = [
   'abort', 'afterscriptexecute',
