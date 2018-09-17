@@ -435,17 +435,108 @@ class Element {
     HttpMethod["PUT"] = "PUT";
     HttpMethod["TRACE"] = "TRACE";
 })(exports.HttpMethod || (exports.HttpMethod = {}));
-function request(method, url, headers, user, password) {
-    let xhr = new XMLHttpRequest();
-    let promise;
-    xhr.open(method, url, true, user, password);
-    if (!!headers) {
-        let header_list = headers;
-        for (var header of header_list) {
-            xhr.setRequestHeader(header.name, header.value);
+
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
+(function (HttpResponseType) {
+    HttpResponseType["TEXT"] = "text";
+    HttpResponseType["ARRAYBUFFER"] = "arraybuffer";
+    HttpResponseType["BLOB"] = "blob";
+    HttpResponseType["DOCUMENT"] = "document";
+    HttpResponseType["JSON"] = "json";
+})(exports.HttpResponseType || (exports.HttpResponseType = {}));
+
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
+(function (HttpProtocol) {
+    HttpProtocol["HTTP"] = "http";
+    HttpProtocol["HTTPS"] = "https";
+    HttpProtocol["FILE"] = "file";
+})(exports.HttpProtocol || (exports.HttpProtocol = {}));
+
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
+class Http {
+    constructor() {
+        this.protocol = exports.HttpProtocol.HTTP;
+        this.port = undefined;
+        this.hostname = '';
+        this.requestHeaders = [];
+        this.path = '';
+        this.method = exports.HttpMethod.GET;
+        this.body = undefined;
+        this.uploadData = undefined;
+        this.responseType = exports.HttpResponseType.TEXT;
+        this.timeoutMS = 1000;
+    }
+    host(protocol, hostname, port) {
+        this.hostname = hostname;
+        this.port = port;
+        this.protocol = protocol;
+        return this;
+    }
+    header(name, value) {
+        this.requestHeaders.push({ name: name, value: value });
+        return this;
+    }
+    expectedData(type) {
+        this.responseType = type;
+        return this;
+    }
+    timeoutAt(duration) {
+        this.timeoutMS = duration;
+        return this;
+    }
+    context(task) {
+        let _context = new Http();
+        _context.protocol = this.protocol;
+        _context.port = this.port;
+        _context.hostname = this.hostname;
+        _context.requestHeaders = new Array().concat(this.requestHeaders);
+        _context.path = this.path;
+        _context.method = this.method;
+        _context.body = this.body;
+        _context.uploadData = this.uploadData;
+        _context.responseType = this.responseType;
+        task(_context);
+        return this;
+    }
+    call(method, path, body) {
+        this.method = method;
+        this.path = path;
+        this.body = body;
+        this.syncPortAndProtocol();
+        let portString = (!!this.port) ? `:${this.port}` : ``;
+        let url = `${this.protocol}://${this.hostname}${portString}${path}`;
+        let xhr = this.createRequestTo(url);
+        let promise = this.setHandlers(xhr);
+        this.addAnyHeaders(xhr);
+        xhr.send(this.body);
+        return promise;
+    }
+    syncPortAndProtocol() {
+        if ((this.protocol == exports.HttpProtocol.HTTP && this.port == 80)
+            || (this.protocol == exports.HttpProtocol.HTTPS && this.port == 443)
+            || this.protocol == exports.HttpProtocol.FILE) {
+            this.port = undefined;
         }
     }
-    promise = new Promise((resolve, reject) => {
+    createRequestTo(url) {
+        let xhr = new XMLHttpRequest();
+        xhr.timeout = this.timeoutMS;
+        xhr.open(this.method, url);
+        return xhr;
+    }
+    setErrorHandlers(xhr, reject) {
         xhr.onabort = () => {
             reject('Request Aborted');
         };
@@ -455,29 +546,62 @@ function request(method, url, headers, user, password) {
         xhr.onerror = () => {
             reject('Error occurred.');
         };
+    }
+    createResponseObject(xhr) {
+        let headers = xhr
+            .getAllResponseHeaders().split('\r\n')
+            .map(header_line => {
+            let parts = header_line.split(':');
+            if (parts && parts.length == 2) {
+                return { name: parts[0], value: parts[1] };
+            }
+            else {
+                return undefined;
+            }
+        })
+            .filter(item => item != undefined);
+        let collection = {};
+        for (var hdr in headers) {
+            let a_header = headers[hdr];
+            if (a_header) {
+                collection[a_header.name] = a_header.value;
+            }
+        }
+        let response = {
+            status: xhr.status,
+            type: xhr.responseType,
+            body: xhr.response,
+            headers: collection
+        };
+        return response;
+    }
+    setOnCompleteHandler(xhr, resolve, reject) {
         xhr.onreadystatechange = () => {
             if (xhr.readyState == 4) {
                 if (xhr.status == 200) {
-                    let res = {
-                        status: xhr.status,
-                        type: xhr.responseType,
-                        body: xhr.response,
-                        timeout: !!xhr.timeout
-                    };
-                    resolve(res);
+                    resolve(this.createResponseObject(xhr));
                 }
                 else {
                     reject(`Returned HTTP ${xhr.status}`);
                 }
             }
         };
-    });
-    xhr.send();
-    return promise;
+    }
+    addAnyHeaders(xhr) {
+        if (this.requestHeaders.length > 0) {
+            for (var header of this.requestHeaders) {
+                xhr.setRequestHeader(header.name, header.value);
+            }
+        }
+    }
+    setHandlers(xhr) {
+        let promise = new Promise((resolve, reject) => {
+            this.setErrorHandlers(xhr, reject);
+            this.setOnCompleteHandler(xhr, resolve, reject);
+        });
+        return promise;
+    }
 }
-const Http = {
-    request: request
-};
 
 /*
  * Fluid DOM for JavaScript

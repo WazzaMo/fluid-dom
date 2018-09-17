@@ -10,6 +10,6 @@ export interface HttpResponse {
   status: number;
   type: string;
   body: string | Document | ArrayBuffer | Blob;
-  timeout: boolean;
-  headers: Array<HttpHeader>;
+  // headers: Array<HttpHeader>;
+  headers: { [name: string]: string };
 }

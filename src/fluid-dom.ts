@@ -50,6 +50,12 @@ function createEventHash() {
   return events
 }
 
+export { Http } from './http';
+export { HttpMethod } from "./http-method";
+export { HttpResponseType } from "./http-response-type";
+export { HttpProtocol } from "./http-protocol";
+export { HttpResponse } from "./http-response";
+
 export class DOM {
   events: any;
 

@@ -35,11 +35,15 @@ let insertionSpot1 =
 
 insertionSpot1.html('<b>fetching...</b>');
 
-fluid.Http.request(
-    fluid.HttpMethod.GET,
-    'https://server.test-cors.org/server?id=5096911&enable=true'
-).then( response => insertionSpot1.text(JSON.stringify(response)) )
-.catch(err => console.error(`Http.request failed -> ${err}`));
+let http = new fluid.Http();
+http
+    .host(fluid.HttpProtocol.HTTPS, 'server.test-cors.org')
+    .call(fluid.HttpMethod.GET, '/server?id=5096911&enable=true')
+    .then( response => {
+        insertionSpot1.text(response.body)
+    })
+    .catch(err => insertionSpot1.text(`Error: ${err}`))
+    ;
 </script>
 
 <script data-http="2">
@@ -48,20 +52,22 @@ let insertionSpot2 =
 
 insertionSpot2.html('<b>fetching...</b>');
 
-fluid.Http.request(
-    fluid.HttpMethod.GET,
-    'https://server.test-cors.org/server?id=5096911&enable=true',
-    [{name:'Accept', value: 'text/floppybunny'}]
-)
-.then( response => {
-    insertionSpot2.html(`
-        <p><b>status:</b> ${response.status}</p>
-        <p><b>responseType:</b> ${response.type}<br></p>
-        <p><b>body:</b> ${response.body}<br></p>
-        <p><b>timeout:</b> ${response.timeout}<br></p>
-    `)
-})
-.catch(err => console.error(`Http.request failed -> ${err}`));
+http.call(fluid.HttpMethod.GET, '/server?id=5096911&enable=true')
+    .then( response => {
+        let headerPart = ''
+        for(var name in response.headers) {
+            headerPart += `<br>  <b>${name} :</b>${response.headers[name]}`;
+        }
+        insertionSpot2.html(`
+            <p><b>status:</b> ${response.status}</p>
+            <p><b>responseType:</b> ${response.type}<br></p>
+            <p><b>body:</b> ${response.body}<br></p>
+            <p><b>Response Headers: </b> ${headerPart}</p>
+        `)
+    })
+    .catch(err => insertionSpot1.text(`Error: ${err}`))
+    ;
+
 </script>
 
 

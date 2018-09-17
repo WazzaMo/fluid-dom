@@ -5,8 +5,9 @@
  */
 
 export enum HttpResponseType {
-  TEXT = "text",
-  ARRAYBUFFER = "arraybuffer",
-  BLOB = "blob",
-  DOCUMENT = "document"
+  TEXT = 'text',
+  ARRAYBUFFER = 'arraybuffer',
+  BLOB = 'blob',
+  DOCUMENT = 'document',
+  JSON = 'json'
 }

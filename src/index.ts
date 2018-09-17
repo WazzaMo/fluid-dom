@@ -13,3 +13,9 @@ export * from './element-location'
 export * from './element-list-location'
 export * from './event-handler-info'
 export * from './util'
+
+export * from './http';
+export * from "./http-method";
+export * from "./http-response-type";
+export * from "./http-protocol";
+export * from "./http-response";

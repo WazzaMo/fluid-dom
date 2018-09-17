@@ -1,18 +1,18 @@
-import { resolvePtr } from "dns";
-import { HttpHeader } from "./http-header";
-import { HttpMethod } from "./http-method";
-import { unwatchFile } from "fs";
-import { HttpResponseType } from "./http-response-type";
-import { HttpProtocol } from "./http-protocol";
-import { HttpResponse } from "./http-response";
-
 /*
  * Fluid DOM for JavaScript
  * (c) Copyright 2018 Warwick Molloy
  * Available under the MIT License
  */
 
-class Http {
+
+import { HttpHeader } from "./http-header";
+import { HttpMethod } from "./http-method";
+import { HttpResponseType } from "./http-response-type";
+import { HttpProtocol } from "./http-protocol";
+import { HttpResponse } from "./http-response";
+
+
+export class Http {
   requestHeaders: Array<HttpHeader>;
   protocol: HttpProtocol;
   port?: number;
@@ -22,6 +22,7 @@ class Http {
   body?: string;
   uploadData?: any;
   responseType: HttpResponseType;
+  timeoutMS: number;
 
   constructor() {
     this.protocol = HttpProtocol.HTTP;
@@ -33,6 +34,7 @@ class Http {
     this.body = undefined;
     this.uploadData = undefined;
     this.responseType = HttpResponseType.TEXT;
+    this.timeoutMS = 1000;
   }
 
   host(protocol: HttpProtocol, hostname: string, port?: number) {
@@ -49,6 +51,11 @@ class Http {
 
   expectedData(type: HttpResponseType) {
     this.responseType = type;
+    return this;
+  }
+
+  timeoutAt(duration: number) : Http {
+    this.timeoutMS = duration;
     return this;
   }
 
@@ -93,6 +100,7 @@ class Http {
 
   private createRequestTo(url: string) : XMLHttpRequest {
     let xhr = new XMLHttpRequest();
+    xhr.timeout = this.timeoutMS;
     xhr.open(this.method, url);
     return xhr;
   }
@@ -121,13 +129,19 @@ class Http {
         }
       })
       .filter( item => item != undefined);
+    let collection : { [name: string]: string} = {};
+    for(var hdr in headers) {
+      let a_header = headers[hdr];
+      if (a_header) {
+        collection[a_header.name] = a_header.value;
+      }
+    }
 
     let response : HttpResponse = {
       status: xhr.status,
       type: xhr.responseType,
       body: xhr.response,
-      timeout: !! xhr.timeout,
-      headers: <Array<HttpHeader>>headers
+      headers: collection
     };
     return response;
   }
