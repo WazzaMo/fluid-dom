@@ -35,30 +35,20 @@ let insertionSpot1 =
 
 insertionSpot1.html('<b>fetching...</b>');
 
+let HOSTNAME = 'wazzamo.github.io'
+let PAGE = '/fluid-dom/live/http-payload.html'
+let PAGE2 = '/fluid-dom/live/http-second-payload.html'
+
 let http = new fluid.Http();
 http
-    .host(fluid.HttpProtocol.HTTPS, 'server.test-cors.org')
-    .call(fluid.HttpMethod.GET, '/server?id=5096911&enable=true')
-    .then( response => {
-        insertionSpot1.text(response.body)
-    })
-    .catch(err => insertionSpot1.text(`Error: ${err}`))
-    ;
-</script>
-
-<script data-http="2">
-let insertionSpot2 = 
-    dom.findElement({selector: 'div.insert-here[data-http="2"]'});
-
-insertionSpot2.html('<b>fetching...</b>');
-
-http.call(fluid.HttpMethod.GET, '/server?id=5096911&enable=true')
+    .host(fluid.HttpProtocol.HTTPS, HOSTNAME)
+    .call(fluid.HttpMethod.GET, PAGE)
     .then( response => {
         let headerPart = ''
         for(var name in response.headers) {
             headerPart += `<br>  <b>${name} :</b>${response.headers[name]}`;
         }
-        insertionSpot2.html(`
+        insertionSpot1.html(`
             <p><b>status:</b> ${response.status}</p>
             <p><b>responseType:</b> ${response.type}<br></p>
             <p><b>body:</b> ${response.body}<br></p>
@@ -67,6 +57,48 @@ http.call(fluid.HttpMethod.GET, '/server?id=5096911&enable=true')
     })
     .catch(err => insertionSpot1.text(`Error: ${err}`))
     ;
+</script>
+
+<script data-http="2">
+const DELAY = 3; //seconds
+
+let insertionSpot2 = 
+    dom
+    .findElement({selector: 'div.insert-here[data-http="2"]'});
+
+insertionSpot2.html('<b>fetching...</b>');
+
+function delay(secs) {
+    return new Promise((resolve, reject) => {
+        setTimeout( resolve, secs * 1000);
+    });
+}
+
+http
+    .call(fluid.HttpMethod.GET, PAGE)
+    .then( response => {
+        insertionSpot2.html( response.body );
+        insertionSpot2.append( `<span id="wait">Wait ${DELAY} seconds...</span>` );
+    })
+    .catch(err => insertionSpot1.text(`Error: ${err}`))
+    .afterResult( (http, response) => {
+        let waitMsg = dom.findElement({id: 'wait'});
+        delay(1)
+            .then( () => {
+                waitMsg.text('Wait 2 seconds...');
+                return delay(1);
+            })
+            .then( ()=> {
+                waitMsg.text('Wait 1 second...');
+                return delay(1);
+            })
+            .then( ()=> {
+                http.call(fluid.HttpMethod.GET, PAGE2)
+                .then( (response) => {
+                    insertionSpot2.html( response.body );
+                });
+            });
+    });
 
 </script>
 

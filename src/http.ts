@@ -10,7 +10,7 @@ import { HttpMethod } from "./http-method";
 import { HttpResponseType } from "./http-response-type";
 import { HttpProtocol } from "./http-protocol";
 import { HttpResponse } from "./http-response";
-
+import { HttpPromise } from './http-promise';
 
 export class Http {
   requestHeaders: Array<HttpHeader>;
@@ -74,10 +74,14 @@ export class Http {
     return this;
   }
 
-  call(method: HttpMethod, path: string, body?: string) : Promise<HttpResponse> {
+  call(method: HttpMethod, path: string, body?: any) : HttpPromise<HttpResponse> {
     this.method = method;
     this.path = path;
-    this.body = body;
+    if (typeof(body) === 'string') {
+      this.body = body;
+    } else {
+      this.body = JSON.stringify(body);
+    }
 
     this.syncPortAndProtocol();
     let portString = (!! this.port) ? `:${this.port}` : ``
@@ -170,8 +174,9 @@ export class Http {
     }
   }
 
-  private setHandlers(xhr: XMLHttpRequest) : Promise<HttpResponse> {
-    let promise = new Promise<HttpResponse>( (resolve, reject) => {
+  private setHandlers(xhr: XMLHttpRequest) : HttpPromise<HttpResponse> {
+    let promise = new HttpPromise<HttpResponse>(this)
+    promise.createPromise( (resolve, reject) => {
       this.setErrorHandlers(xhr, reject);
       this.setOnCompleteHandler(xhr, resolve, reject);
     });

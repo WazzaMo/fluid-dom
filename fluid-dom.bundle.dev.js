@@ -459,6 +459,58 @@ var fluid = (function (exports) {
         HttpProtocol["FILE"] = "file";
     })(exports.HttpProtocol || (exports.HttpProtocol = {}));
 
+    class HttpPromise {
+        constructor(_http) {
+            this.httpObject = _http;
+            this.promise = undefined;
+        }
+        createPromise(handler) {
+            this.result = undefined;
+            this.promise = new Promise((promiseResolver, promiseRejector) => {
+                let self = this;
+                let _resolve = function (data) {
+                    self.result = data;
+                    promiseResolver(data);
+                };
+                handler(_resolve, promiseRejector);
+            });
+        }
+        isResolved() {
+            return this.result != undefined;
+        }
+        http() {
+            return this.httpObject;
+        }
+        afterResult(contextThen) {
+            if (this.hasPromise(this.promise)) {
+                this.promise.then(resolvedResult => {
+                    contextThen(this.httpObject, resolvedResult);
+                });
+            }
+            return this;
+        }
+        then(when) {
+            if (this.hasPromise(this.promise)) {
+                return this.next(this.promise.then(when));
+            }
+            return this;
+        }
+        catch(when) {
+            if (this.hasPromise(this.promise)) {
+                return this.next(this.promise.catch(when));
+            }
+            return this;
+        }
+        hasPromise(promise) {
+            return this.promise instanceof Promise;
+        }
+        next(_promise) {
+            let _next = new HttpPromise(this.httpObject);
+            _next.promise = _promise;
+            return _next;
+        }
+    }
+
     /*
      * Fluid DOM for JavaScript
      * (c) Copyright 2018 Warwick Molloy
@@ -512,7 +564,12 @@ var fluid = (function (exports) {
         call(method, path, body) {
             this.method = method;
             this.path = path;
-            this.body = body;
+            if (typeof (body) === 'string') {
+                this.body = body;
+            }
+            else {
+                this.body = JSON.stringify(body);
+            }
             this.syncPortAndProtocol();
             let portString = (!!this.port) ? `:${this.port}` : ``;
             let url = `${this.protocol}://${this.hostname}${portString}${path}`;
@@ -594,7 +651,8 @@ var fluid = (function (exports) {
             }
         }
         setHandlers(xhr) {
-            let promise = new Promise((resolve, reject) => {
+            let promise = new HttpPromise(this);
+            promise.createPromise((resolve, reject) => {
                 this.setErrorHandlers(xhr, reject);
                 this.setOnCompleteHandler(xhr, resolve, reject);
             });
