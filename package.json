@@ -1,6 +1,6 @@
 {
   "name": "fluid-dom",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "description": "A fluid DOM (DSL style) library.",
   "browser": "./fluid-dom.bundle.js",
   "main": "./fluid-dom.commonjs.js",
