@@ -4,6 +4,7 @@ A class that represents the ability to make
 HTTP(S) requests, asynchronously, using JavaScript. The class is designed to have
 the same fluid style API that the DOM class provides - meaning, method calls can be chained.
 
+See [live demo page](./live/example-02.html) for Http.
 
 ## host(protocol, hostname, port )
 

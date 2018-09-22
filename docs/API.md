@@ -32,6 +32,8 @@ for document manipulation.
 - [ElementList Object](./ElementList.md)
 - [Attributes Object](./Attributes.md)
 - [Classes Object](./Classes.md)
+- [Http Class](./Http.md)
+- [HttpPromise](./HttpPromise.md)
 
 ## Locating Options
 
