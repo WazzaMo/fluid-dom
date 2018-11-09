@@ -4,14 +4,15 @@
  * Available under the MIT License
  */
 
-export enum LocatedBy  {
+export enum SourceType  {
   FailedToLocate = 'Failed to locate',
   Id = 'id',
   Selector = 'selector',
   Class = 'class',
   TagName = 'tagName',
   ConstructedWithElement = 'from given element',
-  ConstructedWithChildren = 'from given list of children'
+  ConstructedWithChildren = 'from given list of children',
+  Mock = 'Mock'
 }
 
 export enum Tag {

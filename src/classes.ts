@@ -4,13 +4,13 @@
  * Available under the MIT License
  */
 
-import { Element } from './element'
+import { DomElement } from './dom-element'
 
 export class Classes {
   domElement: any
-  element: Element
+  element: DomElement
 
-  constructor(domElement: any, elementObject: Element) {
+  constructor(domElement: any, elementObject: DomElement) {
     this.element = elementObject
     this.domElement = domElement
   }
@@ -26,7 +26,7 @@ export class Classes {
     return this.domElement.classList.contains(name)
   }
 
-  whenHas(name: string, task: (element: Element)=> void) : Classes {
+  whenHas(name: string, task: (element: DomElement)=> void) : Classes {
     if (this.has(name)) {
       task(this.element)
     }

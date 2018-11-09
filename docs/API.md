@@ -41,8 +41,8 @@ There are two types of locating options. One is for
 identifying a single element in a document. The other
 is to identify zero or more elements from a document.
 
-- [Element Locating Options](./ElementOptions.md)
-- [Element List Locating Options](./ElementListOptions.md)
+- [Element Locating Options](./ElementLocation.md)
+- [Element List Locating Options](./ElementListLocation.md)
 
 ----
 Fluid DOM (c) Copyright 2018 Warwick Molloy

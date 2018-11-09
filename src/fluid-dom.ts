@@ -6,12 +6,12 @@
 
 
 import { providesOne, providesAll } from './util'
-import { Element } from './element'
-import { ElementList } from './element-list'
-import { LocatedBy, Tag } from './constants'
-import { ElementLocation } from './element-location'
-import { ElementListLocation } from './element-list-location'
+import { DomElement } from './dom-element'
+import { SourceType, Tag } from './constants'
+import { ElementListSource } from './element-list-source'
 import { EventHandlerInfo } from './event-handler-info';
+import { IElement } from './i-element';
+import { ElementSource } from './element-source';
 
 
 
@@ -56,6 +56,7 @@ export { HttpResponseType } from "./http-response-type";
 export { HttpProtocol } from "./http-protocol";
 export { HttpResponse } from "./http-response";
 
+
 export class DOM {
   events: any;
 
@@ -63,12 +64,36 @@ export class DOM {
     this.events = createEventHash()
   }
 
-  findElement(arg: ElementLocation) {
-    return new Element(arg)
+  findElement(arg: ElementSource) : IElement {
+    let id = arg['id'];
+    if (id) {
+      return DomElement.getElementFromId(id);
+    }
+
+    let selector = arg['selector'];
+    if (selector) {
+      return  DomElement.getElementFromSelector(selector);
+    }
+    return DomElement.nullElement();
   }
 
-  findAll(arg: ElementListLocation) {
-    return new ElementList(arg)
+  findAll(arg: ElementListSource) : Array<IElement> {
+    let selector = arg['selector'];
+    if(selector) {
+      return DomElement.getListFromSelector(selector);
+    }
+
+    let _class = arg['class'];
+    if (_class) {
+      return DomElement.getListFromClass(_class);
+    }
+
+    let tagName = arg['tagName'];
+    if (tagName) {
+      return DomElement.getListFromTagName(tagName);
+    }
+
+    return [];
   }
 
   buttonOn(eventInfo: EventHandlerInfo) {
