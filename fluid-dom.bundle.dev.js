@@ -149,6 +149,19 @@ var fluid = (function (exports) {
         }
     }
 
+    /*
+     * Fluid DOM for JavaScript
+     * (c) Copyright 2018 Warwick Molloy
+     * Available under the MIT License
+     */
+    /**
+     * # NonClasses
+     *
+     * Is a nil-effect IClasses instance to return
+     * in any situation where the IElement implementation
+     * cannot provide a backing for the style classes from
+     * a document.
+     */
     class NonClasses {
         constructor() { }
         each(callback) {
@@ -168,6 +181,124 @@ var fluid = (function (exports) {
         }
         set(_class) {
             return this;
+        }
+    }
+
+    /*
+     * Fluid DOM for JavaScript
+     * (c) Copyright 2018 Warwick Molloy
+     * Available under the MIT License
+     */
+    /**
+     * Represents a non-attributes instance, to be returned
+     * when no effective attributes instance can be provided.
+     */
+    class NonAttributes {
+        constructor() { }
+        each(callback) {
+            return this;
+        }
+        attributeNames() {
+            return [];
+        }
+        add(name, value) {
+            return this;
+        }
+        set(name, value) {
+            return this;
+        }
+        with(name, callback) {
+            return this;
+        }
+        get(name) {
+            return null;
+        }
+        has(name) {
+            return false;
+        }
+        remove(name) {
+            return this;
+        }
+    }
+
+    /*
+     * Fluid DOM for JavaScript
+     * (c) Copyright 2018 Warwick Molloy
+     * Available under the MIT License
+     */
+    /**
+     * Represents a non-element. To be returned in answer
+     * for an element but one cannot be provided.
+     */
+    class NonElement {
+        constructor() { }
+        isValid() {
+            return false;
+        }
+        getParent() {
+            return this;
+        }
+        withChildren(callback) {
+            return this;
+        }
+        expect(tagName) {
+            return this;
+        }
+        getId() {
+            return null;
+        }
+        hasId() {
+            return false;
+        }
+        exists() {
+            return false;
+        }
+        findAll(elementListLocation) {
+            return [];
+        }
+        selectFirst(selector) {
+            return this;
+        }
+        selectorPath() {
+            return '';
+        }
+        tagName() {
+            return '';
+        }
+        text(_text) {
+            if (_text) {
+                return this;
+            }
+            else {
+                return '';
+            }
+        }
+        html(_html) {
+            if (_html) {
+                return this;
+            }
+            else {
+                return '';
+            }
+        }
+        append(_html) {
+            return this;
+        }
+        prepend(_html) {
+            return this;
+        }
+        remove() {
+            return undefined;
+        }
+        attributes() {
+            return new NonAttributes();
+        }
+        classes() {
+            return new NonClasses();
+        }
+        on(args) { }
+        value() {
+            return undefined;
         }
     }
 
@@ -278,16 +409,8 @@ var fluid = (function (exports) {
             let element = document.querySelector(selector);
             return DomElement.makeFromElement(element);
         }
-        /**
-         * Factory method for a non-element object.
-         * @returns an element object where isValid() is always false.
-         * @see isValid
-         */
-        static nullElement() {
-            return new DomElement();
-        }
         static makeFromElement(element) {
-            return (!!element) ? new DomElement(element) : this.nullElement();
+            return (!!element) ? new DomElement(element) : new NonElement();
         }
         isValid() {
             return this.domElement.isValid;
@@ -300,7 +423,7 @@ var fluid = (function (exports) {
                 parent = _par ? new DomElement(_par) : new DomElement();
                 return parent;
             }
-            return DomElement.nullElement();
+            return new NonElement();
         }
         withChildren(callback) {
             if (this.domElement.isValid && this.domElement.Value.children.length > 0) {
@@ -415,7 +538,12 @@ var fluid = (function (exports) {
             return undefined;
         }
         attributes() {
-            return new DomAttributes(this.domElement.Value);
+            if (this.domElement.isValid) {
+                return new DomAttributes(this.domElement.Value);
+            }
+            else {
+                return new NonAttributes();
+            }
         }
         classes() {
             if (this.domElement.isValid) {
@@ -764,7 +892,7 @@ var fluid = (function (exports) {
             if (selector) {
                 return DomElement.getElementFromSelector(selector);
             }
-            return DomElement.nullElement();
+            return new NonElement();
         }
         findAll(arg) {
             let selector = arg['selector'];

@@ -13,6 +13,7 @@ import { EventHandlerInfo } from './event-handler-info';
 import { IElement } from './i-element';
 import { ElementSource } from './element-source';
 
+import { NonElement } from './non-element';
 
 
 const EVENT_LIST = [
@@ -74,7 +75,7 @@ export class DOM {
     if (selector) {
       return  DomElement.getElementFromSelector(selector);
     }
-    return DomElement.nullElement();
+    return new NonElement();
   }
 
   findAll(arg: ElementListSource) : Array<IElement> {

@@ -24,8 +24,6 @@ export interface IElement {
    */
   getId() : string | null;
 
-  getParent(): IElement;
-
   hasId() : boolean;
 
   exists() : boolean;

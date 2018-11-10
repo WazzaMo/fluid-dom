@@ -11,12 +11,14 @@ import { DomAttributes } from './dom-attributes'
 import { DomClasses } from './dom-classes'
 
 import { NonClasses } from './non-classes';
+import { NonAttributes } from './non-attributes';
 
 import { ElementListSource } from './element-list-source';
 import { EventHandlerInfo } from './event-handler-info';
 import { IAttributes } from './i-attributes';
 import { IElement } from './i-element';
 import { IClasses } from './i-classes';
+import { NonElement } from './non-element';
 
 /**
  * @private an internal function.
@@ -133,17 +135,8 @@ export class DomElement implements IElement {
     return DomElement.makeFromElement(element);
   }
 
-  /**
-   * Factory method for a non-element object.
-   * @returns an element object where isValid() is always false.
-   * @see isValid
-   */
-  static nullElement() : IElement {
-    return new DomElement();
-  }
-
   private static makeFromElement(element: Element | HTMLElement | null ): IElement {
-    return (!! element) ? new DomElement(element): this.nullElement();
+    return (!! element) ? new DomElement(element): new NonElement();
   }
 
   isValid() : boolean {
@@ -158,7 +151,7 @@ export class DomElement implements IElement {
       parent = _par ? new DomElement(<HTMLElement> _par) : new DomElement();
       return parent;
     }
-    return DomElement.nullElement();
+    return new NonElement();
   }
 
   withChildren(callback: (list:Array<IElement>)=>void) : IElement {
@@ -283,7 +276,11 @@ export class DomElement implements IElement {
   }
 
   attributes() : IAttributes {
-    return new DomAttributes(this.domElement.Value);
+    if (this.domElement.isValid) {
+      return new DomAttributes(this.domElement.Value);
+    } else {
+      return new NonAttributes();
+    }
   }
 
   classes(): IClasses {
