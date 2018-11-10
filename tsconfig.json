@@ -3,10 +3,11 @@
         "target": "es2016",
         "declaration": true,
         "inlineSourceMap": true,
-        "declarationMap": true,
+        "declarationMap": false,
         "strict": true,
         "module": "es6",
-        "outDir": "js"
+        "outDir": "js",
+        "composite": true
     },
     "include": [
         "src",

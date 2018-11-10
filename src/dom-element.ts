@@ -7,30 +7,35 @@
 import { Option } from './option';
 
 import { providesOne, providesAll, logWarning } from './util'
-import { Attributes } from './attributes'
-import { Classes } from './classes'
+import { DomAttributes } from './dom-attributes'
+import { DomClasses } from './dom-classes'
+
+import { NonClasses } from './non-classes';
 
 import { ElementListSource } from './element-list-source';
 import { EventHandlerInfo } from './event-handler-info';
+import { IAttributes } from './i-attributes';
 import { IElement } from './i-element';
+import { IClasses } from './i-classes';
 
-
+/**
+ * @private an internal function.
+ * @param collection HTML collection to convert into array of IElement
+ */
 function convertHtmlCollection(
   collection: HTMLCollection | NodeListOf<Element>
 ) : Array<IElement> {
   let list: Array<IElement> = [];
   for(var index = 0; index < collection.length; index++) {
     let child = <HTMLElement> collection[index];
-    list.push( cast( new DomElement(child) ) );
+    list.push( new DomElement(child) );
   }
   return list;
 }
 
-function cast(domElement: DomElement) : IElement {
-  let that: unknown = domElement;
-  return <IElement> that;
-}
-
+/**
+ * @private an internal function.
+ */
 function selectorPath(element : HTMLElement | Element ) : string {
   let path = '';
   if (element) {
@@ -46,6 +51,9 @@ function selectorPath(element : HTMLElement | Element ) : string {
   return path;
 }
 
+/**
+ * @private an internal function.
+ */
 function getBySelector(element: HTMLElement | Element, selector: string) : HTMLElement | null {
   let first = element.querySelector(selector);
 
@@ -62,8 +70,9 @@ function getBySelector(element: HTMLElement | Element, selector: string) : HTMLE
 
 
 /**
- * @type DomElement
- * Is the IElement implementation for elements in the browser
+ * # DomElement
+ * 
+ * The implementation IElement for elements in the browser
  * page from the DOM.
  */
 export class DomElement implements IElement {
@@ -77,16 +86,33 @@ export class DomElement implements IElement {
     console.error("IElement[DomElement] is invalid.");
   }
 
+  /**
+   * Finds elements in a document using a selector.
+   * @param selector - CSS style selector.
+   * @returns list of matching elements.
+   */
   static getListFromSelector(selector:string) : Array<IElement> {
     let list = document.querySelectorAll(selector);
     return convertHtmlCollection(list);
   }
 
+  /**
+   * Finds elements in a document using a class name.
+   * Note do not prefix with a period (`.`) - just provide
+   * the pure class name.
+   * @param class - pure class name.
+   * @returns list of matching elements.
+   */
   static getListFromClass(_class:string) : Array<IElement> {
-    let list = document.querySelectorAll(_class);
+    let list = document.querySelectorAll(`.${_class}`);
     return convertHtmlCollection(list);
   }
 
+  /**
+   * Finds elements in a document using a tag-name.
+   * @param tagName - tag name (case insensitive).
+   * @returns list of matching elements.
+   */
   static getListFromTagName(tagName:string) : Array<IElement> {
     let list = document.querySelectorAll(tagName);
     return convertHtmlCollection(list);
@@ -97,17 +123,27 @@ export class DomElement implements IElement {
     return DomElement.makeFromElement(element);
   }
 
+  /**
+   * Gets the first matching element from a document.
+   * @param selector - a CSS style selector
+   * @returns an element object.
+   */
   static getElementFromSelector(selector: string) : IElement {
     let element = document.querySelector(selector);
     return DomElement.makeFromElement(element);
   }
 
+  /**
+   * Factory method for a non-element object.
+   * @returns an element object where isValid() is always false.
+   * @see isValid
+   */
   static nullElement() : IElement {
-    return cast( new DomElement() );
+    return new DomElement();
   }
 
   private static makeFromElement(element: Element | HTMLElement | null ): IElement {
-    return (!! element) ? cast( new DomElement(element) ) : cast( new DomElement() );
+    return (!! element) ? new DomElement(element): this.nullElement();
   }
 
   isValid() : boolean {
@@ -120,9 +156,9 @@ export class DomElement implements IElement {
       let _par = element.parentElement;
       let parent: DomElement;
       parent = _par ? new DomElement(<HTMLElement> _par) : new DomElement();
-      return cast( parent );
+      return parent;
     }
-    return cast( new DomElement() );
+    return DomElement.nullElement();
   }
 
   withChildren(callback: (list:Array<IElement>)=>void) : IElement {
@@ -130,7 +166,7 @@ export class DomElement implements IElement {
       let list = convertHtmlCollection( this.domElement.Value.children);
       callback(list);
     }
-    return cast( this );
+    return this;
   }
 
   expect(tagName: string) : IElement{
@@ -143,11 +179,11 @@ export class DomElement implements IElement {
     } else {
       this.alertInvalid();
     }
-    return cast( this );
+    return this;
   }
 
-  getId() {
-    return this.attributes().get('id')
+  getId() : string | null {
+    return this.attributes().get('id');
   }
 
   hasId() {
@@ -173,10 +209,10 @@ export class DomElement implements IElement {
       let first : HTMLElement | null = getBySelector(this.domElement.Value, selector);
 
       if (first) {
-        return cast(new DomElement(<HTMLElement>first));
+        return new DomElement(<HTMLElement>first);
       }
     }
-    return cast(new DomElement());
+    return new DomElement();
   }
 
   selectorPath() : string {
@@ -200,7 +236,7 @@ export class DomElement implements IElement {
       let element = this.domElement.Value;
       if (!!_text ) {
         element.innerText = _text
-        return cast( this );
+        return this;
       } else {
         return element.innerText;
       }
@@ -215,7 +251,7 @@ export class DomElement implements IElement {
       let element = this.domElement.Value;
       if (!! _html) {
         element.innerHTML = _html
-        return cast( this );
+        return this;
       } else {
         return element.innerHTML;
       }
@@ -228,13 +264,13 @@ export class DomElement implements IElement {
   append(_html: string) : IElement{
     var totalHtml = `${this.html()}${_html}`
     this.html(totalHtml)
-    return cast( this );
+    return this;
   }
 
   prepend(_html: string) : IElement {
     var totalHtml = `${_html}${this.html()}`
     this.html(totalHtml)
-    return cast( this );
+    return this;
   }
 
   remove() : undefined {
@@ -243,15 +279,18 @@ export class DomElement implements IElement {
     } else {
       this.alertInvalid();
     }
-    return undefined
+    return undefined;
   }
 
-  attributes() {
-    return new Attributes(this.domElement);
+  attributes() : IAttributes {
+    return new DomAttributes(this.domElement.Value);
   }
 
-  classes() {
-    return new Classes(this.domElement, this);
+  classes(): IClasses {
+    if (this.domElement.isValid) {
+      return new DomClasses(this.domElement.Value, this);
+    }
+    return new NonClasses();
   }
 
   on(args: EventHandlerInfo) : void {

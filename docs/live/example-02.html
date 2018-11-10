@@ -105,7 +105,7 @@ http
 
 <script>
     dom.findAll({selector: 'div.source[data-http]'})
-        .each(div => {
+        .forEach(div => {
             let index = div.attributes().get('data-http');
             let script = dom.findElement({selector: `script[data-http="${index}"]`});
             let srcCode = script.text().replace(/</g,'&lt;').replace(/>/g,'&gt;');

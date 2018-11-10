@@ -18,7 +18,11 @@ export interface IElement {
 
   expect(tagName: string) : IElement;
 
-  getId() : string;
+  /**
+   * Shortcut to get the 'id' attribute's value from the element.
+   * @returns null when the 'id' attribute is not present.
+   */
+  getId() : string | null;
 
   getParent(): IElement;
 

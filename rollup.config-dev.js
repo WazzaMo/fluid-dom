@@ -1,6 +1,6 @@
 
 export default {
-  input: 'js/fluid-dom.js',
+  input: 'js/src/fluid-dom.js',
   output: {
     name: 'fluid'
   }

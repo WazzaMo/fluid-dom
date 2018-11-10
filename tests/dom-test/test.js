@@ -5,7 +5,7 @@ function findElement_id() {
   test.for_target('#single')
   test.execute( ()=> {
     var single = dom.findElement({id: 'single'})
-    spec.markElementWith(single, 'single-found')
+    single.attributes().add('single-found', true);
     test.expectAttribute('single-found')
   })
 }
@@ -15,7 +15,7 @@ function findElement_selector() {
     test.for_target('body>ul')
     test.execute( () => {
         var body_ul = dom.findElement({selector: 'html>body>ul'})
-        spec.markElementWith(body_ul, 'ul_found')
+        body_ul.attributes().add('ul_found', true);
         test.expectAttribute('ul_found')
     })
 }
@@ -25,7 +25,7 @@ function findAll_selector() {
     test.for_all_targets('ul>li')
     test.execute( () => {
         var list_li = dom.findAll({selector: 'ul>li'})
-        spec.markAllElementsWith(list_li, 'li_list')
+        list_li.forEach( element => element.attributes().add('li_list', true));
         test.expectAttribute('li_list')
     })
 }
@@ -35,7 +35,7 @@ function findAll_class() {
     test.for_all_targets('.class-target')
     test.execute( () => {
         var list_class = dom.findAll({class: 'class-target'})
-        spec.markAllElementsWith(list_class, 'class-found')
+        list_class.forEach( element => element.attributes().add('class-found', true) );
         test.expectAttribute('class-found')
     })
 }
@@ -44,8 +44,8 @@ function findAll_tagName() {
     var test = new spec.Test('findAll_tagName')
     test.for_all_targets('ul>li')
     test.execute(() => {
-        var list_tag = dom.findAll({tagName: 'li'}).elementList
-        spec.markAllElementsWith(list_tag, 'tag-found')
+        var list_tag = dom.findAll({tagName: 'li'});
+        list_tag.forEach(element => element.attributes().add('tag-found', true));
         test.expectAttribute('tag-found')
     })
 }

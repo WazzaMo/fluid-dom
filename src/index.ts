@@ -4,8 +4,8 @@
  * Available under the MIT License
  */
 
-export * from './attributes'
-export * from './classes'
+export * from './dom-attributes'
+export * from './dom-classes'
 export * from './constants'
 export * from './dom-element'
 export * from './element-source'

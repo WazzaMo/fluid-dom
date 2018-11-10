@@ -21,26 +21,6 @@ function isElement(element) {
   return typeof(element.findAll) === 'function'
 }
 
-function markElementWith(element, attrib) {
-  if (isElement(element)) {
-    element.domElement.setAttribute(attrib, true)
-  } else {
-    element.setAttribute(attrib, true)
-  }
-}
-
-function markAllElementsWith(elementList, attrib) {
-  var list = undefined
-  if (isElementList(elementList)) {
-    list = elementList.elementList
-  } else {
-    list = elementList
-  }
-  for(var element of list) {
-    markElementWith(element, attrib)
-  }
-}
-
 function makeHandlerName(domElement) {
   return `handler-${domElement.tagName}`
 }
@@ -79,9 +59,9 @@ const Test = function(id) {
   }
 
   this.checkTargets = function(withTask) {
-    if (!!this.target && withTask(this.target)){
-      passed(this.id)
-    } else if (!! this.all_targets) {
+    if (!!that.target && withTask(that.target)){
+      passed(that.id)
+    } else if (!! that.all_targets) {
       var all_true = true
 
       for(var index = 0; all_true && index < this.all_targets.length; index++) {
@@ -113,8 +93,6 @@ const spec = {
   passed:               passed,
   isElementList:        isElementList,
   isElement:            isElement,
-  markElementWith:      markElementWith,
-  markAllElementsWith:  markAllElementsWith,
   makeHandlerName:      makeHandlerName,
   Test:                 Test
 }

@@ -21,17 +21,22 @@ var fluid = (function (exports) {
         }
         return true;
     }
-    function providesOne(list, args) {
-        var definitionMissing = list.filter(word => args[word] === undefined);
-        var isOneMatched = definitionMissing.length === (list.length - 1);
-        if (isOneMatched) {
-            var argumentNames = list.reduce((arg1, arg2) => `${arg1}, ${arg2}`);
-            console.error(`One of these parameters were expected ${argumentNames} but none had a hasValue!`);
+
+    class Option {
+        constructor(_value) {
+            if (_value) {
+                this.value = _value;
+            }
+            else {
+                this.value = null;
+            }
         }
-        return isOneMatched;
-    }
-    function logWarning(message) {
-        console.warn("FluidDOM: " + message);
+        get Value() {
+            return this.value;
+        }
+        get isValid() {
+            return !!this.value;
+        }
     }
 
     /*
@@ -39,20 +44,20 @@ var fluid = (function (exports) {
      * (c) Copyright 2018 Warwick Molloy
      * Available under the MIT License
      */
-    class Attributes {
-        constructor(domElement) {
-            this.domElement = domElement;
+    class DomAttributes {
+        constructor(_webElement) {
+            this._webElement = _webElement;
         }
-        each(task) {
-            for (var attribute of this.domElement.attributes) {
-                task(attribute.name, attribute.value);
+        each(callback) {
+            for (var attribute of this._webElement.attributes) {
+                callback(attribute.name, attribute.value);
             }
             return this;
         }
         attributeNames() {
             var list = new Array();
-            for (var name of this.domElement.attributes) {
-                list.push(name);
+            for (var attr of this._webElement.attributes) {
+                list.push(attr.name);
             }
             return list;
         }
@@ -60,22 +65,22 @@ var fluid = (function (exports) {
             return this.set(name, value);
         }
         set(name, value) {
-            this.domElement.setAttribute(name, value);
+            this._webElement.setAttribute(name, value);
             return this;
         }
-        with(name, task) {
+        with(name, callback) {
             var value = this.get(name);
-            task(value);
+            callback(value);
             return this;
         }
         get(name) {
-            return this.domElement.getAttribute(name);
+            return this._webElement.getAttribute(name);
         }
         has(name) {
-            return this.domElement.getAttribute(name) != null;
+            return this._webElement.getAttribute(name) != null;
         }
         remove(name) {
-            this.domElement.removeAttribute(name);
+            this._webElement.removeAttribute(name);
             return this;
         }
     }
@@ -85,29 +90,47 @@ var fluid = (function (exports) {
      * (c) Copyright 2018 Warwick Molloy
      * Available under the MIT License
      */
-    class Classes {
-        constructor(domElement, elementObject) {
+    /**
+     * # DomClasses
+     *
+     * An implementation of the IClasses interface that allows operations
+     * to be performed on DOM objects in a browser.
+     */
+    class DomClasses {
+        constructor(_element, elementObject) {
             this.element = elementObject;
-            this.domElement = domElement;
+            this.htmlElement = _element;
         }
         each(task) {
-            for (var _class of this.domElement.classList) {
+            for (var _class of this.htmlElement.classList) {
                 task(_class);
             }
             return this;
         }
         has(name) {
-            return this.domElement.classList.contains(name);
+            return this.htmlElement.classList.contains(name);
         }
-        whenHas(name, task) {
+        /**
+         * Calls the given function if-and-only-if the named class is on the element.
+         * The function is called with the (fluid) element object to allow things to
+         * be done with it. Returns self.
+         * @param name- HTML class name to seek
+         * @param callback- callback to run to manipulate the element if present.
+         */
+        whenHas(name, callback) {
             if (this.has(name)) {
-                task(this.element);
+                callback(this.element);
             }
             return this;
         }
         add(_class) {
             if (!!_class && _class.length > 0) {
-                this.domElement.classList.add(_class);
+                if (this.htmlElement) {
+                    this.htmlElement.classList.add(_class);
+                }
+                else {
+                    throw Error(`Can't edit classes on DomElement that provides no HTMLElement.`);
+                }
             }
             else {
                 console.error(`Class name given was "${_class}" - it must not be empty!`);
@@ -115,7 +138,7 @@ var fluid = (function (exports) {
             return this;
         }
         remove(_class) {
-            this.domElement.classList.remove(_class);
+            this.htmlElement.classList.remove(_class);
             return this;
         }
         set(_class) {
@@ -126,108 +149,25 @@ var fluid = (function (exports) {
         }
     }
 
-    /*
-     * Fluid DOM for JavaScript
-     * (c) Copyright 2018 Warwick Molloy
-     * Available under the MIT License
-     */
-    var LocatedBy;
-    (function (LocatedBy) {
-        LocatedBy["FailedToLocate"] = "Failed to locate";
-        LocatedBy["Id"] = "id";
-        LocatedBy["Selector"] = "selector";
-        LocatedBy["Class"] = "class";
-        LocatedBy["TagName"] = "tagName";
-        LocatedBy["ConstructedWithElement"] = "from given element";
-        LocatedBy["ConstructedWithChildren"] = "from given list of children";
-    })(LocatedBy || (LocatedBy = {}));
-    var Tag;
-    (function (Tag) {
-        Tag["Button"] = "BUTTON";
-        Tag["Div"] = "DIV";
-        Tag["Input"] = "INPUT";
-        Tag["Paragraph"] = "P";
-    })(Tag || (Tag = {}));
-
-    /*
-     * Fluid DOM for JavaScript
-     * (c) Copyright 2018 Warwick Molloy
-     * Available under the MIT License
-     */
-    class ElementList {
-        convertToListOfElements(htmlList) {
-            var list = [];
-            if (!!htmlList) {
-                for (var member of htmlList) {
-                    var element = new Element({ domElement: member });
-                    list.push(element);
-                }
-            }
-            return list;
-        }
-        constructor(elementListLocation) {
-            var selector = elementListLocation.selector;
-            var tagName = elementListLocation.tagName;
-            var children = elementListLocation.children;
-            var _class = elementListLocation.class;
-            this.elementListLocation = elementListLocation;
-            this.elementList = Array();
-            this.locatedBy = LocatedBy.FailedToLocate;
-            if (selector != undefined) {
-                this.selectList(selector);
-            }
-            else if (!!tagName) {
-                this.tagList(tagName);
-            }
-            else if (!!children) {
-                this.childList(children);
-            }
-            else if (!!_class) {
-                this.classList(_class);
-            }
-            else {
-                providesOne(['selector', 'class', 'tagName'], elementListLocation);
-                this.elementList = [];
-            }
-            this.isSingle = false;
-            this.type = 'ElementList';
-        }
-        each(doTask) {
-            for (var index = 0; index < this.elementList.length; index++) {
-                doTask(this.getElementAt(index));
-            }
+    class NonClasses {
+        constructor() { }
+        each(callback) {
             return this;
         }
-        getElementAt(index) {
-            return this.elementList[index];
+        has(name) {
+            return false;
         }
-        map(func) {
-            return this.elementList.map(func);
+        whenHas(name, callback) {
+            return this;
         }
-        filter(func) {
-            return this.elementList.filter(func);
+        add(_class) {
+            return this;
         }
-        reduce(func) {
-            return this.elementList.reduce(func);
+        remove(_class) {
+            return this;
         }
-        length() {
-            return this.elementList.length;
-        }
-        selectList(selector) {
-            this.elementList = this.convertToListOfElements(document.querySelectorAll(selector));
-            this.locatedBy = LocatedBy.Selector;
-        }
-        tagList(tagName) {
-            this.elementList = this.convertToListOfElements(document.getElementsByTagName(tagName));
-            this.locatedBy = LocatedBy.TagName;
-        }
-        childList(children) {
-            this.elementList = this.convertToListOfElements(children);
-            this.locatedBy = LocatedBy.ConstructedWithChildren;
-        }
-        classList(_class) {
-            this.elementList = this.convertToListOfElements(document.getElementsByClassName(_class));
-            this.locatedBy = LocatedBy.Class;
+        set(_class) {
+            return this;
         }
     }
 
@@ -236,145 +176,223 @@ var fluid = (function (exports) {
      * (c) Copyright 2018 Warwick Molloy
      * Available under the MIT License
      */
-    class Element {
-        constructor(elementLocation) {
-            this.type = 'Element';
-            this.isSingle = true;
-            var id = elementLocation.id;
-            var selector = elementLocation.selector;
-            var domElement = elementLocation.domElement;
-            this.locatedBy = LocatedBy.FailedToLocate;
-            this.isValid = false;
-            if (!!domElement) {
-                this.elementPassed(elementLocation);
+    /**
+     * @private an internal function.
+     * @param collection HTML collection to convert into array of IElement
+     */
+    function convertHtmlCollection(collection) {
+        let list = [];
+        for (var index = 0; index < collection.length; index++) {
+            let child = collection[index];
+            list.push(new DomElement(child));
+        }
+        return list;
+    }
+    /**
+     * @private an internal function.
+     */
+    function selectorPath(element) {
+        let path = '';
+        if (element) {
+            let id = element.getAttribute('id');
+            if (id) {
+                path = `#{$id}`;
             }
-            else if (!!id) {
-                this.idPassed(id);
-            }
-            else if (!!selector) {
-                this.selectorPassed(selector);
+            else if (!element.parentElement) {
+                path = element.tagName;
             }
             else {
-                providesOne(['id', 'selector'], elementLocation);
-                this.nullElement(elementLocation);
-                this.isValid = false;
+                path = `${selectorPath(element.parentElement)}>${element.tagName}`;
             }
-            if (!this.isValid) {
-                logWarning(`Element to be matched by ${this.locatedBy} was not valid`);
+        }
+        return path;
+    }
+    /**
+     * @private an internal function.
+     */
+    function getBySelector(element, selector) {
+        let first = element.querySelector(selector);
+        if (first) {
+            return first;
+        }
+        else {
+            first = document.querySelector(`${selectorPath(element)}>${selector}`);
+            if (first) {
+                return first;
             }
-            this.parent = this.isValid ? this.domElement.parentElement : undefined;
-            this.type = 'Element';
-            this.elementLocation = elementLocation;
-            this.isSingle = true;
         }
-        elementPassed(elementLocation) {
-            this.domElement = elementLocation.domElement;
-            this.locatedBy = LocatedBy.ConstructedWithElement;
-            this.isValid = !!this.domElement;
+        return null;
+    }
+    /**
+     * # DomElement
+     *
+     * The implementation IElement for elements in the browser
+     * page from the DOM.
+     */
+    class DomElement {
+        constructor(element) {
+            this.domElement = new Option(element);
         }
-        idPassed(id) {
-            this.locatedBy = LocatedBy.Id;
-            this.domElement = document.getElementById(id);
-            this.isValid = !!this.domElement;
+        alertInvalid() {
+            console.error("IElement[DomElement] is invalid.");
         }
-        selectorPassed(selector) {
-            this.domElement = document.querySelector(selector);
-            this.locatedBy = LocatedBy.Selector;
-            this.isValid = !!this.domElement;
+        /**
+         * Finds elements in a document using a selector.
+         * @param selector - CSS style selector.
+         * @returns list of matching elements.
+         */
+        static getListFromSelector(selector) {
+            let list = document.querySelectorAll(selector);
+            return convertHtmlCollection(list);
         }
-        nullElement(elementLocation) {
-            this.domElement = {
-                tagName: `NO MATCH by ${elementLocation}`,
-                parentElement: undefined,
-                innerHTML: undefined,
-                innerText: undefined
-            };
-            this.locatedBy = LocatedBy.FailedToLocate;
+        /**
+         * Finds elements in a document using a class name.
+         * Note do not prefix with a period (`.`) - just provide
+         * the pure class name.
+         * @param class - pure class name.
+         * @returns list of matching elements.
+         */
+        static getListFromClass(_class) {
+            let list = document.querySelectorAll(`.${_class}`);
+            return convertHtmlCollection(list);
         }
-        children() {
-            return new ElementList({
-                children: this.domElement.children
-            });
+        /**
+         * Finds elements in a document using a tag-name.
+         * @param tagName - tag name (case insensitive).
+         * @returns list of matching elements.
+         */
+        static getListFromTagName(tagName) {
+            let list = document.querySelectorAll(tagName);
+            return convertHtmlCollection(list);
         }
-        eachChild(doWith) {
-            for (var child of this.domElement.children) {
-                var childElement = new Element({ domElement: child });
-                doWith(childElement);
+        static getElementFromId(id) {
+            let element = document.querySelector(`#${id}`);
+            return DomElement.makeFromElement(element);
+        }
+        /**
+         * Gets the first matching element from a document.
+         * @param selector - a CSS style selector
+         * @returns an element object.
+         */
+        static getElementFromSelector(selector) {
+            let element = document.querySelector(selector);
+            return DomElement.makeFromElement(element);
+        }
+        /**
+         * Factory method for a non-element object.
+         * @returns an element object where isValid() is always false.
+         * @see isValid
+         */
+        static nullElement() {
+            return new DomElement();
+        }
+        static makeFromElement(element) {
+            return (!!element) ? new DomElement(element) : this.nullElement();
+        }
+        isValid() {
+            return this.domElement.isValid;
+        }
+        getParent() {
+            if (this.domElement.isValid) {
+                let element = this.domElement.Value;
+                let _par = element.parentElement;
+                let parent;
+                parent = _par ? new DomElement(_par) : new DomElement();
+                return parent;
+            }
+            return DomElement.nullElement();
+        }
+        withChildren(callback) {
+            if (this.domElement.isValid && this.domElement.Value.children.length > 0) {
+                let list = convertHtmlCollection(this.domElement.Value.children);
+                callback(list);
             }
             return this;
         }
         expect(tagName) {
-            if (this.domElement.tagName !== tagName) {
-                console.error(`Expected ${tagName} but Actual ${this.domElement.tagName}`);
+            if (this.domElement.isValid) {
+                let actual = this.domElement.Value.tagName.toUpperCase();
+                let expected = tagName.toUpperCase();
+                if (actual != expected) {
+                    console.error(`Expected ${expected} but Actual tagName was ${actual}`);
+                }
+            }
+            else {
+                this.alertInvalid();
             }
             return this;
         }
         getId() {
             return this.attributes().get('id');
         }
-        getParent() {
-            return new Element({ domElement: this.domElement.parentElement });
-        }
         hasId() {
             return this.attributes().has('id');
         }
         exists() {
-            return this.isValid;
+            return this.isValid();
         }
         findAll(elementListLocation) {
-            return new ElementList(elementListLocation);
+            let selector = elementListLocation['selector'] || elementListLocation['tagName'];
+            if (selector) {
+                let collection = this.domElement.Value.querySelectorAll(selector);
+                let list = convertHtmlCollection(collection);
+                return list;
+            }
+            return [];
         }
         selectFirst(selector) {
-            var domElement = this.domElement.querySelector(selector);
-            if (!domElement) {
-                var fullSelector = `${this.selectorPath()}>${selector}`;
-                return new Element({ selector: fullSelector });
+            if (this.domElement.isValid) {
+                let first = getBySelector(this.domElement.Value, selector);
+                if (first) {
+                    return new DomElement(first);
+                }
             }
-            else {
-                return new Element({ selector: selector });
-            }
+            return new DomElement();
         }
         selectorPath() {
-            var domElement = this.domElement;
-            var isValid = (e) => (!!e);
-            var nodeList = [];
-            while (isValid(domElement)) {
-                var _id = domElement.getAttribute('id');
-                var _class = domElement.getAttribute('class');
-                if (_id) {
-                    nodeList.push('#' + _id);
-                    domElement = null; // break out
-                }
-                else {
-                    if (_class) {
-                        nodeList.push('.' + _class);
-                    }
-                    else {
-                        nodeList.push(domElement.tagName);
-                    }
-                    domElement = domElement.parentElement;
-                }
+            if (this.domElement.isValid) {
+                return selectorPath(this.domElement.Value);
             }
-            nodeList.reverse();
-            return nodeList.reduce((parent, child) => `${parent}>${child}`);
+            this.alertInvalid();
+            return '';
         }
         tagName() {
-            return this.isValid ? this.domElement.tagName : 'UNKNOWN';
+            if (this.domElement.isValid) {
+                return this.domElement.Value.tagName;
+            }
+            this.alertInvalid();
+            return 'UNKNOWN';
         }
         text(_text) {
-            if (!!_text) {
-                this.domElement.innerText = _text;
-                return this;
-            }
-            return this.domElement.innerText;
-        }
-        html(_html) {
-            if (!!_html) {
-                this.domElement.innerHTML = _html;
-                return this;
+            if (this.domElement.isValid) {
+                let element = this.domElement.Value;
+                if (!!_text) {
+                    element.innerText = _text;
+                    return this;
+                }
+                else {
+                    return element.innerText;
+                }
             }
             else {
-                return this.domElement.innerHTML;
+                this.alertInvalid();
+                return '';
+            }
+        }
+        html(_html) {
+            if (this.domElement.isValid) {
+                let element = this.domElement.Value;
+                if (!!_html) {
+                    element.innerHTML = _html;
+                    return this;
+                }
+                else {
+                    return element.innerHTML;
+                }
+            }
+            else {
+                this.alertInvalid();
+                return '';
             }
         }
         append(_html) {
@@ -388,21 +406,29 @@ var fluid = (function (exports) {
             return this;
         }
         remove() {
-            this.domElement.remove();
+            if (this.domElement.isValid) {
+                this.domElement.Value.remove();
+            }
+            else {
+                this.alertInvalid();
+            }
             return undefined;
         }
         attributes() {
-            return new Attributes(this.domElement);
+            return new DomAttributes(this.domElement.Value);
         }
         classes() {
-            return new Classes(this.domElement, this);
+            if (this.domElement.isValid) {
+                return new DomClasses(this.domElement.Value, this);
+            }
+            return new NonClasses();
         }
         on(args) {
-            if (providesAll(['event', 'handler'], args)) {
+            if (providesAll(['event', 'handler'], args) && this.domElement.isValid) {
                 var event = args.event;
                 var handler = args.handler;
                 var optKeepDefault = args.keepDefault;
-                this.domElement.addEventListener(event, function (firedEvent) {
+                this.domElement.Value.addEventListener(event, function (firedEvent) {
                     if (!optKeepDefault) {
                         firedEvent.preventDefault();
                     }
@@ -411,12 +437,39 @@ var fluid = (function (exports) {
             }
         }
         value() {
-            if (this.domElement['value'] != undefined) {
-                return this.domElement.value;
+            if (this.domElement.isValid) {
+                let element = this.domElement.Value;
+                if (element['value']) {
+                    return element.value;
+                }
             }
             return undefined;
         }
     }
+
+    /*
+     * Fluid DOM for JavaScript
+     * (c) Copyright 2018 Warwick Molloy
+     * Available under the MIT License
+     */
+    var SourceType;
+    (function (SourceType) {
+        SourceType["FailedToLocate"] = "Failed to locate";
+        SourceType["Id"] = "id";
+        SourceType["Selector"] = "selector";
+        SourceType["Class"] = "class";
+        SourceType["TagName"] = "tagName";
+        SourceType["ConstructedWithElement"] = "from given element";
+        SourceType["ConstructedWithChildren"] = "from given list of children";
+        SourceType["Mock"] = "Mock";
+    })(SourceType || (SourceType = {}));
+    var Tag;
+    (function (Tag) {
+        Tag["Button"] = "BUTTON";
+        Tag["Div"] = "DIV";
+        Tag["Input"] = "INPUT";
+        Tag["Paragraph"] = "P";
+    })(Tag || (Tag = {}));
 
     /*
      * Fluid DOM for JavaScript
@@ -703,10 +756,30 @@ var fluid = (function (exports) {
             this.events = createEventHash();
         }
         findElement(arg) {
-            return new Element(arg);
+            let id = arg['id'];
+            if (id) {
+                return DomElement.getElementFromId(id);
+            }
+            let selector = arg['selector'];
+            if (selector) {
+                return DomElement.getElementFromSelector(selector);
+            }
+            return DomElement.nullElement();
         }
         findAll(arg) {
-            return new ElementList(arg);
+            let selector = arg['selector'];
+            if (selector) {
+                return DomElement.getListFromSelector(selector);
+            }
+            let _class = arg['class'];
+            if (_class) {
+                return DomElement.getListFromClass(_class);
+            }
+            let tagName = arg['tagName'];
+            if (tagName) {
+                return DomElement.getListFromTagName(tagName);
+            }
+            return [];
         }
         buttonOn(eventInfo) {
             if (providesAll(['id', 'event', 'handler'], eventInfo)) {

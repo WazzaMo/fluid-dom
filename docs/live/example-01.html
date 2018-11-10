@@ -74,7 +74,7 @@
         button.on({
             event: dom.events.CLICK,
             handler: function() {
-                hidables.each( function( thing) {
+                hidables.forEach( function( thing) {
                     if (thing.attributes().has('hidden')) {
                         thing.attributes().remove('hidden')
                     } else {
@@ -90,18 +90,18 @@
     function iterationDemoAddClass() {
         dom.findElement({id:'iteration_demo'})
             .findAll({selector:'ul>li'})
-            .each( li => li.classes().add('fancy') )
+            .forEach( li => li.classes().add('fancy') );
     }
 
     function iterationDemoRemoveClass() {
         dom
             .findAll({selector: 'li.fancy'})
-            .each(x=>x.classes().remove('fancy'))
+            .forEach(x=>x.classes().remove('fancy'))
     }
 
     function setupToggleFancy(button) {
         button.on({event: fluid.Events.CLICK, handler: () => {
-            if (dom.findAll({selector: 'li.fancy'}).length() > 0) {
+            if (dom.findAll({selector: 'li.fancy'}).length > 0) {
                 button.text("Make Fancy")
                 iterationDemoRemoveClass()
             } else {
@@ -114,7 +114,7 @@
     function iterationDemoReplace(as_was, to_be) {
         var match = new RegExp(as_was, 'g')
         dom.findAll({tagName: 'li'})
-        .each(item =>
+        .forEach(item =>
             item.text( item.text().replace(match,to_be) )
         )
     }
@@ -133,7 +133,7 @@
 
     function setupIterationDemoButtons() {
         dom.findAll({selector: 'button[data-setup]'})
-            .each(
+            .forEach(
                 button =>
                     button.attributes().with('data-setup', func => window[func](button) )
             )
@@ -144,9 +144,9 @@
     function setupHeadings() {
         var toName = (val) => val.charAt(0).toUpperCase() + val.substr(1)
         dom.findAll({tagName: 'div'})
-          .filter( div => div.domElement.id.includes('demo'))
+          .filter( div => div.attributes().has('id') && div.getId().includes('demo'))
           .forEach(div => {
-            var name = div.domElement.id.split('_').map(x => toName(x)).reduce((a,b) => `${a} ${b}`)
+            var name = div.getId().split('_').map(x => toName(x)).reduce((a,b) => `${a} ${b}`)
             div.prepend(`<h2>${name}</h2>`)
         })
     }
@@ -164,7 +164,7 @@
 
 <script>
     dom.findAll({selector: 'div.source[data-source]'})
-    .each(div => {
+    .forEach(div => {
         let source = div.attributes().get('data-source');
         let script = dom.findElement({selector: `script[data-source="${source}"]`});
         let srcCode = script.text().replace(/>/g,'&gt;').replace(/</g,'&lt;');
