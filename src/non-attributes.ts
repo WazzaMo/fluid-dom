@@ -13,7 +13,7 @@ import { IAttributes } from './i-attributes';
 export class NonAttributes implements IAttributes {
   constructor() {}
 
-  each(callback: (name: string, value: string) => void): IAttributes {
+  forEach(callback: (name: string, value: string) => void): IAttributes {
     return this;
   }
   
@@ -21,11 +21,11 @@ export class NonAttributes implements IAttributes {
     return [];
   }
 
-  add(name: string, value: any): IAttributes {
+  add(name: string, value: string): IAttributes {
     return this;
   }
 
-  set(name: string, value: any): IAttributes {
+  set(name: string, value: string): IAttributes {
     return this;
   }
 

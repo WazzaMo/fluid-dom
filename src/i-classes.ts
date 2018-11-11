@@ -18,7 +18,7 @@ export interface IClasses {
    * Iterate through each HTML class.
    * @param callback - called with the name of the class as the parameter. 
    */
-  each(callback: (className: string)=> void) : IClasses;
+  forEach(callback: (className: string)=> void) : IClasses;
   
   has(name: string) : boolean;
 

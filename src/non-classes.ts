@@ -18,7 +18,7 @@ import { IElement } from './i-element';
 export class NonClasses implements IClasses {
   constructor() {}
 
-  each(callback: (className: string) => void): IClasses {
+  forEach(callback: (className: string) => void): IClasses {
     return this;
   }
   

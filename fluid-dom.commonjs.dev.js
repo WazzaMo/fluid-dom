@@ -49,7 +49,7 @@ class DomAttributes {
     constructor(_webElement) {
         this._webElement = _webElement;
     }
-    each(callback) {
+    forEach(callback) {
         for (var attribute of this._webElement.attributes) {
             callback(attribute.name, attribute.value);
         }
@@ -102,7 +102,7 @@ class DomClasses {
         this.element = elementObject;
         this.htmlElement = _element;
     }
-    each(task) {
+    forEach(task) {
         for (var _class of this.htmlElement.classList) {
             task(_class);
         }
@@ -165,7 +165,7 @@ class DomClasses {
  */
 class NonClasses {
     constructor() { }
-    each(callback) {
+    forEach(callback) {
         return this;
     }
     has(name) {
@@ -196,7 +196,7 @@ class NonClasses {
  */
 class NonAttributes {
     constructor() { }
-    each(callback) {
+    forEach(callback) {
         return this;
     }
     attributeNames() {

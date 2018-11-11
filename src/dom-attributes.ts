@@ -18,7 +18,7 @@ export class DomAttributes implements IAttributes {
     this._webElement = _webElement;
   }
 
-  each(callback: (name:string, value:string)=> void) {
+  forEach(callback: (name:string, value:string)=> void) {
     for(var attribute of this._webElement.attributes) {
       callback(attribute.name, attribute.value);
     }
@@ -34,11 +34,11 @@ export class DomAttributes implements IAttributes {
     return list;
   }
 
-  add(name: string, value: any) : IAttributes {
+  add(name: string, value: string) : IAttributes {
     return this.set(name, value);
   }
 
-  set(name: string, value: any) : IAttributes {
+  set(name: string, value: string) : IAttributes {
     this._webElement.setAttribute(name, value)
     return this;
   }

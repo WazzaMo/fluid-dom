@@ -23,7 +23,7 @@ export class DomClasses implements IClasses {
     this.htmlElement = _element;
   }
 
-  each(task: (className: string)=> void) : IClasses {
+  forEach(task: (className: string)=> void) : IClasses {
     for(var _class of this.htmlElement.classList) {
       task(_class)
     }

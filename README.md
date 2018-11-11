@@ -80,13 +80,13 @@ To iterate through the list items and add a class called "fancy"...
 var dom = new fluid.DOM()
 dom.findElement({id:'iteration'})
     .findAll({selector:'ul>li'})
-    .each( li => li.classes().add('fancy') )
+    .forEach( li => li.classes().add('fancy') )
 ```
 
 Or if you want to add 'mouseover' events to the List Items and use a selector to get all the list items...
 ```js
 dom.findAll({selector:'#iteration>ul>li'})
-    .each(item => item.on({
+    .forEach(item => item.on({
         event: dom.events.MOUSEOVER,
         handler: () => alert('Mouse over list item')
     }))
@@ -109,7 +109,7 @@ And if you wanted to hide any LI member that had the word 'yay'
 in their text...
 ```js
 dom.findAll({tagName: 'li'})
-    .each(item => item.text( item.text().replace(/yay/,'boo') ))
+    .forEach(item => item.text( item.text().replace(/yay/,'boo') ))
 ```
 
 And finally, if you need to use the regular DOM API for some reason,
