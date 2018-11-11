@@ -7,7 +7,6 @@
 
 import { providesOne, providesAll } from './util'
 import { DomElement } from './dom-element'
-import { SourceType, Tag } from './constants'
 import { ElementListSource } from './element-list-source'
 import { EventHandlerInfo } from './event-handler-info';
 import { IElement } from './i-element';
@@ -15,41 +14,12 @@ import { ElementSource } from './element-source';
 
 import { NonElement } from './non-element';
 
+import {
+  Doc,
+  IFluidDocument
+} from './i-fluid-document';
 
-const EVENT_LIST = [
-  'abort', 'afterscriptexecute',
-  'animationcancel', 'animationend', 'animationiteration',
-  'auxclick',
-  'beforescriptexecute', 'blur',
-  'change', 'click', 'close', 'contextmenu',
-  'dblclick',
-  'error',
-  'focus', 'fullscreenchange', 'fullscreenerror',
-  'gotpointercapture',
-  'input',
-  'keydown', 'keypress', 'keyup',
-  'load', 'loadend', 'loadstart', 'lostpointercapture',
-  'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
-  'offline', 'online',
-  'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave',
-  'pointermove', 'pointerout', 'pointerover', 'pointerup', 
-  'reset', 'resize',
-  'scroll', 'select', 'selectionchange', 'selectionchange',
-  'selectstart', 'submit', 
-  'touchcancel', 'touchmove', 'touchstart',
-  'transitioncancel', 'transitionend',
-  'visibilitychange',
-  'wheel'
-]
-
-function createEventHash() {
-  var events : any = {}
-  for(var ev of EVENT_LIST) {
-    var key = ev.toUpperCase()
-    events[key] = ev
-  }
-  return events
-}
+import { EVENT_LIST } from './constants';
 
 export { Http } from './http';
 export { HttpMethod } from "./http-method";
@@ -57,12 +27,12 @@ export { HttpResponseType } from "./http-response-type";
 export { HttpProtocol } from "./http-protocol";
 export { HttpResponse } from "./http-response";
 
+export const Events = EVENT_LIST;
 
-export class DOM {
-  events: any;
+
+class DOM implements IFluidDocument {
 
   constructor() {
-    this.events = createEventHash()
   }
 
   findElement(arg: ElementSource) : IElement {
@@ -107,9 +77,6 @@ export class DOM {
 
 }
 
-export const Events : any = {}
-
-for(var event of EVENT_LIST) {
-  Events[event.toUpperCase()] = event
+export function Doc() : IFluidDocument {
+  return new DOM();
 }
-

@@ -10,18 +10,17 @@ or functional DSL styled API for the HTML JavaScript DOM.
 3. [Live Running Example](./live/example-01.html)
 4. Why use it? (this page)
 5. [Quick Examples](./Quick-Examples.md)
+6. [Writing Mocks](./Mocking.md)
 
 ## Why Use It?
 
 Convenience AND Security!
 Fluid DOM has NO RUNTIME DEPENDENCIES and is very small!
 
-It can be dangerous to use too many packages and even more
-dangerous to rely on packages with many cascading dependencies.
-
-The developer, non-minified version of fluid-dom is under 500 lines
-long and fairly easy to read so you can confirm for yourself that
-it does what it said on the the tin and there's no malicious code.
+Also, Fluid DOM now has a mocking API so you can write
+unit tests with predictable outcomes that run entirely
+in NodeJS. If you've ever had to debug browser-based
+unit tests, you'll understand why this is valuable.
 
 ## That's Great by Why Use It?
 

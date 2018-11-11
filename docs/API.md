@@ -7,23 +7,13 @@
 3. [Live Running Example](./live/example-01.html)
 4. [Why use it?](./README.md)
 5. [Quick Examples](./Quick-Examples.md)
-
+6. [Writing Mocks](./Mocking.md)
 
 ## Introduction
 
-Fluid DOM attempts to wrap the standard DOM API with
-a more modern-feeling style.
-
-The fluid global variable hash is used as a namespace.
-
-The DOM object is a gateway to either an Element object
-or an ElementList object. An ElementList object is just
-a container for Element objects and help represent the
-document hierarchy and support iteration, filter, map and reduce operations.
-
-The Element object provides access to the Attributes object
-or the Classes object and these three types are the core
-for document manipulation.
+The API is now generated with TypeDoc to keep
+the documentation in-sync with the code. It will
+improve over time.
 
 ## Object Types
 - [fluid root object](./fluid.md)

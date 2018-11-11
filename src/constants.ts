@@ -4,16 +4,6 @@
  * Available under the MIT License
  */
 
-export enum SourceType  {
-  FailedToLocate = 'Failed to locate',
-  Id = 'id',
-  Selector = 'selector',
-  Class = 'class',
-  TagName = 'tagName',
-  ConstructedWithElement = 'from given element',
-  ConstructedWithChildren = 'from given list of children',
-  Mock = 'Mock'
-}
 
 export enum Tag {
   Button = 'BUTTON',
@@ -21,3 +11,29 @@ export enum Tag {
   Input = 'INPUT',
   Paragraph = 'P'
 }
+
+export const EVENT_LIST = [
+  'abort', 'afterscriptexecute',
+  'animationcancel', 'animationend', 'animationiteration',
+  'auxclick',
+  'beforescriptexecute', 'blur',
+  'change', 'click', 'close', 'contextmenu',
+  'dblclick',
+  'error',
+  'focus', 'fullscreenchange', 'fullscreenerror',
+  'gotpointercapture',
+  'input',
+  'keydown', 'keypress', 'keyup',
+  'load', 'loadend', 'loadstart', 'lostpointercapture',
+  'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
+  'offline', 'online',
+  'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave',
+  'pointermove', 'pointerout', 'pointerover', 'pointerup', 
+  'reset', 'resize',
+  'scroll', 'select', 'selectionchange', 'selectionchange',
+  'selectstart', 'submit', 
+  'touchcancel', 'touchmove', 'touchstart',
+  'transitioncancel', 'transitionend',
+  'visibilitychange',
+  'wheel'
+];

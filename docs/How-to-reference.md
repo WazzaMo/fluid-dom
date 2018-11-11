@@ -7,7 +7,7 @@
 3. [Live Running Example](./live/example-01.html)
 4. [Why use it?](./README.md)
 5. [Quick Examples](./Quick-Examples.md)
-
+6. [Writing Mocks](./Mocking.md)
 
 ## Introduction
 
