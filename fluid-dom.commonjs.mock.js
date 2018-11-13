@@ -8,11 +8,18 @@ Object.defineProperty(exports, '__esModule', { value: true });
  * (c) Copyright 2018 Warwick Molloy
  * Available under the MIT License
  */
+/**
+ * Identifies a mock document node as text-only or a mark-up element.
+ */
 var MockNodeType;
 (function (MockNodeType) {
     MockNodeType["TextNode"] = "TEXTNODE";
     MockNodeType["ElementNode"] = "ELEMENTNODE";
 })(MockNodeType || (MockNodeType = {}));
+/**
+ * Concrete implementation of a TextNode.
+ * Represents the un-marked-up text in a document.
+ */
 class TextNode {
     get nodeType() { return MockNodeType.TextNode; }
     get children() { return []; }
@@ -20,6 +27,10 @@ class TextNode {
         this.text_value = (!!text) ? text : '';
     }
 }
+/**
+ * Concrete implementation of a mark-up element node.
+ * Represents the main building blocks of a mock document.
+ */
 class ElementNode {
     get nodeType() { return MockNodeType.ElementNode; }
     get children() { return this._children; }
@@ -40,6 +51,53 @@ class ElementNode {
             this._attributes[name] = value;
         }
         return this._attributes[name];
+    }
+    /**
+     * Represents a single element get using the ID
+     * @param id_value - raw string without "#" prefix.
+     * @returns ElementNode instance or undefined
+     */
+    queryById(id_value) {
+        let id = this.attrib('id');
+        if (id && id === id_value) {
+            return this;
+        }
+        else {
+            let element;
+            this.recursiveQuery((child) => {
+                element = child.queryById(id_value);
+                return !!element;
+            });
+            return element;
+        }
+    }
+    /**
+     * Represents a multi-element get using the class name.
+     * @param class_name - without CSS '.' prefix.
+     * @param collector - an array to push ElementNode instances into.
+     */
+    queryByClass(class_name, collector) {
+        if (!collector) {
+            throw Error("Parameter 'collector' was not passed");
+        }
+        let classes = this.attrib('class');
+        if (classes && classes.includes(class_name)) {
+            collector.push(this);
+        }
+        this.recursiveQuery((child) => {
+            child.queryByClass(class_name, collector);
+            return false;
+        });
+    }
+    recursiveQuery(callback) {
+        let isDone = false;
+        for (var index = 0; index < this._children.length && !isDone; index++) {
+            let child = this._children[index];
+            if (child.nodeType == MockNodeType.ElementNode) {
+                let child_element = child;
+                isDone = callback(child_element);
+            }
+        }
     }
     get tag() { return this._tag; }
     get parent() { return this._parent; }
@@ -74,11 +132,6 @@ class ElementNode {
             if (node.nodeType === MockNodeType.ElementNode) {
                 let element = node;
                 return toHtml(element);
-                //         let attribs = attributesToString(element);
-                //         return `
-                // <${element.tag}${attribs}>
-                //   ${element.text_value}${element.children_as_html()}
-                // </${element.tag}>`;
             }
             else {
                 return node.text_value;
@@ -90,7 +143,10 @@ class ElementNode {
     get attributes() {
         return this._attributes;
     }
-}
+    toString() {
+        return `Element [${this._tag}](${attributesToString(this)})`;
+    }
+} // -- ElementNode --
 function attributesToString(element) {
     let attribs = '';
     for (var attr in element.attributes) {
@@ -99,6 +155,11 @@ function attributesToString(element) {
     }
     return attribs;
 }
+/**
+ * For the mocking API, will take an internal mock representation
+ * and write it out as HTML text. It won't be pretty but it works.
+ * @param element - base element to dump.
+ */
 function toHtml(element) {
     let attribs = attributesToString(element);
     let as_html = `
@@ -294,11 +355,6 @@ class MockAttributes {
  * (c) Copyright 2018 Warwick Molloy
  * Available under the MIT License
  */
-// function MakeNodeRef() : NodeRef {
-//   let timeId = toBase64( getTimeId() );
-//   let randId = toBase64( getRandomId() );
-//   return { node_id: `${randId}-${timeId}` };
-// }
 /**
  * # MockDocument
  */
@@ -317,9 +373,22 @@ class MockDocument {
     toHtml() {
         return toHtml(this.root_node);
     }
+    findElement(arg) {
+        throw new Error("Method not implemented.");
+    }
+    findAll(arg) {
+        throw new Error("Method not implemented.");
+    }
+    buttonOn(eventInfo) {
+        throw new Error("Method not implemented.");
+    }
+}
+function Doc() {
+    return new MockDocument();
 }
 
 exports.MockDocument = MockDocument;
+exports.Doc = Doc;
 exports.MockElement = MockElement;
 exports.MockAttributes = MockAttributes;
 exports.MockClasses = MockClasses;

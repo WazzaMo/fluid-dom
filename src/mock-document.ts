@@ -15,6 +15,13 @@ import {
   toHtml
 } from './mock-document-nodes';
 
+import { IFluidDocument } from './i-fluid-document';
+
+import { IElement } from './i-element';
+import { ElementSource } from './element-source';
+import { ElementListSource } from './element-list-source';
+import { EventHandlerInfo } from './event-handler-info';
+
 export { MockElement } from './mock-element';
 export { MockAttributeSet, MockAttributes } from './mock-attributes';
 export { MockClasses } from './mock-classes';
@@ -23,7 +30,7 @@ export { MockClasses } from './mock-classes';
 /**
  * # MockDocument
  */
-export class MockDocument implements IElementNodeFactory {
+export class MockDocument implements IElementNodeFactory, IFluidDocument {
   root_node: ElementNode;
 
   constructor() {
@@ -47,5 +54,20 @@ export class MockDocument implements IElementNodeFactory {
   toHtml() : string {
     return toHtml(this.root_node);
   }
+
+  findElement(arg: ElementSource): IElement {
+    throw new Error("Method not implemented.");
+  }
+
+  findAll(arg: ElementListSource): IElement[] {
+    throw new Error("Method not implemented.");
+  }
+
+  buttonOn(eventInfo: EventHandlerInfo): void {
+    throw new Error("Method not implemented.");
+  }
 }
 
+export function Doc() : IFluidDocument {
+  return new MockDocument();
+}

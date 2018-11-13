@@ -10,7 +10,6 @@ import { EventHandlerInfo } from './event-handler-info';
 
 import { IElement } from './i-element';
 
-export declare function Doc() : IFluidDocument;
 
 /**
  * Represents the concept of a Document that can 
@@ -22,3 +21,4 @@ export interface IFluidDocument {
   buttonOn(eventInfo: EventHandlerInfo) : void;
 }
 
+declare function Doc() : IFluidDocument;

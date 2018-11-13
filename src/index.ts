@@ -19,11 +19,11 @@ export * from "./http-response-type";
 export * from "./http-protocol";
 export * from "./http-response";
 
-export { DOM, Events } from './fluid-dom';
+export { Doc, Events } from './fluid-dom';
 
-import { DOM, Events } from './fluid-dom';
+import { Doc, Events } from './fluid-dom';
 
 export const fluid = {
-  DOM,
+  Doc,
   Events
 }

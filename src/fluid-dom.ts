@@ -15,11 +15,10 @@ import { ElementSource } from './element-source';
 import { NonElement } from './non-element';
 
 import {
-  Doc,
   IFluidDocument
 } from './i-fluid-document';
 
-import { EVENT_LIST } from './constants';
+import { EVENT_LIST, Tag } from './constants';
 
 export { Http } from './http';
 export { HttpMethod } from "./http-method";

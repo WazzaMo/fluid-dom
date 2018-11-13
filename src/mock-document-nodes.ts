@@ -5,17 +5,18 @@
  * Available under the MIT License
  */
 
+ /**
+  * Identifies a mock document node as text-only or a mark-up element.
+  */
 export enum MockNodeType {
   TextNode = 'TEXTNODE',
   ElementNode = 'ELEMENTNODE'
 }
 
-/*
-export interface NodeRef {
-  node_id: string;
-}
-*/
-
+/**
+ * The document creation API for mock document setup.
+ * This is a substitute for not being able to load HTML.
+ */
 export interface IElementNodeFactory {
   create_child_text( text: string ): IElementNodeFactory;
 
@@ -26,12 +27,19 @@ export interface IElementNodeFactory {
   ) : IElementNodeFactory;
 }
 
+/**
+ * Basic definition of a mock document node.
+ */
 export interface IMockDocNode {
   nodeType: MockNodeType;
   children: Array<IMockDocNode>;
   text_value: string;
 }
 
+/**
+ * Concrete implementation of a TextNode.
+ * Represents the un-marked-up text in a document.
+ */
 export class TextNode implements IMockDocNode {
   get nodeType(): MockNodeType { return MockNodeType.TextNode; }
   get children(): IMockDocNode[] { return []; }
@@ -42,10 +50,17 @@ export class TextNode implements IMockDocNode {
   }
 }
 
+/**
+ * Definition of an attributes JS Object.
+ */
 export interface IMockNodeAttributes {
   [_name: string] : string;
 }
 
+/**
+ * Concrete implementation of a mark-up element node.
+ * Represents the main building blocks of a mock document.
+ */
 export class ElementNode implements IMockDocNode, IElementNodeFactory {
   private _children: Array<IMockDocNode>;
   private _text_value: string;
@@ -78,6 +93,61 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
       this._attributes[name] = value;
     }
     return this._attributes[name];
+  }
+
+  /**
+   * Represents a single element get using the ID
+   * @param id_value - raw string without "#" prefix.
+   * @returns ElementNode instance or undefined
+   */
+  queryById(id_value: string) : ElementNode | undefined {
+    let id = this.attrib('id');
+    if (id && id === id_value) {
+      return this;
+    } else {
+      let element;
+      this.recursiveQuery( (child: ElementNode)=> {
+        element = child.queryById(id_value);
+        return !!element;
+      });
+      return element;
+    }
+  }
+
+  /**
+   * Represents a multi-element get using the class name.
+   * @param class_name - without CSS '.' prefix.
+   * @param collector - an array to push ElementNode instances into.
+   */
+  queryByClass(
+    class_name: string,
+    collector: Array<ElementNode>
+  ) : void {
+    if (! collector) {
+      throw Error("Parameter 'collector' was not passed");
+    }
+    let classes = this.attrib('class');
+    if (classes && classes.includes(class_name)) {
+      collector.push(this);
+    }
+    this.recursiveQuery((child: ElementNode) => {
+      child.queryByClass(class_name, collector);
+      return false;
+    });
+  }
+
+  private recursiveQuery(
+    callback: (candidate:ElementNode)=> boolean
+  ) : void {
+    let isDone : boolean = false;
+
+    for(var index = 0; index < this._children.length && ! isDone; index++) {
+      let child = this._children[index];
+      if (child.nodeType == MockNodeType.ElementNode) {
+        let child_element = <ElementNode> child;
+        isDone = callback(child_element);
+      }
+    }
   }
 
   get tag() : string { return this._tag; }
@@ -125,11 +195,6 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
         if (node.nodeType === MockNodeType.ElementNode) {
           let element = <ElementNode> node;
           return toHtml(element);
-  //         let attribs = attributesToString(element);
-  //         return `
-  // <${element.tag}${attribs}>
-  //   ${element.text_value}${element.children_as_html()}
-  // </${element.tag}>`;
         } else {
           return node.text_value;
         }
@@ -141,7 +206,12 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
   get attributes() : any {
     return this._attributes;
   }
-}
+
+  toString() : string {
+    return `Element [${this._tag}](${attributesToString(this)})`;
+  }
+} // -- ElementNode --
+
 
 function attributesToString(element: ElementNode) : string {
   let attribs = '';
@@ -152,6 +222,11 @@ function attributesToString(element: ElementNode) : string {
   return attribs;
 }
 
+/**
+ * For the mocking API, will take an internal mock representation
+ * and write it out as HTML text. It won't be pretty but it works.
+ * @param element - base element to dump.
+ */
 export function toHtml( element: ElementNode) : string {
   let attribs = attributesToString(element);
   let as_html =

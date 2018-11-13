@@ -6,12 +6,14 @@
         "declarationMap": false,
         "strict": true,
         "module": "es6",
+        "moduleResolution": "node",
         "outDir": "js",
-        "composite": true
+        "composite": true,
+        "baseUrl": "."
     },
     "include": [
-        "src",
-        "tests"
+        "src/**/*.ts",
+        "tests/**/*.ts"
     ],
     "exclude": [
         "node_modules",

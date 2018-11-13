@@ -23,6 +23,23 @@ function providesAll(list, args) {
     return true;
 }
 
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
+/**
+ * Represents an uncertain return type.
+ * In TypeScript it's possible to return
+ * `Type | undefined` but at runtime it can
+ * get a bit messy to handle this well.
+ * The Option class represents this cleanly
+ * and explicitly while making it easy
+ * determine whether the value is valid or not
+ * and, if valid, provides easy ways to get
+ * the value with proper type consistency in
+ * TypeScript.
+ */
 class Option {
     constructor(_value) {
         if (_value) {
@@ -32,9 +49,17 @@ class Option {
             this.value = null;
         }
     }
+    /**
+     * Check that there is a value before
+     * calling this.
+     * @see isValid
+     */
     get Value() {
         return this.value;
     }
+    /**
+     * Tests if the value is known.
+     */
     get isValid() {
         return !!this.value;
     }
@@ -581,17 +606,6 @@ class DomElement {
  * (c) Copyright 2018 Warwick Molloy
  * Available under the MIT License
  */
-var SourceType;
-(function (SourceType) {
-    SourceType["FailedToLocate"] = "Failed to locate";
-    SourceType["Id"] = "id";
-    SourceType["Selector"] = "selector";
-    SourceType["Class"] = "class";
-    SourceType["TagName"] = "tagName";
-    SourceType["ConstructedWithElement"] = "from given element";
-    SourceType["ConstructedWithChildren"] = "from given list of children";
-    SourceType["Mock"] = "Mock";
-})(SourceType || (SourceType = {}));
 var Tag;
 (function (Tag) {
     Tag["Button"] = "BUTTON";
@@ -599,6 +613,31 @@ var Tag;
     Tag["Input"] = "INPUT";
     Tag["Paragraph"] = "P";
 })(Tag || (Tag = {}));
+const EVENT_LIST = [
+    'abort', 'afterscriptexecute',
+    'animationcancel', 'animationend', 'animationiteration',
+    'auxclick',
+    'beforescriptexecute', 'blur',
+    'change', 'click', 'close', 'contextmenu',
+    'dblclick',
+    'error',
+    'focus', 'fullscreenchange', 'fullscreenerror',
+    'gotpointercapture',
+    'input',
+    'keydown', 'keypress', 'keyup',
+    'load', 'loadend', 'loadstart', 'lostpointercapture',
+    'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
+    'offline', 'online',
+    'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave',
+    'pointermove', 'pointerout', 'pointerover', 'pointerup',
+    'reset', 'resize',
+    'scroll', 'select', 'selectionchange', 'selectionchange',
+    'selectstart', 'submit',
+    'touchcancel', 'touchmove', 'touchstart',
+    'transitioncancel', 'transitionend',
+    'visibilitychange',
+    'wheel'
+];
 
 /*
  * Fluid DOM for JavaScript
@@ -847,42 +886,9 @@ class Http {
  * (c) Copyright 2018 Warwick Molloy
  * Available under the MIT License
  */
-const EVENT_LIST = [
-    'abort', 'afterscriptexecute',
-    'animationcancel', 'animationend', 'animationiteration',
-    'auxclick',
-    'beforescriptexecute', 'blur',
-    'change', 'click', 'close', 'contextmenu',
-    'dblclick',
-    'error',
-    'focus', 'fullscreenchange', 'fullscreenerror',
-    'gotpointercapture',
-    'input',
-    'keydown', 'keypress', 'keyup',
-    'load', 'loadend', 'loadstart', 'lostpointercapture',
-    'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
-    'offline', 'online',
-    'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave',
-    'pointermove', 'pointerout', 'pointerover', 'pointerup',
-    'reset', 'resize',
-    'scroll', 'select', 'selectionchange', 'selectionchange',
-    'selectstart', 'submit',
-    'touchcancel', 'touchmove', 'touchstart',
-    'transitioncancel', 'transitionend',
-    'visibilitychange',
-    'wheel'
-];
-function createEventHash() {
-    var events = {};
-    for (var ev of EVENT_LIST) {
-        var key = ev.toUpperCase();
-        events[key] = ev;
-    }
-    return events;
-}
+const Events = EVENT_LIST;
 class DOM {
     constructor() {
-        this.events = createEventHash();
     }
     findElement(arg) {
         let id = arg['id'];
@@ -918,12 +924,11 @@ class DOM {
         }
     }
 }
-const Events = {};
-for (var event of EVENT_LIST) {
-    Events[event.toUpperCase()] = event;
+function Doc() {
+    return new DOM();
 }
 
-exports.DOM = DOM;
 exports.Events = Events;
+exports.Doc = Doc;
 exports.Http = Http;
 
