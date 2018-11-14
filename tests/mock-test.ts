@@ -46,3 +46,8 @@ let list :Array<ElementNode> = [];
 doc.root_node.queryByClass('highlight', list);
 
 list.forEach(item => console.log(`seeking 'highlight': ${item}`));
+
+console.log("\n\nQuery by Tag");
+list = [];
+doc.root_node.queryByTag('p', list);
+list.forEach(item => console.log(`P... ${item}`));

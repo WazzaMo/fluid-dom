@@ -67,6 +67,8 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
   private _tag: string;
   private _parent: ElementNode | undefined;
   private _attributes: IMockNodeAttributes;
+  private _findElementQuery: () => undefined | ElementNode;
+  private _findManyElementsQuery: (collector: Array<ElementNode>) => void;
 
   get nodeType(): MockNodeType { return MockNodeType.ElementNode; }
   get children(): IMockDocNode[] { return this._children; }
@@ -86,6 +88,14 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
     if (id) {
       this.attrib('id', id);
     }
+    this.reset_queries();
+    this._findElementQuery = () => undefined;
+    this._findManyElementsQuery = () => {};
+  }
+
+  private reset_queries() : void {
+    this._findElementQuery = () => undefined;
+    this._findManyElementsQuery = () => {};
   }
 
   attrib(name: string, value?: string) : undefined | string {
@@ -132,6 +142,25 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
     }
     this.recursiveQuery((child: ElementNode) => {
       child.queryByClass(class_name, collector);
+      return false;
+    });
+  }
+
+  /**
+   * Represents getting multiple nodes by their tag-name.
+   * @param tag - 
+   * @param collector 
+   */
+  queryByTag(
+    tag: string,
+    collector: Array<ElementNode>
+  ) : void {
+    if (! collector) throw Error(`The 'collector' parameter is mandatory.`);
+    if (this._tag === tag) {
+      collector.push(this);
+    }
+    this.recursiveQuery( (child: ElementNode) => {
+      child.queryByTag( tag, collector);
       return false;
     });
   }

@@ -45,6 +45,13 @@ class ElementNode {
         if (id) {
             this.attrib('id', id);
         }
+        this.reset_queries();
+        this._findElementQuery = () => undefined;
+        this._findManyElementsQuery = () => { };
+    }
+    reset_queries() {
+        this._findElementQuery = () => undefined;
+        this._findManyElementsQuery = () => { };
     }
     attrib(name, value) {
         if (value) {
@@ -86,6 +93,22 @@ class ElementNode {
         }
         this.recursiveQuery((child) => {
             child.queryByClass(class_name, collector);
+            return false;
+        });
+    }
+    /**
+     * Represents getting multiple nodes by their tag-name.
+     * @param tag -
+     * @param collector
+     */
+    queryByTag(tag, collector) {
+        if (!collector)
+            throw Error(`The 'collector' parameter is mandatory.`);
+        if (this._tag === tag) {
+            collector.push(this);
+        }
+        this.recursiveQuery((child) => {
+            child.queryByTag(tag, collector);
             return false;
         });
     }

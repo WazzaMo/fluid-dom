@@ -5,7 +5,8 @@
 
 dist/
 js/
+type/
 fluid-dom/
 node_modules/
 
-
+.rpt2_cache/

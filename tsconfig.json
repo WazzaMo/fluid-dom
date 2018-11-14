@@ -2,17 +2,17 @@
     "compilerOptions": {
         "target": "es2016",
         "declaration": true,
+        "declarationDir": "type",
         "inlineSourceMap": true,
         "declarationMap": false,
         "strict": true,
         "module": "es6",
         "moduleResolution": "node",
         "outDir": "js",
-        "composite": true,
-        "baseUrl": "."
+        "composite": true
     },
     "include": [
-        "src/**/*.ts",
+        "./src/**/*.ts",
         "tests/**/*.ts"
     ],
     "exclude": [
