@@ -7,8 +7,10 @@
 import {
   ElementNode,
   IMockNodeAttributes,
-  MockNodeType
+  MockNodeType,
+  IMockDocNode
 } from './mock-document-nodes';
+import { find } from 'shelljs';
 
 /*
 selector ::= (advanced_selector ',' )* advanced_selector
@@ -36,7 +38,57 @@ function TagSelector(selector: string) : ParseOutput {
   return step;
 }
 
-function AllOutputs(list: Array<ParseOutput>) : ParseOutput {
+function ChildrenByTag(tag:string) : ParseOutput {
+  let finder: ParseOutput = (element: ElementNode) => {
+    let nodeList = element.children
+      .filter( (node: IMockDocNode) => node.nodeType == MockNodeType.ElementNode)
+      .filter( (child_node: IMockDocNode) => {
+        let child = <ElementNode> child_node;
+        return child.tag.toUpperCase() == tag.toUpperCase();
+      });
+    return nodeList.map( (item: IMockDocNode)=> <ElementNode>item);
+  };
+  return finder;
+}
+
+function HierarchySelector(selector: string): ParseOutput {
+  return (element: ElementNode) => {
+    let pathList = selector.split('>')
+      .map( (part:string)=> part.trim() )
+      .map( (sub: string) => ChildrenByTag(sub));
+    let task = ApplyRecursiveElementForBestMatch(pathList);
+    return task(element);
+  }
+}
+
+function ApplyRecursiveElementForBestMatch(list: Array<ParseOutput>) : ParseOutput {
+
+  function goDeeper(
+    command_list: Array<ParseOutput>,
+    element: ElementNode,
+    results: Array<ElementNode>
+  ) : void {
+    let command = command_list.pop();
+    if (command) {
+      let possibles = command(element);
+      if (command_list.length == 0) {
+        possibles.forEach( (item: ElementNode) => results.push(item));
+      } else {
+        possibles.forEach( (item: ElementNode) => goDeeper(command_list, item, results));
+      }
+    }
+  } //-- goDeeper --
+
+  let trail : ParseOutput = (root: ElementNode) => {
+    list.reverse();
+    let results: Array<ElementNode> = [];
+    goDeeper(list, root, results);
+    return results;
+  };
+  return trail;
+}
+
+function ApplySameElementToList(list: Array<ParseOutput>) : ParseOutput {
   let task : ParseOutput = (element: ElementNode) => {
     let result: Array<ElementNode> = [];
     list.forEach( (output: ParseOutput) => result = result.concat(output(element)));
@@ -45,16 +97,30 @@ function AllOutputs(list: Array<ParseOutput>) : ParseOutput {
   return task;
 }
 
-function UnionSelector(selector: string) : ParseOutput {
-  // if (selector.includes(',')) {
-    return (element: ElementNode) => {
-      let list = selector.split(',')
-        .map( (s:string) => s.trim() )
-        .map( (sub_selector:string ) => TagSelector(sub_selector));
-      let task = AllOutputs(list);
-      return task(element);
-    }
-  // }
+function SelectorList(selector: string) : ParseOutput {
+  return (element: ElementNode) => {
+    let list = selector.split(',')
+      .map( (s:string) => s.trim() )
+      .map( (sub_selector:string ) => TagSelector(sub_selector));
+    let task = ApplySameElementToList(list);
+    return task(element);
+  }
+}
+
+function HierarchyOrOther(selector: string) : ParseOutput {
+  if (selector.includes('>')) {
+    return HierarchySelector(selector);
+  } else {
+    return TagSelector(selector);
+  }
+}
+
+function ListOrOther(selector: string) : ParseOutput {
+  if (selector.includes(',')) {
+    return SelectorList(selector);
+  } else {
+    return HierarchyOrOther(selector);
+  }
 }
 
 /**
@@ -69,7 +135,7 @@ export class MockSelectorParser {
   }
 
   parseWith(element: ElementNode) : Array<ElementNode> {
-    let output = UnionSelector(this.selector);
+    let output = ListOrOther(this.selector);
     return output(element);
   }
 }

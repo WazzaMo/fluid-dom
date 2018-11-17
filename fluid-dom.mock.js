@@ -465,7 +465,49 @@ function TagSelector(selector) {
     };
     return step;
 }
-function AllOutputs(list) {
+function ChildrenByTag(tag) {
+    let finder = (element) => {
+        let nodeList = element.children
+            .filter((node) => node.nodeType == exports.MockNodeType.ElementNode)
+            .filter((child_node) => {
+            let child = child_node;
+            return child.tag.toUpperCase() == tag.toUpperCase();
+        });
+        return nodeList.map((item) => item);
+    };
+    return finder;
+}
+function HierarchySelector(selector) {
+    return (element) => {
+        let pathList = selector.split('>')
+            .map((part) => part.trim())
+            .map((sub) => ChildrenByTag(sub));
+        let task = ApplyRecursiveElementForBestMatch(pathList);
+        return task(element);
+    };
+}
+function ApplyRecursiveElementForBestMatch(list) {
+    function goDeeper(command_list, element, results) {
+        let command = command_list.pop();
+        if (command) {
+            let possibles = command(element);
+            if (command_list.length == 0) {
+                possibles.forEach((item) => results.push(item));
+            }
+            else {
+                possibles.forEach((item) => goDeeper(command_list, item, results));
+            }
+        }
+    } //-- goDeeper --
+    let trail = (root) => {
+        list.reverse();
+        let results = [];
+        goDeeper(list, root, results);
+        return results;
+    };
+    return trail;
+}
+function ApplySameElementToList(list) {
     let task = (element) => {
         let result = [];
         list.forEach((output) => result = result.concat(output(element)));
@@ -473,16 +515,30 @@ function AllOutputs(list) {
     };
     return task;
 }
-function UnionSelector(selector) {
-    // if (selector.includes(',')) {
+function SelectorList(selector) {
     return (element) => {
         let list = selector.split(',')
             .map((s) => s.trim())
             .map((sub_selector) => TagSelector(sub_selector));
-        let task = AllOutputs(list);
+        let task = ApplySameElementToList(list);
         return task(element);
     };
-    // }
+}
+function HierarchyOrOther(selector) {
+    if (selector.includes('>')) {
+        return HierarchySelector(selector);
+    }
+    else {
+        return TagSelector(selector);
+    }
+}
+function ListOrOther(selector) {
+    if (selector.includes(',')) {
+        return SelectorList(selector);
+    }
+    else {
+        return HierarchyOrOther(selector);
+    }
 }
 /**
  * Parses a selector to create a parse plan that can be
@@ -493,7 +549,7 @@ class MockSelectorParser {
         this.selector = selector;
     }
     parseWith(element) {
-        let output = UnionSelector(this.selector);
+        let output = ListOrOther(this.selector);
         return output(element);
     }
 }
