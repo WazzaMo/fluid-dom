@@ -75,6 +75,9 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
   get text_value(): string { return this._text_value; }
   set text_value(value: string) { this._text_value = value; }
 
+  get tag() : string { return this._tag; }
+  get parent() : ElementNode | undefined { return this._parent; }
+
   constructor(
     tag: string,
     parent ?: ElementNode,
@@ -103,6 +106,16 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
       this._attributes[name] = value;
     }
     return this._attributes[name];
+  }
+
+  /**
+   * The root element of a document has no parent so, in a way,
+   * this is asking if this node is the root or not. Note: it
+   * also asks if the parent node should be followed for
+   * upward traversal or de-referencing.
+   */
+  hasParent() : boolean {
+    return !! this._parent;
   }
 
   /**
@@ -178,9 +191,6 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
       }
     }
   }
-
-  get tag() : string { return this._tag; }
-  get parent() : ElementNode | undefined { return this._parent; }
 
   private addChild(node: IMockDocNode) {
     this._children.push( node );

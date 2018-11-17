@@ -1,3 +1,8 @@
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
 
 
 let mockfluid = require('../../fluid-dom.commonjs.mock');

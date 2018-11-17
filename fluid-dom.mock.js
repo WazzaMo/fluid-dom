@@ -1,4 +1,3 @@
-//  Fluid-DOM v 1.2.0
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -8,20 +7,16 @@ Object.defineProperty(exports, '__esModule', { value: true });
  * (c) Copyright 2018 Warwick Molloy
  * Available under the MIT License
  */
-/**
- * Identifies a mock document node as text-only or a mark-up element.
- */
-var MockNodeType;
 (function (MockNodeType) {
     MockNodeType["TextNode"] = "TEXTNODE";
     MockNodeType["ElementNode"] = "ELEMENTNODE";
-})(MockNodeType || (MockNodeType = {}));
+})(exports.MockNodeType || (exports.MockNodeType = {}));
 /**
  * Concrete implementation of a TextNode.
  * Represents the un-marked-up text in a document.
  */
 class TextNode {
-    get nodeType() { return MockNodeType.TextNode; }
+    get nodeType() { return exports.MockNodeType.TextNode; }
     get children() { return []; }
     constructor(text) {
         this.text_value = (!!text) ? text : '';
@@ -32,10 +27,12 @@ class TextNode {
  * Represents the main building blocks of a mock document.
  */
 class ElementNode {
-    get nodeType() { return MockNodeType.ElementNode; }
+    get nodeType() { return exports.MockNodeType.ElementNode; }
     get children() { return this._children; }
     get text_value() { return this._text_value; }
     set text_value(value) { this._text_value = value; }
+    get tag() { return this._tag; }
+    get parent() { return this._parent; }
     constructor(tag, parent, id) {
         this._tag = tag;
         this._parent = parent;
@@ -58,6 +55,15 @@ class ElementNode {
             this._attributes[name] = value;
         }
         return this._attributes[name];
+    }
+    /**
+     * The root element of a document has no parent so, in a way,
+     * this is asking if this node is the root or not. Note: it
+     * also asks if the parent node should be followed for
+     * upward traversal or de-referencing.
+     */
+    hasParent() {
+        return !!this._parent;
     }
     /**
      * Represents a single element get using the ID
@@ -116,14 +122,12 @@ class ElementNode {
         let isDone = false;
         for (var index = 0; index < this._children.length && !isDone; index++) {
             let child = this._children[index];
-            if (child.nodeType == MockNodeType.ElementNode) {
+            if (child.nodeType == exports.MockNodeType.ElementNode) {
                 let child_element = child;
                 isDone = callback(child_element);
             }
         }
     }
-    get tag() { return this._tag; }
-    get parent() { return this._parent; }
     addChild(node) {
         this._children.push(node);
     }
@@ -152,7 +156,7 @@ class ElementNode {
         }
         let html = this._children
             .map((node) => {
-            if (node.nodeType === MockNodeType.ElementNode) {
+            if (node.nodeType === exports.MockNodeType.ElementNode) {
                 let element = node;
                 return toHtml(element);
             }
@@ -199,48 +203,39 @@ function toHtml(element) {
  * Available under the MIT License
  */
 /**
- * # MockClasses
- *
- * Representation of classes on a mock element.
+ * Represents an uncertain return type.
+ * In TypeScript it's possible to return
+ * `Type | undefined` but at runtime it can
+ * get a bit messy to handle this well.
+ * The Option class represents this cleanly
+ * and explicitly while making it easy
+ * determine whether the value is valid or not
+ * and, if valid, provides easy ways to get
+ * the value with proper type consistency in
+ * TypeScript.
  */
-class MockClasses {
-    constructor(element) {
-        this.classNames = [];
-        this.element = element;
-    }
-    internalGetClassValue() {
-        return this.classNames.reduce((a, b) => `${a} ${b}`);
-    }
-    forEach(callback) {
-        this.classNames.forEach(callback);
-        return this;
-    }
-    has(name) {
-        return this.classNames.includes(name);
-    }
-    whenHas(name, callback) {
-        if (this.has(name)) {
-            callback(this.element);
+class Option {
+    constructor(_value) {
+        if (_value) {
+            this.value = _value;
         }
-        return this;
-    }
-    add(_class) {
-        if (!this.has(_class)) {
-            this.classNames.push(_class);
+        else {
+            this.value = null;
         }
-        return this;
     }
-    remove(_class) {
-        if (this.has(_class)) {
-            let index = this.classNames.indexOf(_class);
-            let before = this.classNames.slice(0, index);
-            let after = this.classNames.slice(index);
-            this.classNames = before.concat(after);
-        }
-        return this;
+    /**
+     * Check that there is a value before
+     * calling this.
+     * @see isValid
+     */
+    get Value() {
+        return this.value;
     }
-    set(_class) {
-        return this.add(_class);
+    /**
+     * Tests if the value is known.
+     */
+    get isValid() {
+        return !!this.value;
     }
 }
 
@@ -250,46 +245,78 @@ class MockClasses {
  * Available under the MIT License
  */
 class MockElement {
-    constructor(tag, parent) {
-        this._tag = tag;
-        this._attributes = {};
-        this._classes = new MockClasses(this);
-        this._children = [];
-        this._text_value = '';
-        this._parent = parent;
+    constructor(element) {
+        if (element) {
+            this._element = new Option(element);
+        }
+        else {
+            this._element = new Option();
+        }
+        // this._classes = new MockClasses(this);
     }
     isValid() {
-        return true;
+        return this._element.isValid;
     }
     getParent() {
-        return this._parent;
+        if (this._element.isValid) {
+            let element = this._element.Value;
+            if (element.hasParent()) {
+                return new MockElement(element.parent);
+            }
+        }
+        return new MockElement();
     }
     withChildren(callback) {
-        if (this._children.length > 0) {
-            callback(this._children);
+        if (this._element.isValid) {
+            let children = this._element.Value.children;
+            if (children && children.length > 0) {
+                let mockElements = this.makeElementList(children);
+                callback(mockElements);
+            }
         }
         return this;
     }
+    makeElementList(fromList) {
+        let elements = fromList
+            .filter((node) => node.nodeType == exports.MockNodeType.ElementNode)
+            .map((elementNode) => elementNode);
+        return elements.map((ele) => new MockElement(ele));
+    }
     expect(tagName) {
-        if (this._tag.toUpperCase() !== tagName.toUpperCase()) {
-            console.trace(`Expected ${tagName} but actual value was ${this._tag}`);
+        if (this._element.isValid) {
+            let element = this._element.Value;
+            if (element.tag.toUpperCase() !== tagName.toUpperCase()) {
+                console.trace(`Expected ${tagName} but actual value was ${element.tag}`);
+            }
         }
         return this;
     }
     getId() {
-        let id = this._attributes['id'];
-        if (id) {
-            return id;
+        if (this._element.isValid) {
+            let element = this._element.Value;
+            let id = element.attrib('id');
+            if (id) {
+                return id;
+            }
         }
         return null;
     }
     hasId() {
-        return !!this._attributes['id'];
+        return !!this.getId();
     }
     exists() {
-        return true;
+        return this._element.isValid;
     }
     findAll(elementListLocation) {
+        let results = [];
+        if (elementListLocation.class && this._element.isValid) {
+            this._element.Value.queryByClass(elementListLocation.class, results);
+            return this.makeElementList(results);
+        }
+        else if (elementListLocation.tagName && this._element.isValid) {
+            this._element.Value.queryByTag(elementListLocation.tagName, results);
+            return this.makeElementList(results);
+        }
         throw new Error("Method not implemented.");
     }
     selectFirst(selector) {
@@ -379,6 +406,104 @@ class MockAttributes {
  * Available under the MIT License
  */
 /**
+ * # MockClasses
+ *
+ * Representation of classes on a mock element.
+ */
+class MockClasses {
+    constructor(element) {
+        this.classNames = [];
+        this.element = element;
+    }
+    internalGetClassValue() {
+        return this.classNames.reduce((a, b) => `${a} ${b}`);
+    }
+    forEach(callback) {
+        this.classNames.forEach(callback);
+        return this;
+    }
+    has(name) {
+        return this.classNames.includes(name);
+    }
+    whenHas(name, callback) {
+        if (this.has(name)) {
+            callback(this.element);
+        }
+        return this;
+    }
+    add(_class) {
+        if (!this.has(_class)) {
+            this.classNames.push(_class);
+        }
+        return this;
+    }
+    remove(_class) {
+        if (this.has(_class)) {
+            let index = this.classNames.indexOf(_class);
+            let before = this.classNames.slice(0, index);
+            let after = this.classNames.slice(index);
+            this.classNames = before.concat(after);
+        }
+        return this;
+    }
+    set(_class) {
+        return this.add(_class);
+    }
+}
+
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
+// ----------
+function TagSelector(selector) {
+    let step = (element) => {
+        let list = [];
+        element.queryByTag(selector, list);
+        return list;
+    };
+    return step;
+}
+function AllOutputs(list) {
+    let task = (element) => {
+        let result = [];
+        list.forEach((output) => result = result.concat(output(element)));
+        return result;
+    };
+    return task;
+}
+function UnionSelector(selector) {
+    // if (selector.includes(',')) {
+    return (element) => {
+        let list = selector.split(',')
+            .map((s) => s.trim())
+            .map((sub_selector) => TagSelector(sub_selector));
+        let task = AllOutputs(list);
+        return task(element);
+    };
+    // }
+}
+/**
+ * Parses a selector to create a parse plan that can be
+ * executed using the @see parseWith method.
+ */
+class MockSelectorParser {
+    constructor(selector) {
+        this.selector = selector;
+    }
+    parseWith(element) {
+        let output = UnionSelector(this.selector);
+        return output(element);
+    }
+}
+
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
+/**
  * # MockDocument
  */
 class MockDocument {
@@ -410,9 +535,17 @@ function Doc() {
     return new MockDocument();
 }
 
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
+
+exports.ElementNode = ElementNode;
+exports.TextNode = TextNode;
 exports.MockDocument = MockDocument;
 exports.Doc = Doc;
+exports.MockSelectorParser = MockSelectorParser;
 exports.MockElement = MockElement;
 exports.MockAttributes = MockAttributes;
 exports.MockClasses = MockClasses;
-

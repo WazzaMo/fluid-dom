@@ -25,7 +25,9 @@ import { EventHandlerInfo } from './event-handler-info';
 export { MockElement } from './mock-element';
 export { MockAttributeSet, MockAttributes } from './mock-attributes';
 export { MockClasses } from './mock-classes';
+export { MockSelectorParser } from './mock-selector-parser';
 
+export { ElementNode };
 
 /**
  * # MockDocument
@@ -44,8 +46,8 @@ export class MockDocument implements IElementNodeFactory, IFluidDocument {
 
   create_child_element(
     child_tag: string,
-    id?: string | undefined,
-    callback?: ((mock: ElementNode) => void ) | undefined
+    id: string | undefined,
+    callback: ((mock: ElementNode) => void ) | undefined
   ): IElementNodeFactory {
     this.root_node.create_child_element(child_tag, id, callback);
     return this;

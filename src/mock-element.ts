@@ -12,70 +12,103 @@ import { IElement } from './i-element';
 
 import { MockAttributeSet, MockAttributes } from './mock-attributes';
 import { MockClasses } from './mock-classes';
+import { Option } from './option';
 
 import {
   IMockDocNode,
   ElementNode,
+  MockNodeType,
 } from './mock-document-nodes';
 
 export class MockElement implements IElement {
-  private _attributes: MockAttributeSet;
-  private _classes: MockClasses;
-  private _tag: string;
-  private _children: Array<MockElement>;
-  private _text_value: string;
-  private _parent: IElement;
+  private _element : Option<ElementNode>;
 
-  constructor(tag: string, parent: IElement) {
-    this._tag = tag;
-    this._attributes = {};
-    this._classes = new MockClasses(this);
-    this._children = [];
-    this._text_value = '';
-    this._parent = parent;
+  constructor(element?: ElementNode) {
+    if (element) {
+      this._element = new Option<ElementNode>(element);
+    } else {
+      this._element = new Option<ElementNode>();
+    }
+    // this._classes = new MockClasses(this);
   }
 
   isValid(): boolean {
-    return true;
+    return this._element.isValid;
   }
 
   getParent(): IElement {
-    return this._parent;
+    if (this._element.isValid) {
+      let element = this._element.Value;
+      if (element.hasParent()) {
+        return new MockElement( element.parent );
+      }
+    }
+    return new MockElement();
   }
 
   withChildren(callback: (list: IElement[]) => void): IElement {
-    if(this._children.length > 0) {
-      callback(this._children);
+    if (this._element.isValid) {
+      let children = this._element.Value.children;
+      if(children && children.length > 0) {
+        let mockElements = this.makeElementList(children);
+        callback(mockElements);
+      }
     }
     return this;
   }
 
+  private makeElementList(
+    fromList: Array<IMockDocNode>
+  ): Array<MockElement> {
+    let elements: Array<ElementNode> = fromList
+      .filter( (node:IMockDocNode) => node.nodeType == MockNodeType.ElementNode)
+      .map( (elementNode: IMockDocNode) => <ElementNode> elementNode);
+    return elements.map( (ele: ElementNode) => new MockElement(ele));
+  }
+
   expect(tagName: string): IElement {
-    if (this._tag.toUpperCase() !== tagName.toUpperCase()) {
-      console.trace(`Expected ${tagName} but actual value was ${this._tag}`);
+    if (this._element.isValid) {
+      let element = this._element.Value;
+      if (element.tag.toUpperCase() !== tagName.toUpperCase()) {
+        console.trace(`Expected ${tagName} but actual value was ${element.tag}`);
+      }
     }
     return this;
   }
 
   getId(): string | null {
-    let id = this._attributes['id'];
-    if (id) {
-      return id;
+    if (this._element.isValid) {
+      let element = this._element.Value;
+
+      let id = element.attrib('id');
+      if (id) {
+        return id;
+      }
     }
     return null;
   }
 
   hasId(): boolean {
-    return !! this._attributes['id'];
+    return !! this.getId();
   }
 
   exists(): boolean {
-    return true;
+    return this._element.isValid;
   }
 
   findAll(elementListLocation: ElementListSource): IElement[] {
+    let results: Array<ElementNode> = [];
+    if (elementListLocation.class && this._element.isValid) {
+      this._element.Value.queryByClass(elementListLocation.class, results);
+      return this.makeElementList(results);
+    } else if ( elementListLocation.tagName && this._element.isValid ) {
+      this._element.Value.queryByTag(elementListLocation.tagName, results);
+      return this.makeElementList(results);
+    }
+    
     throw new Error("Method not implemented.");
   }
+  
   selectFirst(selector: string): IElement {
     throw new Error("Method not implemented.");
   }

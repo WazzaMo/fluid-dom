@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "target": "es2016",
+        "declaration": true,
+        "inlineSourceMap": true,
+        "declarationMap": false,
+        "strict": true,
+        "module": "es6",
+        "moduleResolution": "node",
+        "outDir": "mock-js",
+        "composite": true
+    },
+    "files": [
+        "src/fluid-mock.ts",
+        "src/mock-document.ts",
+        "src/mock-document-nodes.ts",
+        "src/constants.ts",
+        "src/mock-element.ts",
+        "src/mock-attributes.ts",
+        "src/mock-classes.ts",
+        "src/element-list-source.ts",
+        "src/element-source.ts",
+        "src/event-handler-info.ts",
+        "src/i-attributes.ts",
+        "src/i-classes.ts",
+        "src/i-element.ts",
+        "src/i-fluid-document.ts",
+        "src/mock-selector-parser.ts",
+        "src/option.ts",
+
+        "tests/mock-test.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "js"
+    ]
+}
