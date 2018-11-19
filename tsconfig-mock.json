@@ -27,6 +27,7 @@
         "src/i-fluid-document.ts",
         "src/mock-selector-parser.ts",
         "src/option.ts",
+        "src/selector-lexer.ts",
 
         "tests/mock-test.ts"
     ],

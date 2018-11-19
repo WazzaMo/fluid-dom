@@ -67,8 +67,6 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
   private _tag: string;
   private _parent: ElementNode | undefined;
   private _attributes: IMockNodeAttributes;
-  private _findElementQuery: () => undefined | ElementNode;
-  private _findManyElementsQuery: (collector: Array<ElementNode>) => void;
 
   get nodeType(): MockNodeType { return MockNodeType.ElementNode; }
   get children(): IMockDocNode[] { return this._children; }
@@ -91,14 +89,6 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
     if (id) {
       this.attrib('id', id);
     }
-    this.reset_queries();
-    this._findElementQuery = () => undefined;
-    this._findManyElementsQuery = () => {};
-  }
-
-  private reset_queries() : void {
-    this._findElementQuery = () => undefined;
-    this._findManyElementsQuery = () => {};
   }
 
   attrib(name: string, value?: string) : undefined | string {

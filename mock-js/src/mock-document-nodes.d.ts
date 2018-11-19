@@ -47,15 +47,12 @@ export declare class ElementNode implements IMockDocNode, IElementNodeFactory {
     private _tag;
     private _parent;
     private _attributes;
-    private _findElementQuery;
-    private _findManyElementsQuery;
     readonly nodeType: MockNodeType;
     readonly children: IMockDocNode[];
     text_value: string;
     readonly tag: string;
     readonly parent: ElementNode | undefined;
     constructor(tag: string, parent?: ElementNode, id?: string);
-    private reset_queries;
     attrib(name: string, value?: string): undefined | string;
     /**
      * The root element of a document has no parent so, in a way,

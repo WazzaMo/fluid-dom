@@ -42,13 +42,6 @@ class ElementNode {
         if (id) {
             this.attrib('id', id);
         }
-        this.reset_queries();
-        this._findElementQuery = () => undefined;
-        this._findManyElementsQuery = () => { };
-    }
-    reset_queries() {
-        this._findElementQuery = () => undefined;
-        this._findManyElementsQuery = () => { };
     }
     attrib(name, value) {
         if (value) {
@@ -457,14 +450,6 @@ class MockClasses {
  * Available under the MIT License
  */
 // ----------
-function TagSelector(selector) {
-    let step = (element) => {
-        let list = [];
-        element.queryByTag(selector, list);
-        return list;
-    };
-    return step;
-}
 function ChildrenByTag(tag) {
     let finder = (element) => {
         let nodeList = element.children
@@ -477,11 +462,77 @@ function ChildrenByTag(tag) {
     };
     return finder;
 }
+function AttributeSelector(selector) {
+    function HasTag(tag) {
+        return (!!tag) && tag.length > 0;
+    }
+    function toPairs(attribList) {
+        let attribs = [];
+        attribList.forEach((part) => {
+            let nameOnly, nameValue;
+            nameOnly = part.match(/(\w+)/);
+            nameValue = part.match(/(\w+).*="(.*)"/);
+            if (nameValue) {
+                let [_all, name, value] = nameValue;
+                attribs.push({ name, value });
+            }
+            else if (nameOnly) {
+                let [_all, name] = nameOnly;
+                attribs.push({ name });
+            }
+        });
+        return attribs;
+    }
+    function isMatch(tag, pairList, element) {
+        let matchesAttrib = pairList.every((pair) => {
+            if (pair.value) {
+                return element.attrib(pair.name) === pair.value;
+            }
+            else {
+                return !!element.attrib(pair.name);
+            }
+        });
+        let matchesTag = HasTag(tag)
+            ? tag.toUpperCase() === element.tag.toUpperCase()
+            : true;
+        return matchesTag && matchesAttrib;
+    }
+    function addAllMatches(tag, attribs, element, collection) {
+        if (isMatch(tag, attribs, element)) {
+            collection.push(element);
+        }
+        if (element.children) {
+            element.children.forEach((child) => {
+                if (child.nodeType == exports.MockNodeType.ElementNode) {
+                    addAllMatches(tag, attribs, child, collection);
+                }
+            });
+        }
+    }
+    const OPT_TAG_AND_ATTRIBUTE_PATTERN = /(\w*)\W*\[(.*)\]/;
+    let _match = selector.match(OPT_TAG_AND_ATTRIBUTE_PATTERN);
+    let _all, tag, attribs;
+    if (_match) {
+        [_all, tag, attribs] = _match;
+        let attribList = (!!attribs) ? toPairs(attribs.split('][')) : [];
+        return (element) => {
+            let collection = [];
+            addAllMatches(tag, attribList, element, collection);
+            return collection;
+        };
+    }
+    else {
+        return ChildrenByTag(selector);
+    }
+} // -- AttributeSelector
+function SingleSelector(selector) {
+    return AttributeSelector(selector);
+}
 function HierarchySelector(selector) {
     return (element) => {
         let pathList = selector.split('>')
             .map((part) => part.trim())
-            .map((sub) => ChildrenByTag(sub));
+            .map((sub) => SingleSelector(sub));
         let task = ApplyRecursiveElementForBestMatch(pathList);
         return task(element);
     };
@@ -519,7 +570,7 @@ function SelectorList(selector) {
     return (element) => {
         let list = selector.split(',')
             .map((s) => s.trim())
-            .map((sub_selector) => TagSelector(sub_selector));
+            .map((sub_selector) => SingleSelector(sub_selector));
         let task = ApplySameElementToList(list);
         return task(element);
     };
@@ -529,7 +580,7 @@ function HierarchyOrOther(selector) {
         return HierarchySelector(selector);
     }
     else {
-        return TagSelector(selector);
+        return SingleSelector(selector);
     }
 }
 function ListOrOther(selector) {
@@ -596,6 +647,239 @@ function Doc() {
  * (c) Copyright 2018 Warwick Molloy
  * Available under the MIT License
  */
+// selector ::= (advanced_selector ',' )* advanced_selector
+// advanced_selector ::= path_selector | composite_selector
+// simple_selector ::= #ID | .CLASS | TAG_NAME
+// name_selector ::= TAG QUALIFIER ATTRIBSET
+// attribset ::= '[' LABEL ']' ATTRIBSET
+// =' '"' VALUE'"'
+// qualifier ::= (CLASS | ID ) QUALIFIER
+//           ::= NONE
+// class ::= '.' LABEL
+// id ::= '#' LABEL
+// tag ::= LABEL
+var Events;
+(function (Events) {
+    Events[Events["LeadLabelChar"] = 0] = "LeadLabelChar";
+    Events[Events["LabelChar"] = 1] = "LabelChar";
+    Events[Events["ChildSeparator"] = 2] = "ChildSeparator";
+    Events[Events["DescendentSeparator"] = 3] = "DescendentSeparator";
+    Events[Events["ClassPrefix"] = 4] = "ClassPrefix";
+    Events[Events["IdPrefix"] = 5] = "IdPrefix";
+    Events[Events["LeftSqBracket"] = 6] = "LeftSqBracket";
+    Events[Events["RightSqBracket"] = 7] = "RightSqBracket";
+    Events[Events["EqualSign"] = 8] = "EqualSign";
+    Events[Events["Quote"] = 9] = "Quote";
+    Events[Events["EndInput"] = 10] = "EndInput";
+    Events[Events["Illegal"] = 11] = "Illegal";
+    Events[Events["LAST_EVENT"] = 12] = "LAST_EVENT";
+})(Events || (Events = {}));
+var Actions;
+(function (Actions) {
+    Actions["Ignore"] = "IGNORE";
+    Actions["ErrorBeforeSelector"] = "ERROR-before-selector";
+    Actions["ErrorInTag"] = "ERROR-in-tag";
+    Actions["ErrorAfterTag"] = "ERROR-after-tag";
+    Actions["ErrorInClass"] = "ERROR-in-class";
+    Actions["ErrorInId"] = "ERROR-in-ID";
+    Actions["ErrorInAttribute"] = "ERROR-in-attrib";
+    Actions["ErrorInAttribValue"] = "ERROR-in-attrib-value";
+    Actions["ClearTag"] = "CLEAR-TAG";
+    Actions["AppendTag"] = "APPEND-TAG";
+    Actions["SaveTag"] = "SAVE-TAG";
+    Actions["ClearClass"] = "CLEAR-CLASS";
+    Actions["AppendClass"] = "APPEND-CLASS";
+    Actions["SaveClass"] = "SAVE-CLASS";
+    Actions["ClearId"] = "CLEAR-ID";
+    Actions["AppendId"] = "STORE-ID";
+    Actions["SaveId"] = "SAVE-ID";
+    Actions["ClearAttrib"] = "CLEAR-ATTRIB";
+    Actions["AppendAttrib"] = "APPEND-ATTRIB";
+    Actions["SaveAttrib"] = "SAVE-ATTRIB";
+    Actions["ClearAttribValue"] = "CLEAR-VALUE";
+    Actions["AppendAttribValue"] = "APPEND-VALUE";
+    Actions["SaveAttribValue"] = "SAVE-VALUE";
+    Actions["NewChild"] = "NEW-CHILD-SELECTOR";
+    Actions["NewDescendent"] = "NEW-DESCENDENT-SELECTOR";
+})(Actions || (Actions = {}));
+var States;
+(function (States) {
+    States[States["StartAwaitSelector"] = 0] = "StartAwaitSelector";
+    States[States["GettingTag"] = 1] = "GettingTag";
+    States[States["GettingClass"] = 2] = "GettingClass";
+    States[States["GettingId"] = 3] = "GettingId";
+    States[States["AwaitDescendentSelector"] = 4] = "AwaitDescendentSelector";
+    States[States["AwaitChildSelector"] = 5] = "AwaitChildSelector";
+    States[States["GettingAttribName"] = 6] = "GettingAttribName";
+    States[States["AwaitAttribValueOrEnd"] = 7] = "AwaitAttribValueOrEnd";
+    States[States["AttribValueStart"] = 8] = "AttribValueStart";
+    States[States["GettingAttribValue"] = 9] = "GettingAttribValue";
+    States[States["AwaitAttribEnd"] = 10] = "AwaitAttribEnd";
+    States[States["LAST_STATE"] = 11] = "LAST_STATE";
+})(States || (States = {}));
+const TransitionTable = {};
+const ActionTable = {};
+function isString(s) {
+    return typeof s === "string";
+}
+function setup_tables() {
+    function initState() {
+        return {};
+    }
+    function initTable(table) {
+        for (var stateNum = 0; stateNum < States.LAST_STATE; stateNum++) {
+            table[stateNum] = initState();
+        }
+    }
+    function at_on(state, event, next, action) {
+        TransitionTable[state][event] = next;
+        if (isString(action)) {
+            ActionTable[state][event] = [action];
+        }
+        else {
+            ActionTable[state][event] = action;
+        }
+    }
+    function default_for(state, next, action) {
+        for (var event = Events.LeadLabelChar; event < Events.LAST_EVENT; event++) {
+            at_on(state, event, next, action);
+        }
+    }
+    function _start() {
+        let start = States.StartAwaitSelector;
+        default_for(start, start, Actions.ErrorBeforeSelector);
+        at_on(start, Events.LeadLabelChar, States.GettingTag, Actions.ClearTag);
+        at_on(start, Events.ClassPrefix, States.GettingClass, Actions.ClearClass);
+        at_on(start, Events.IdPrefix, States.GettingId, Actions.ClearId);
+    }
+    function _tag() {
+        let tag = States.GettingTag;
+        default_for(tag, tag, Actions.ErrorInTag);
+        at_on(tag, Events.LabelChar, tag, Actions.AppendTag);
+        at_on(tag, Events.LeadLabelChar, tag, Actions.AppendTag);
+        at_on(tag, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SaveTag);
+        at_on(tag, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveTag);
+        at_on(tag, Events.ClassPrefix, States.GettingClass, [Actions.SaveTag, Actions.ClearClass]);
+        at_on(tag, Events.IdPrefix, States.GettingId, [Actions.SaveTag, Actions.ClearId]);
+        at_on(tag, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveTag, Actions.ClearAttrib]);
+    }
+    function _id() {
+        let id = States.GettingId;
+        default_for(id, id, Actions.ErrorInId);
+        at_on(id, Events.LabelChar, id, Actions.AppendId);
+        at_on(id, Events.LeadLabelChar, id, Actions.AppendId);
+        at_on(id, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SaveId);
+        at_on(id, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveId);
+        at_on(id, Events.ClassPrefix, States.GettingClass, [Actions.SaveId, Actions.ClearClass]);
+        at_on(id, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveId, Actions.ClearAttrib]);
+    }
+    function _class() {
+        let classState = States.GettingId;
+        default_for(classState, classState, Actions.ErrorInClass);
+        at_on(classState, Events.LabelChar, classState, Actions.AppendClass);
+        at_on(classState, Events.LeadLabelChar, classState, Actions.AppendClass);
+        at_on(classState, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SaveClass);
+        at_on(classState, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveClass);
+        at_on(classState, Events.IdPrefix, States.GettingId, [Actions.SaveClass, Actions.ClearId]);
+        at_on(classState, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveClass, Actions.ClearAttrib]);
+    }
+    function _descendent() {
+        let descend = States.AwaitDescendentSelector;
+        default_for(descend, descend, Actions.ErrorBeforeSelector);
+        at_on(descend, Events.DescendentSeparator, descend, Actions.Ignore);
+        at_on(descend, Events.ChildSeparator, States.AwaitChildSelector, Actions.Ignore);
+        at_on(descend, Events.LeadLabelChar, States.GettingTag, [Actions.NewDescendent, Actions.ClearTag, Actions.AppendTag]);
+        at_on(descend, Events.IdPrefix, States.GettingId, [Actions.NewDescendent, Actions.ClearId]);
+        at_on(descend, Events.ClassPrefix, States.GettingClass, [Actions.NewDescendent, Actions.ClearClass]);
+        at_on(descend, Events.LeftSqBracket, States.AttribValueStart, [Actions.NewDescendent, Actions.ClearAttrib]);
+    }
+    function _child() {
+        let waitchild = States.AwaitChildSelector;
+        default_for(waitchild, waitchild, Actions.ErrorBeforeSelector);
+        at_on(waitchild, Events.ChildSeparator, waitchild, Actions.Ignore);
+        at_on(waitchild, Events.DescendentSeparator, waitchild, Actions.Ignore);
+        at_on(waitchild, Events.LeadLabelChar, States.GettingTag, [Actions.NewChild, Actions.ClearTag, Actions.AppendTag]);
+        at_on(waitchild, Events.IdPrefix, States.GettingId, [Actions.NewChild, Actions.ClearId, Actions.AppendId]);
+        at_on(waitchild, Events.ClassPrefix, States.GettingClass, [Actions.NewChild, Actions.ClearClass, Actions.AppendClass]);
+        at_on(waitchild, Events.LeftSqBracket, States.AttribValueStart, [Actions.NewChild, Actions.ClearAttrib]);
+    }
+    initTable(TransitionTable);
+    initTable(ActionTable);
+    _start();
+    _tag();
+    _id();
+    _class();
+    _descendent();
+    _child();
+} //-- setup_tables
+setup_tables();
+function isAlpha(_char) {
+    return (_char >= 'a' && _char <= 'z') || (_char >= 'A' || _char <= 'Z');
+}
+function isLabelLead(_char) {
+    return _char === '_' || isAlpha(_char);
+}
+function isNumeric(_char) {
+    return _char >= '0' && _char <= '9';
+}
+function isLabelContinuer(_char) {
+    return isNumeric(_char) || isLabelLead(_char);
+}
+function event(_char) {
+    if (_char.length != 1) {
+        throw new Error("Can only determine an event for a single character!");
+    }
+    if (isLabelLead(_char)) {
+        return Events.LeadLabelChar;
+    }
+    if (isLabelContinuer(_char)) {
+        return Events.LabelChar;
+    }
+    switch (_char) {
+        case '.': return Events.ClassPrefix;
+        case '#': return Events.IdPrefix;
+        case '[': return Events.LeftSqBracket;
+        case ']': return Events.RightSqBracket;
+        case '=': return Events.EqualSign;
+        case ' ': return Events.DescendentSeparator;
+        case '\t': return Events.DescendentSeparator;
+        case '>': return Events.ChildSeparator;
+        case '"': return Events.Quote;
+    }
+    return Events.Illegal;
+}
+class SelectorLexer {
+    constructor() {
+        this._root_token = {};
+        this._current = this._root_token;
+        this._state = States.StartAwaitSelector;
+        this._event = Events.LAST_EVENT;
+        this._actions = [Actions.Ignore];
+        this._input = '';
+    }
+    lex_selector(selector) {
+        for (var index = 0; index < selector.length; index++) {
+            this._input = selector.charAt(index);
+            this._event = event(this._input);
+            this.stimulus();
+        }
+    }
+    stimulus() {
+        let current = this._state;
+        this._state = TransitionTable[this._state][this._event];
+        this._actions = ActionTable[this._state][this._event];
+        console.warn(`Stimulus: ${current} =['${this._input}' ${this._event.toString()}]=>${this._state} @ ${this._actions}`);
+    }
+    setup_actions() {
+        // ActionTable[Actions.AppendAttrib]
+    }
+}
+
+/*
+ * Fluid DOM for JavaScript
+ * (c) Copyright 2018 Warwick Molloy
+ * Available under the MIT License
+ */
 
 exports.ElementNode = ElementNode;
 exports.TextNode = TextNode;
@@ -605,3 +889,4 @@ exports.MockSelectorParser = MockSelectorParser;
 exports.MockElement = MockElement;
 exports.MockAttributes = MockAttributes;
 exports.MockClasses = MockClasses;
+exports.SelectorLexer = SelectorLexer;

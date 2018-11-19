@@ -19,3 +19,7 @@ export { MockElement } from './mock-element';
 export { MockAttributes } from './mock-attributes';
 export { MockClasses } from './mock-classes';
 
+export {
+  SelectorToken,
+  SelectorLexer
+} from './selector-lexer';

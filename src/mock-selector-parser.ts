@@ -16,6 +16,14 @@ import { find } from 'shelljs';
 selector ::= (advanced_selector ',' )* advanced_selector
 advanced_selector ::= path_selector | composite_selector
 simple_selector ::= #ID | .CLASS | TAG_NAME
+name_selector ::= TAG QUALIFIER ATTRIBSET
+attribset ::= '[' LABEL ']' ATTRIBSET
+=' '"' VALUE'"'
+qualifier ::= (CLASS | ID ) QUALIFIER
+          ::= NONE
+class ::= '.' LABEL
+id ::= '#' LABEL
+tag ::= LABEL
  */
 
 //export type ParseCommand = (parser: MockSelectorParser, element:ElementNode) => ParseDecision;
@@ -28,15 +36,6 @@ interface ParseDecision {
 type ParseOutput = (element: ElementNode) => Array<ElementNode>;
 type ParseStep = (element: ElementNode) => ParseDecision;
 // ----------
-
-function TagSelector(selector: string) : ParseOutput {
-  let step:ParseOutput = (element: ElementNode) => {
-    let list: Array<ElementNode> = [];
-    element.queryByTag(selector, list);
-    return list;
-  }
-  return step;
-}
 
 function ChildrenByTag(tag:string) : ParseOutput {
   let finder: ParseOutput = (element: ElementNode) => {
@@ -51,11 +50,93 @@ function ChildrenByTag(tag:string) : ParseOutput {
   return finder;
 }
 
+function AttributeSelector(selector: string) : ParseOutput {
+  interface AttribPair { name: string, value?: string | undefined};
+
+  function HasTag(tag: string) : boolean {
+    return (!!tag) && tag.length > 0;
+  }
+
+  function toPairs(attribList:Array<string>): Array<AttribPair> {
+    let attribs : Array<AttribPair> = [];
+
+    attribList.forEach( (part: string)=>{
+      let nameOnly, nameValue;
+      nameOnly = part.match(/(\w+)/);
+      nameValue = part.match(/(\w+).*="(.*)"/);
+      if (nameValue) {
+        let  [_all, name, value] = nameValue;
+        attribs.push( <AttribPair>{name,value} );
+      } else if (nameOnly) {
+        let [_all, name] = nameOnly;
+        attribs.push( <AttribPair> { name } );
+      }
+    });
+    return attribs;
+  }
+
+  function isMatch(
+    tag:string, pairList: Array<AttribPair>, element: ElementNode
+  ): boolean {
+    let matchesAttrib: boolean = pairList.every( (pair: AttribPair)=> {
+      if (pair.value) {
+        return element.attrib(pair.name) === pair.value;
+      } else {
+        return !! element.attrib(pair.name);
+      }
+    });
+    let matchesTag = HasTag(tag) 
+      ? tag.toUpperCase() === element.tag.toUpperCase()
+      : true;
+    return matchesTag && matchesAttrib;
+  }
+
+  function addAllMatches(
+    tag: string,
+    attribs: Array<AttribPair>,
+    element: ElementNode,
+    collection: Array<ElementNode>
+  ) : void {
+    if (isMatch(tag, attribs, element)) {
+      collection.push(element);
+    }
+    if (element.children) {
+      element.children.forEach( (child: IMockDocNode) => {
+        if (child.nodeType == MockNodeType.ElementNode) {
+          addAllMatches(tag, attribs, <ElementNode>child, collection)
+        }
+      });
+    }
+  }
+
+  const OPT_TAG_AND_ATTRIBUTE_PATTERN = /(\w*)\W*\[(.*)\]/;
+  let _match = selector.match(OPT_TAG_AND_ATTRIBUTE_PATTERN);
+  let _all, tag: string, attribs: string | undefined;
+
+  if (_match) {
+    [_all, tag, attribs] = _match;
+
+    let attribList = (!! attribs) ? toPairs( attribs.split('][') ) : [];
+    return (element: ElementNode) => {
+      let collection: Array<ElementNode> = [];
+      addAllMatches(tag, attribList, element, collection);
+      return collection;
+    }
+  } else {
+    return ChildrenByTag(selector);
+  }
+
+} // -- AttributeSelector
+
+function SingleSelector(selector: string) : ParseOutput {
+  return AttributeSelector(selector);
+}
+
 function HierarchySelector(selector: string): ParseOutput {
   return (element: ElementNode) => {
     let pathList = selector.split('>')
       .map( (part:string)=> part.trim() )
-      .map( (sub: string) => ChildrenByTag(sub));
+      .map( (sub: string) => SingleSelector(sub));
     let task = ApplyRecursiveElementForBestMatch(pathList);
     return task(element);
   }
@@ -101,7 +182,7 @@ function SelectorList(selector: string) : ParseOutput {
   return (element: ElementNode) => {
     let list = selector.split(',')
       .map( (s:string) => s.trim() )
-      .map( (sub_selector:string ) => TagSelector(sub_selector));
+      .map( (sub_selector:string ) => SingleSelector(sub_selector));
     let task = ApplySameElementToList(list);
     return task(element);
   }
@@ -111,7 +192,7 @@ function HierarchyOrOther(selector: string) : ParseOutput {
   if (selector.includes('>')) {
     return HierarchySelector(selector);
   } else {
-    return TagSelector(selector);
+    return SingleSelector(selector);
   }
 }
 
