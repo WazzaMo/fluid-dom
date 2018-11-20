@@ -123,7 +123,30 @@ describe('selector-lexer', ()=> {
         expect(lexer.tokens._attrib[1].name).toEqual('then');
       });
 
+      it('throws error when right bracket not closed (]): ', ()=> {
+        expect( ()=> lexer.lex_selector('[main')).toThrowError(`Error in attribute: missing ']'`)
+      });
+
     }); // attributes
+
+    describe('when attributes have values: ', ()=> {
+
+      it('must get the attrib name and value: ', ()=> {
+        lexer.lex_selector('[name="value"]');
+        expect(lexer.tokens._attrib[0].name).toEqual('name');
+        expect(lexer.tokens._attrib[0].value).toBeDefined();
+        expect(lexer.tokens._attrib[0].value).toEqual('value');
+      });
+
+      it('must accept multiple atttribute name/value pairs: ', ()=>{
+        lexer.lex_selector('[Name1="n.# 1"][Name2="n2"]');
+        expect(lexer.tokens._attrib[0].name).toEqual('Name1');
+        expect(lexer.tokens._attrib[0].value).toEqual('n.# 1');
+        expect(lexer.tokens._attrib[1].name).toEqual('Name2');
+        expect(lexer.tokens._attrib[1].value).toEqual('n2');
+      });
+
+    }); // attributes & values
 
   }); //-- lex_selector()
 

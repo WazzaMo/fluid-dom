@@ -9,6 +9,8 @@ export declare enum Actions {
     ErrorInAttribValue = "ERROR-in-attrib-value",
     ErrorUnexpectedEnd = "ERROR-unexpected-end-of-input",
     ErrorMultipleChildSeparators = "ERROR-too-many-child-separators",
+    ErrorAttribBracketsNotClosed = "ERROR-attribute-bracket-missing",
+    ErrorAttribValueQuoteMissing = "ERROR-attrib-value-quote-missing",
     ClearTag = "CLEAR-TAG",
     AppendTag = "APPEND-TAG",
     SaveTag = "SAVE-TAG",
@@ -66,5 +68,8 @@ export declare class SelectorLexer {
     private child_actions;
     private descendent_actions;
     private attrib_actions;
+    private attrib_value_actions;
     private setup_actions;
+    private createAttrib;
+    private getLastAttrib;
 }

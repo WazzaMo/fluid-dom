@@ -686,6 +686,8 @@ var Actions;
     Actions["ErrorInAttribValue"] = "ERROR-in-attrib-value";
     Actions["ErrorUnexpectedEnd"] = "ERROR-unexpected-end-of-input";
     Actions["ErrorMultipleChildSeparators"] = "ERROR-too-many-child-separators";
+    Actions["ErrorAttribBracketsNotClosed"] = "ERROR-attribute-bracket-missing";
+    Actions["ErrorAttribValueQuoteMissing"] = "ERROR-attrib-value-quote-missing";
     Actions["ClearTag"] = "CLEAR-TAG";
     Actions["AppendTag"] = "APPEND-TAG";
     Actions["SaveTag"] = "SAVE-TAG";
@@ -715,13 +717,12 @@ var States;
     States[States["AwaitAttribName"] = 6] = "AwaitAttribName";
     States[States["GettingAttribName"] = 7] = "GettingAttribName";
     States[States["AwaitEqualSignOrEnd"] = 8] = "AwaitEqualSignOrEnd";
-    States[States["AwaitAttribValue"] = 9] = "AwaitAttribValue";
-    States[States["AttribValueStartQuote"] = 10] = "AttribValueStartQuote";
-    States[States["GettingAttribValue"] = 11] = "GettingAttribValue";
-    States[States["AttribValueEndQuote"] = 12] = "AttribValueEndQuote";
-    States[States["AwaitAttribEnd"] = 13] = "AwaitAttribEnd";
-    States[States["AwaitExtraAttribStart"] = 14] = "AwaitExtraAttribStart";
-    States[States["LAST_STATE"] = 15] = "LAST_STATE";
+    States[States["AwaitAttribValueStartQuote"] = 9] = "AwaitAttribValueStartQuote";
+    States[States["GettingAttribValue"] = 10] = "GettingAttribValue";
+    States[States["AttribValueEndQuote"] = 11] = "AttribValueEndQuote";
+    States[States["AwaitAttribEnd"] = 12] = "AwaitAttribEnd";
+    States[States["AwaitExtraAttribStart"] = 13] = "AwaitExtraAttribStart";
+    States[States["LAST_STATE"] = 14] = "LAST_STATE";
 })(States || (States = {}));
 const TransitionTable = {};
 const ActionTable = {};
@@ -829,9 +830,9 @@ function setup_tables() {
         at_on(attrib, Events.LeadLabelChar, attrib, Actions.AppendAttrib);
         at_on(attrib, Events.LabelChar, attrib, Actions.AppendAttrib);
         at_on(attrib, Events.DescendentSeparator, States.AwaitEqualSignOrEnd, Actions.SaveAttrib);
-        at_on(attrib, Events.EqualSign, States.GettingAttribValue, [Actions.SaveAttrib, Actions.ClearAttribValue]);
+        at_on(attrib, Events.EqualSign, States.AwaitAttribValueStartQuote, [Actions.SaveAttrib, Actions.ClearAttribValue]);
         at_on(attrib, Events.RightSqBracket, States.AwaitExtraAttribStart, Actions.SaveAttrib);
-        at_on(attrib, Events.EndInput, attrib, Actions.ErrorInAttribute);
+        at_on(attrib, Events.EndInput, attrib, Actions.ErrorAttribBracketsNotClosed);
     }
     function _await_extra_attrib() {
         let wait_extra = States.AwaitExtraAttribStart;
@@ -840,6 +841,36 @@ function setup_tables() {
         at_on(wait_extra, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.Ignore);
         at_on(wait_extra, Events.ChildSeparator, States.AwaitChildSelector, Actions.Ignore);
         at_on(wait_extra, Events.EndInput, wait_extra, Actions.Ignore);
+    }
+    function _await_attrib_equals() {
+        let waitequ = States.AwaitEqualSignOrEnd;
+        default_for(waitequ, waitequ, Actions.ErrorInAttribute);
+        at_on(waitequ, Events.EqualSign, States.AwaitAttribValueStartQuote, Actions.Ignore);
+        at_on(waitequ, Events.DescendentSeparator, waitequ, Actions.Ignore);
+        at_on(waitequ, Events.EndInput, waitequ, Actions.ErrorAttribBracketsNotClosed);
+    }
+    function _await_attrib_value_start() {
+        let waitquote = States.AwaitAttribValueStartQuote;
+        default_for(waitquote, waitquote, Actions.ErrorAttribValueQuoteMissing);
+        at_on(waitquote, Events.Quote, States.GettingAttribValue, Actions.ClearAttribValue);
+        at_on(waitquote, Events.DescendentSeparator, waitquote, Actions.Ignore);
+    }
+    function _get_attrib_value() {
+        let getvalue = States.GettingAttribValue;
+        default_for(getvalue, getvalue, Actions.ErrorInAttribValue);
+        at_on(getvalue, Events.Quote, States.AwaitAttribEnd, Actions.SaveAttribValue);
+        at_on(getvalue, Events.LeadLabelChar, getvalue, Actions.AppendAttribValue);
+        at_on(getvalue, Events.LabelChar, getvalue, Actions.AppendAttribValue);
+        at_on(getvalue, Events.DescendentSeparator, getvalue, Actions.AppendAttribValue);
+        at_on(getvalue, Events.IdPrefix, getvalue, Actions.AppendAttribValue);
+        at_on(getvalue, Events.ClassPrefix, getvalue, Actions.AppendAttribValue);
+        at_on(getvalue, Events.ChildSeparator, getvalue, Actions.AppendAttribValue);
+    }
+    function _await_attrib_end() {
+        let wait_end = States.AwaitAttribEnd;
+        default_for(wait_end, wait_end, Actions.ErrorAttribBracketsNotClosed);
+        at_on(wait_end, Events.DescendentSeparator, wait_end, Actions.Ignore);
+        at_on(wait_end, Events.RightSqBracket, States.AwaitExtraAttribStart, Actions.Ignore);
     }
     initTable(TransitionTable);
     initTable(ActionTable);
@@ -852,6 +883,10 @@ function setup_tables() {
     _await_attrib_name();
     _attrib_name();
     _await_extra_attrib();
+    _await_attrib_equals();
+    _await_attrib_value_start();
+    _get_attrib_value();
+    _await_attrib_end();
 } //-- setup_tables
 setup_tables();
 function isAlpha(_char) {
@@ -954,12 +989,12 @@ class SelectorLexer {
         });
     }
     error(message) {
-        throw new Error(message);
+        throw new Error(`Error ${message}`);
     }
     general_actions() {
         this._actionLookup[Actions.Ignore] = () => { };
-        this._actionLookup[Actions.ErrorBeforeSelector] = () => this.error(`Error before selector with character '${this._input}'`);
-        this._actionLookup[Actions.ErrorUnexpectedEnd] = () => this.error(`Unexpected end of input.`);
+        this._actionLookup[Actions.ErrorBeforeSelector] = () => this.error(`before selector with character '${this._input}'`);
+        this._actionLookup[Actions.ErrorUnexpectedEnd] = () => this.error(` - unexpected end of input.`);
     }
     tag_actions() {
         this._actionLookup[Actions.ClearTag] = () => this._current._tag = '';
@@ -968,20 +1003,20 @@ class SelectorLexer {
             let tag = this._current._tag;
             this._current._tag = !!tag ? tag.toUpperCase() : '';
         };
-        this._actionLookup[Actions.ErrorInTag] = () => this.error(`Character '${this._input}' not legal in a tag name.`);
-        this._actionLookup[Actions.ErrorAfterTag] = () => this.error(`Character '${this._input}' not legal after a tag name.`);
+        this._actionLookup[Actions.ErrorInTag] = () => this.error(`- character '${this._input}' not legal in a tag name.`);
+        this._actionLookup[Actions.ErrorAfterTag] = () => this.error(`- character '${this._input}' not legal after a tag name.`);
     }
     class_actions() {
         this._actionLookup[Actions.ClearClass] = () => this._current._class = '';
         this._actionLookup[Actions.AppendClass] = () => this._current._class += this._input;
         this._actionLookup[Actions.SaveClass] = () => { };
-        this._actionLookup[Actions.ErrorInClass] = () => this.error(`Error in class at character '${this._input}'`);
+        this._actionLookup[Actions.ErrorInClass] = () => this.error(`in class at character '${this._input}'`);
     }
     id_actions() {
         this._actionLookup[Actions.ClearId] = () => this._current._id = '';
         this._actionLookup[Actions.AppendId] = () => this._current._id += this._input;
         this._actionLookup[Actions.SaveId] = () => { };
-        this._actionLookup[Actions.ErrorInId] = () => this.error(`Error in ID at character '${this._input}'`);
+        this._actionLookup[Actions.ErrorInId] = () => this.error(`in ID at character '${this._input}'`);
     }
     child_actions() {
         this._actionLookup[Actions.NewChild] = () => {
@@ -998,27 +1033,27 @@ class SelectorLexer {
         };
     }
     attrib_actions() {
-        this._actionLookup[Actions.ClearAttrib] = () => {
-            if (this._current._attrib) {
-                let new_attrib = { name: '' };
-                this._current._attrib.push(new_attrib);
-            }
-            else {
-                this._current._attrib = [{ name: '' }];
-            }
-        };
+        this._actionLookup[Actions.ClearAttrib] = () => this.createAttrib();
         this._actionLookup[Actions.AppendAttrib] = () => {
-            if (this._current._attrib) {
-                let list = this._current._attrib;
-                let latest_attrib = list[list.length - 1];
-                latest_attrib.name += this._input;
-            }
-            else {
-                this.error(`Can't append attribute name when record undefined for input: '${this._input}'`);
-            }
+            let attrib = this.getLastAttrib();
+            attrib.name += this._input;
         };
         this._actionLookup[Actions.SaveAttrib] = () => { };
-        this._actionLookup[Actions.ErrorInAttribute] = () => this.error(`Error in attribute name at character '${this._input}'`);
+        this._actionLookup[Actions.ErrorInAttribute] = () => this.error(`in attribute name at character '${this._input}'`);
+        this._actionLookup[Actions.ErrorAttribBracketsNotClosed] = () => this.error(`in attribute: missing ']'`);
+        this._actionLookup[Actions.ErrorAttribValueQuoteMissing] = () => this.error(`in attribute with missing quote (") for attribute value at character '${this._input}'`);
+    }
+    attrib_value_actions() {
+        this._actionLookup[Actions.ClearAttribValue] = () => {
+            let attrib = this.getLastAttrib();
+            attrib.value = '';
+        };
+        this._actionLookup[Actions.AppendAttribValue] = () => {
+            let attrib = this.getLastAttrib();
+            attrib.value += this._input;
+        };
+        this._actionLookup[Actions.SaveAttribValue] = () => { };
+        this._actionLookup[Actions.ErrorInAttribValue] = () => this.error(`in attribute value at character '${this._input}'`);
     }
     setup_actions() {
         this.general_actions();
@@ -1028,6 +1063,28 @@ class SelectorLexer {
         this.child_actions();
         this.descendent_actions();
         this.attrib_actions();
+        this.attrib_value_actions();
+    }
+    createAttrib() {
+        let new_attrib;
+        new_attrib = { name: '' };
+        if (this._current._attrib) {
+            this._current._attrib.push(new_attrib);
+        }
+        else {
+            this._current._attrib = [new_attrib];
+        }
+        return new_attrib;
+    }
+    getLastAttrib() {
+        if (this._current._attrib) {
+            let list = this._current._attrib;
+            let latest_attrib = list[list.length - 1];
+            return latest_attrib;
+        }
+        else {
+            throw new Error(`Can't append attribute name when record undefined for input: '${this._input}'`);
+        }
     }
 }
 
