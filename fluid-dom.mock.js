@@ -684,6 +684,7 @@ var Actions;
     Actions["ErrorInId"] = "ERROR-in-ID";
     Actions["ErrorInAttribute"] = "ERROR-in-attrib";
     Actions["ErrorInAttribValue"] = "ERROR-in-attrib-value";
+    Actions["ErrorUnexpectedEnd"] = "ERROR-unexpected-end-of-input";
     Actions["ClearTag"] = "CLEAR-TAG";
     Actions["AppendTag"] = "APPEND-TAG";
     Actions["SaveTag"] = "SAVE-TAG";
@@ -748,9 +749,10 @@ function setup_tables() {
     function _start() {
         let start = States.StartAwaitSelector;
         default_for(start, start, Actions.ErrorBeforeSelector);
-        at_on(start, Events.LeadLabelChar, States.GettingTag, Actions.ClearTag);
+        at_on(start, Events.LeadLabelChar, States.GettingTag, [Actions.ClearTag, Actions.AppendTag]);
         at_on(start, Events.ClassPrefix, States.GettingClass, Actions.ClearClass);
         at_on(start, Events.IdPrefix, States.GettingId, Actions.ClearId);
+        at_on(start, Events.DescendentSeparator, start, Actions.Ignore);
     }
     function _tag() {
         let tag = States.GettingTag;
@@ -762,6 +764,7 @@ function setup_tables() {
         at_on(tag, Events.ClassPrefix, States.GettingClass, [Actions.SaveTag, Actions.ClearClass]);
         at_on(tag, Events.IdPrefix, States.GettingId, [Actions.SaveTag, Actions.ClearId]);
         at_on(tag, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveTag, Actions.ClearAttrib]);
+        at_on(tag, Events.EndInput, tag, Actions.SaveTag);
     }
     function _id() {
         let id = States.GettingId;
@@ -772,9 +775,10 @@ function setup_tables() {
         at_on(id, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveId);
         at_on(id, Events.ClassPrefix, States.GettingClass, [Actions.SaveId, Actions.ClearClass]);
         at_on(id, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveId, Actions.ClearAttrib]);
+        at_on(id, Events.EndInput, id, Actions.SaveId);
     }
     function _class() {
-        let classState = States.GettingId;
+        let classState = States.GettingClass;
         default_for(classState, classState, Actions.ErrorInClass);
         at_on(classState, Events.LabelChar, classState, Actions.AppendClass);
         at_on(classState, Events.LeadLabelChar, classState, Actions.AppendClass);
@@ -782,6 +786,7 @@ function setup_tables() {
         at_on(classState, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveClass);
         at_on(classState, Events.IdPrefix, States.GettingId, [Actions.SaveClass, Actions.ClearId]);
         at_on(classState, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveClass, Actions.ClearAttrib]);
+        at_on(classState, Events.EndInput, classState, Actions.SaveClass);
     }
     function _descendent() {
         let descend = States.AwaitDescendentSelector;
@@ -792,6 +797,7 @@ function setup_tables() {
         at_on(descend, Events.IdPrefix, States.GettingId, [Actions.NewDescendent, Actions.ClearId]);
         at_on(descend, Events.ClassPrefix, States.GettingClass, [Actions.NewDescendent, Actions.ClearClass]);
         at_on(descend, Events.LeftSqBracket, States.AttribValueStart, [Actions.NewDescendent, Actions.ClearAttrib]);
+        at_on(descend, Events.EndInput, descend, Actions.Ignore);
     }
     function _child() {
         let waitchild = States.AwaitChildSelector;
@@ -802,6 +808,7 @@ function setup_tables() {
         at_on(waitchild, Events.IdPrefix, States.GettingId, [Actions.NewChild, Actions.ClearId, Actions.AppendId]);
         at_on(waitchild, Events.ClassPrefix, States.GettingClass, [Actions.NewChild, Actions.ClearClass, Actions.AppendClass]);
         at_on(waitchild, Events.LeftSqBracket, States.AttribValueStart, [Actions.NewChild, Actions.ClearAttrib]);
+        at_on(waitchild, Events.EndInput, waitchild, Actions.ErrorUnexpectedEnd);
     }
     initTable(TransitionTable);
     initTable(ActionTable);
@@ -814,7 +821,7 @@ function setup_tables() {
 } //-- setup_tables
 setup_tables();
 function isAlpha(_char) {
-    return (_char >= 'a' && _char <= 'z') || (_char >= 'A' || _char <= 'Z');
+    return (_char >= 'a' && _char <= 'z') || (_char >= 'A' && _char <= 'Z');
 }
 function isLabelLead(_char) {
     return _char === '_' || isAlpha(_char);
@@ -848,7 +855,26 @@ function event(_char) {
     }
     return Events.Illegal;
 }
+function has_tag(token) { return !!token._tag; }
+function with_tag(token, callback) {
+    if (!!token._tag) {
+        callback(token._tag);
+    }
+}
+function has_class(token) { return !!token._class; }
+function with_class(token, callback) {
+    if (!!token._class) {
+        callback(token._class);
+    }
+}
+function has_id(token) { return !!token._id; }
+function with_id(token, callback) {
+    if (!!token._id) {
+        callback(token._id);
+    }
+}
 class SelectorLexer {
+    get tokens() { return this._root_token; }
     constructor() {
         this._root_token = {};
         this._current = this._root_token;
@@ -856,22 +882,85 @@ class SelectorLexer {
         this._event = Events.LAST_EVENT;
         this._actions = [Actions.Ignore];
         this._input = '';
+        this._actionLookup = {};
+        this.setup_actions();
     }
-    lex_selector(selector) {
+    lex_selector(selector, debug = false) {
         for (var index = 0; index < selector.length; index++) {
             this._input = selector.charAt(index);
             this._event = event(this._input);
-            this.stimulus();
+            this.stimulus(debug);
         }
+        this._input = '';
+        this._event = Events.EndInput;
+        this.stimulus(debug);
     }
-    stimulus() {
-        let current = this._state;
-        this._state = TransitionTable[this._state][this._event];
+    stimulus(debug) {
+        let next = TransitionTable[this._state][this._event];
         this._actions = ActionTable[this._state][this._event];
-        console.warn(`Stimulus: ${current} =['${this._input}' ${this._event.toString()}]=>${this._state} @ ${this._actions}`);
+        if (debug) {
+            console.warn(`Stimulus: ${this._state} =['${this._input}' ${this._event.toString()}]=>${next} @ ${this._actions}`);
+        }
+        this._state = next;
+        this.perform_actions();
+    }
+    perform_actions() {
+        if (!this._actions) {
+            console.error(`No actions for State: ${this._state} Input: ${this._input}`);
+            return;
+        }
+        this._actions.forEach((_action) => {
+            if (this._actionLookup[_action]) {
+                this._actionLookup[_action]();
+            }
+            else {
+                console.error(`No action handler setup for action ${_action}`);
+            }
+        });
+    }
+    error(message) {
+        throw new Error(message);
+    }
+    general_actions() {
+        this._actionLookup[Actions.Ignore] = () => { };
+        this._actionLookup[Actions.ErrorBeforeSelector] = () => this.error(`Error before selector with character '${this._input}'`);
+        this._actionLookup[Actions.ErrorUnexpectedEnd] = () => this.error(`Unexpected end of input.`);
+    }
+    tag_actions() {
+        this._actionLookup[Actions.ClearTag] = () => this._current._tag = '';
+        this._actionLookup[Actions.AppendTag] = () => this._current._tag += this._input;
+        this._actionLookup[Actions.SaveTag] = () => {
+            let tag = this._current._tag;
+            this._current._tag = !!tag ? tag.toUpperCase() : '';
+        };
+        this._actionLookup[Actions.ErrorInTag] = () => this.error(`Character '${this._input}' not legal in a tag name.`);
+        this._actionLookup[Actions.ErrorAfterTag] = () => this.error(`Character '${this._input}' not legal after a tag name.`);
+    }
+    class_actions() {
+        this._actionLookup[Actions.ClearClass] = () => this._current._class = '';
+        this._actionLookup[Actions.AppendClass] = () => this._current._class += this._input;
+        this._actionLookup[Actions.SaveClass] = () => { };
+        this._actionLookup[Actions.ErrorInClass] = () => this.error(`Error in class at character '${this._input}'`);
+    }
+    id_actions() {
+        this._actionLookup[Actions.ClearId] = () => this._current._id = '';
+        this._actionLookup[Actions.AppendId] = () => this._current._id += this._input;
+        this._actionLookup[Actions.SaveId] = () => { };
+        this._actionLookup[Actions.ErrorInId] = () => this.error(`Error in ID at character '${this._input}'`);
+    }
+    child_actions() {
+        this._actionLookup[Actions.NewChild] = () => {
+            let new_child = {};
+            this._current._child = new_child;
+            this._current = new_child;
+        };
     }
     setup_actions() {
-        // ActionTable[Actions.AppendAttrib]
+        this.general_actions();
+        this.tag_actions();
+        this.class_actions();
+        this.id_actions();
+        this.child_actions();
     }
 }
 
@@ -890,3 +979,9 @@ exports.MockElement = MockElement;
 exports.MockAttributes = MockAttributes;
 exports.MockClasses = MockClasses;
 exports.SelectorLexer = SelectorLexer;
+exports.has_tag = has_tag;
+exports.with_tag = with_tag;
+exports.has_class = has_class;
+exports.with_class = with_class;
+exports.has_id = has_id;
+exports.with_id = with_id;

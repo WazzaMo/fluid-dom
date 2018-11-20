@@ -21,5 +21,11 @@ export { MockClasses } from './mock-classes';
 
 export {
   SelectorToken,
-  SelectorLexer
+  SelectorLexer,
+  has_tag,
+  with_tag,
+  has_class,
+  with_class,
+  has_id,
+  with_id
 } from './selector-lexer';
