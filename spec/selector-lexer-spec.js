@@ -64,7 +64,7 @@ describe('selector-lexer', ()=> {
         expect( lexer.tokens._id ).toEqual('main3');
       });
 
-    });
+    }); // simple id
 
     describe('when handling children: ', ()=> {
 
@@ -83,7 +83,47 @@ describe('selector-lexer', ()=> {
         expect(lexer.tokens._child._tag).toEqual('CHILD');
       });
 
-    });
+      it('must get "PARENT" -> "CHILD" from " parent > child " ', ()=> {
+        lexer.lex_selector(' parent > child ');
+        expect(lexer.tokens._tag).toEqual('PARENT');
+        expect(lexer.tokens._child).toBeDefined();
+        expect(lexer.tokens._child._tag).toEqual('CHILD');
+      });
+
+    }); // parent child
+
+    describe('when handling descendents: ', ()=> {
+
+      it('must get "PARENT" ->-> "DESCENDENT" from "parent descendent" ', ()=> {
+        lexer.lex_selector('parent descendent');
+        expect(lexer.tokens._tag).toEqual('PARENT');
+        expect(lexer.tokens._descendent).toBeDefined();
+        expect(lexer.tokens._descendent._tag).toEqual('DESCENDENT');
+      });
+
+      it('must get "PARENT" ->-> "DESCENDENT" from " parent  descendent " ', ()=> {
+        lexer.lex_selector(' parent  descendent ');
+        expect(lexer.tokens._tag).toEqual('PARENT');
+        expect(lexer.tokens._descendent).toBeDefined();
+        expect(lexer.tokens._descendent._tag).toEqual('DESCENDENT');
+      });
+
+    }); // descendent
+
+    describe('when handling attribute names: ', ()=> {
+
+      it('must get attrib name "main" from "[main]" :', ()=> {
+        lexer.lex_selector('[main]');
+        expect(lexer.tokens._attrib[0].name).toEqual('main');
+      });
+
+      it('must multiple attribute names :', ()=> {
+        lexer.lex_selector('[main][then]');
+        expect(lexer.tokens._attrib[0].name).toEqual('main');
+        expect(lexer.tokens._attrib[1].name).toEqual('then');
+      });
+
+    }); // attributes
 
   }); //-- lex_selector()
 

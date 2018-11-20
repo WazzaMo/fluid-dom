@@ -685,6 +685,7 @@ var Actions;
     Actions["ErrorInAttribute"] = "ERROR-in-attrib";
     Actions["ErrorInAttribValue"] = "ERROR-in-attrib-value";
     Actions["ErrorUnexpectedEnd"] = "ERROR-unexpected-end-of-input";
+    Actions["ErrorMultipleChildSeparators"] = "ERROR-too-many-child-separators";
     Actions["ClearTag"] = "CLEAR-TAG";
     Actions["AppendTag"] = "APPEND-TAG";
     Actions["SaveTag"] = "SAVE-TAG";
@@ -711,12 +712,16 @@ var States;
     States[States["GettingId"] = 3] = "GettingId";
     States[States["AwaitDescendentSelector"] = 4] = "AwaitDescendentSelector";
     States[States["AwaitChildSelector"] = 5] = "AwaitChildSelector";
-    States[States["GettingAttribName"] = 6] = "GettingAttribName";
-    States[States["AwaitAttribValueOrEnd"] = 7] = "AwaitAttribValueOrEnd";
-    States[States["AttribValueStart"] = 8] = "AttribValueStart";
-    States[States["GettingAttribValue"] = 9] = "GettingAttribValue";
-    States[States["AwaitAttribEnd"] = 10] = "AwaitAttribEnd";
-    States[States["LAST_STATE"] = 11] = "LAST_STATE";
+    States[States["AwaitAttribName"] = 6] = "AwaitAttribName";
+    States[States["GettingAttribName"] = 7] = "GettingAttribName";
+    States[States["AwaitEqualSignOrEnd"] = 8] = "AwaitEqualSignOrEnd";
+    States[States["AwaitAttribValue"] = 9] = "AwaitAttribValue";
+    States[States["AttribValueStartQuote"] = 10] = "AttribValueStartQuote";
+    States[States["GettingAttribValue"] = 11] = "GettingAttribValue";
+    States[States["AttribValueEndQuote"] = 12] = "AttribValueEndQuote";
+    States[States["AwaitAttribEnd"] = 13] = "AwaitAttribEnd";
+    States[States["AwaitExtraAttribStart"] = 14] = "AwaitExtraAttribStart";
+    States[States["LAST_STATE"] = 15] = "LAST_STATE";
 })(States || (States = {}));
 const TransitionTable = {};
 const ActionTable = {};
@@ -753,6 +758,7 @@ function setup_tables() {
         at_on(start, Events.ClassPrefix, States.GettingClass, Actions.ClearClass);
         at_on(start, Events.IdPrefix, States.GettingId, Actions.ClearId);
         at_on(start, Events.DescendentSeparator, start, Actions.Ignore);
+        at_on(start, Events.LeftSqBracket, States.AwaitAttribName, Actions.Ignore);
     }
     function _tag() {
         let tag = States.GettingTag;
@@ -763,7 +769,7 @@ function setup_tables() {
         at_on(tag, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveTag);
         at_on(tag, Events.ClassPrefix, States.GettingClass, [Actions.SaveTag, Actions.ClearClass]);
         at_on(tag, Events.IdPrefix, States.GettingId, [Actions.SaveTag, Actions.ClearId]);
-        at_on(tag, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveTag, Actions.ClearAttrib]);
+        at_on(tag, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveTag);
         at_on(tag, Events.EndInput, tag, Actions.SaveTag);
     }
     function _id() {
@@ -774,7 +780,7 @@ function setup_tables() {
         at_on(id, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SaveId);
         at_on(id, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveId);
         at_on(id, Events.ClassPrefix, States.GettingClass, [Actions.SaveId, Actions.ClearClass]);
-        at_on(id, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveId, Actions.ClearAttrib]);
+        at_on(id, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveId);
         at_on(id, Events.EndInput, id, Actions.SaveId);
     }
     function _class() {
@@ -785,7 +791,7 @@ function setup_tables() {
         at_on(classState, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SaveClass);
         at_on(classState, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveClass);
         at_on(classState, Events.IdPrefix, States.GettingId, [Actions.SaveClass, Actions.ClearId]);
-        at_on(classState, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveClass, Actions.ClearAttrib]);
+        at_on(classState, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveClass);
         at_on(classState, Events.EndInput, classState, Actions.SaveClass);
     }
     function _descendent() {
@@ -796,19 +802,44 @@ function setup_tables() {
         at_on(descend, Events.LeadLabelChar, States.GettingTag, [Actions.NewDescendent, Actions.ClearTag, Actions.AppendTag]);
         at_on(descend, Events.IdPrefix, States.GettingId, [Actions.NewDescendent, Actions.ClearId]);
         at_on(descend, Events.ClassPrefix, States.GettingClass, [Actions.NewDescendent, Actions.ClearClass]);
-        at_on(descend, Events.LeftSqBracket, States.AttribValueStart, [Actions.NewDescendent, Actions.ClearAttrib]);
+        at_on(descend, Events.LeftSqBracket, States.AwaitAttribName, Actions.NewDescendent);
         at_on(descend, Events.EndInput, descend, Actions.Ignore);
     }
     function _child() {
         let waitchild = States.AwaitChildSelector;
         default_for(waitchild, waitchild, Actions.ErrorBeforeSelector);
-        at_on(waitchild, Events.ChildSeparator, waitchild, Actions.Ignore);
+        at_on(waitchild, Events.ChildSeparator, waitchild, Actions.ErrorMultipleChildSeparators);
         at_on(waitchild, Events.DescendentSeparator, waitchild, Actions.Ignore);
         at_on(waitchild, Events.LeadLabelChar, States.GettingTag, [Actions.NewChild, Actions.ClearTag, Actions.AppendTag]);
         at_on(waitchild, Events.IdPrefix, States.GettingId, [Actions.NewChild, Actions.ClearId, Actions.AppendId]);
         at_on(waitchild, Events.ClassPrefix, States.GettingClass, [Actions.NewChild, Actions.ClearClass, Actions.AppendClass]);
-        at_on(waitchild, Events.LeftSqBracket, States.AttribValueStart, [Actions.NewChild, Actions.ClearAttrib]);
+        at_on(waitchild, Events.LeftSqBracket, States.AwaitAttribName, Actions.NewChild);
         at_on(waitchild, Events.EndInput, waitchild, Actions.ErrorUnexpectedEnd);
+    }
+    function _await_attrib_name() {
+        let wait_attrib = States.AwaitAttribName;
+        default_for(wait_attrib, wait_attrib, Actions.ErrorInAttribute);
+        at_on(wait_attrib, Events.LeadLabelChar, States.GettingAttribName, [Actions.ClearAttrib, Actions.AppendAttrib]);
+        at_on(wait_attrib, Events.DescendentSeparator, wait_attrib, Actions.Ignore);
+        at_on(wait_attrib, Events.EndInput, wait_attrib, Actions.ErrorInAttribute);
+    }
+    function _attrib_name() {
+        let attrib = States.GettingAttribName;
+        default_for(attrib, States.StartAwaitSelector, Actions.ErrorInAttribute);
+        at_on(attrib, Events.LeadLabelChar, attrib, Actions.AppendAttrib);
+        at_on(attrib, Events.LabelChar, attrib, Actions.AppendAttrib);
+        at_on(attrib, Events.DescendentSeparator, States.AwaitEqualSignOrEnd, Actions.SaveAttrib);
+        at_on(attrib, Events.EqualSign, States.GettingAttribValue, [Actions.SaveAttrib, Actions.ClearAttribValue]);
+        at_on(attrib, Events.RightSqBracket, States.AwaitExtraAttribStart, Actions.SaveAttrib);
+        at_on(attrib, Events.EndInput, attrib, Actions.ErrorInAttribute);
+    }
+    function _await_extra_attrib() {
+        let wait_extra = States.AwaitExtraAttribStart;
+        default_for(wait_extra, wait_extra, Actions.ErrorBeforeSelector);
+        at_on(wait_extra, Events.LeftSqBracket, States.AwaitAttribName, Actions.Ignore);
+        at_on(wait_extra, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.Ignore);
+        at_on(wait_extra, Events.ChildSeparator, States.AwaitChildSelector, Actions.Ignore);
+        at_on(wait_extra, Events.EndInput, wait_extra, Actions.Ignore);
     }
     initTable(TransitionTable);
     initTable(ActionTable);
@@ -818,6 +849,9 @@ function setup_tables() {
     _class();
     _descendent();
     _child();
+    _await_attrib_name();
+    _attrib_name();
+    _await_extra_attrib();
 } //-- setup_tables
 setup_tables();
 function isAlpha(_char) {
@@ -873,6 +907,7 @@ function with_id(token, callback) {
         callback(token._id);
     }
 }
+// --------- Token -------------
 class SelectorLexer {
     get tokens() { return this._root_token; }
     constructor() {
@@ -955,12 +990,44 @@ class SelectorLexer {
             this._current = new_child;
         };
     }
+    descendent_actions() {
+        this._actionLookup[Actions.NewDescendent] = () => {
+            let new_descendent = {};
+            this._current._descendent = new_descendent;
+            this._current = new_descendent;
+        };
+    }
+    attrib_actions() {
+        this._actionLookup[Actions.ClearAttrib] = () => {
+            if (this._current._attrib) {
+                let new_attrib = { name: '' };
+                this._current._attrib.push(new_attrib);
+            }
+            else {
+                this._current._attrib = [{ name: '' }];
+            }
+        };
+        this._actionLookup[Actions.AppendAttrib] = () => {
+            if (this._current._attrib) {
+                let list = this._current._attrib;
+                let latest_attrib = list[list.length - 1];
+                latest_attrib.name += this._input;
+            }
+            else {
+                this.error(`Can't append attribute name when record undefined for input: '${this._input}'`);
+            }
+        };
+        this._actionLookup[Actions.SaveAttrib] = () => { };
+        this._actionLookup[Actions.ErrorInAttribute] = () => this.error(`Error in attribute name at character '${this._input}'`);
+    }
     setup_actions() {
         this.general_actions();
         this.tag_actions();
         this.class_actions();
         this.id_actions();
         this.child_actions();
+        this.descendent_actions();
+        this.attrib_actions();
     }
 }
 

@@ -8,6 +8,7 @@ export declare enum Actions {
     ErrorInAttribute = "ERROR-in-attrib",
     ErrorInAttribValue = "ERROR-in-attrib-value",
     ErrorUnexpectedEnd = "ERROR-unexpected-end-of-input",
+    ErrorMultipleChildSeparators = "ERROR-too-many-child-separators",
     ClearTag = "CLEAR-TAG",
     AppendTag = "APPEND-TAG",
     SaveTag = "SAVE-TAG",
@@ -26,14 +27,15 @@ export declare enum Actions {
     NewChild = "NEW-CHILD-SELECTOR",
     NewDescendent = "NEW-DESCENDENT-SELECTOR"
 }
+export interface AttribInfo {
+    name: string;
+    value?: string;
+}
 export interface SelectorToken {
     _tag?: string;
     _class?: string;
     _id?: string;
-    _attrib?: {
-        name: string;
-        value?: string;
-    };
+    _attrib?: Array<AttribInfo>;
     _child?: SelectorToken;
     _descendent?: SelectorToken;
 }
@@ -62,5 +64,7 @@ export declare class SelectorLexer {
     private class_actions;
     private id_actions;
     private child_actions;
+    private descendent_actions;
+    private attrib_actions;
     private setup_actions;
 }

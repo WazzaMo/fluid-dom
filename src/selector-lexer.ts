@@ -48,6 +48,7 @@ export enum Actions {
   ErrorInAttribute = 'ERROR-in-attrib',
   ErrorInAttribValue = 'ERROR-in-attrib-value',
   ErrorUnexpectedEnd = 'ERROR-unexpected-end-of-input',
+  ErrorMultipleChildSeparators = 'ERROR-too-many-child-separators',
 
   ClearTag = 'CLEAR-TAG',
   AppendTag = 'APPEND-TAG',
@@ -80,11 +81,16 @@ enum States {
   GettingId,
   AwaitDescendentSelector,
   AwaitChildSelector,
+  AwaitAttribName,
   GettingAttribName,
-  AwaitAttribValueOrEnd,
-  AttribValueStart,
+
+  AwaitEqualSignOrEnd,
+  AwaitAttribValue,
+  AttribValueStartQuote,
   GettingAttribValue,
+  AttribValueEndQuote,
   AwaitAttribEnd,
+  AwaitExtraAttribStart,
 
   LAST_STATE
 }
@@ -134,6 +140,7 @@ function setup_tables() {
     at_on(start, Events.ClassPrefix, States.GettingClass, Actions.ClearClass);
     at_on(start, Events.IdPrefix, States.GettingId, Actions.ClearId);
     at_on(start, Events.DescendentSeparator, start, Actions.Ignore);
+    at_on(start, Events.LeftSqBracket, States.AwaitAttribName, Actions.Ignore);
   }
 
   function _tag() {
@@ -145,7 +152,7 @@ function setup_tables() {
     at_on(tag, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveTag);
     at_on(tag, Events.ClassPrefix, States.GettingClass, [Actions.SaveTag, Actions.ClearClass]);
     at_on(tag, Events.IdPrefix, States.GettingId, [Actions.SaveTag, Actions.ClearId]);
-    at_on(tag, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveTag, Actions.ClearAttrib]);
+    at_on(tag, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveTag);
     at_on(tag, Events.EndInput, tag, Actions.SaveTag);
   }
 
@@ -157,7 +164,7 @@ function setup_tables() {
     at_on(id, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SaveId);
     at_on(id, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveId);
     at_on(id, Events.ClassPrefix, States.GettingClass, [Actions.SaveId, Actions.ClearClass]);
-    at_on(id, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveId, Actions.ClearAttrib]);
+    at_on(id, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveId);
     at_on(id, Events.EndInput, id, Actions.SaveId);
   }
 
@@ -169,7 +176,7 @@ function setup_tables() {
     at_on(classState, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SaveClass);
     at_on(classState, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveClass);
     at_on(classState, Events.IdPrefix, States.GettingId, [Actions.SaveClass, Actions.ClearId]);
-    at_on(classState, Events.LeftSqBracket, States.GettingAttribName, [Actions.SaveClass, Actions.ClearAttrib]);
+    at_on(classState, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveClass);
     at_on(classState, Events.EndInput, classState, Actions.SaveClass);
   }
 
@@ -181,26 +188,48 @@ function setup_tables() {
     at_on(descend, Events.LeadLabelChar, States.GettingTag, [Actions.NewDescendent, Actions.ClearTag, Actions.AppendTag]);
     at_on(descend, Events.IdPrefix, States.GettingId, [Actions.NewDescendent, Actions.ClearId]);
     at_on(descend, Events.ClassPrefix, States.GettingClass, [Actions.NewDescendent, Actions.ClearClass]);
-    at_on(descend, Events.LeftSqBracket, States.AttribValueStart, [Actions.NewDescendent, Actions.ClearAttrib]);
+    at_on(descend, Events.LeftSqBracket, States.AwaitAttribName, Actions.NewDescendent);
     at_on(descend, Events.EndInput, descend, Actions.Ignore);
   }
 
   function _child() {
     let waitchild = States.AwaitChildSelector;
     default_for(waitchild, waitchild, Actions.ErrorBeforeSelector);
-    at_on(waitchild, Events.ChildSeparator, waitchild, Actions.Ignore);
+    at_on(waitchild, Events.ChildSeparator, waitchild, Actions.ErrorMultipleChildSeparators);
     at_on(waitchild, Events.DescendentSeparator, waitchild, Actions.Ignore);
     at_on(waitchild, Events.LeadLabelChar, States.GettingTag, [Actions.NewChild, Actions.ClearTag, Actions.AppendTag]);
     at_on(waitchild, Events.IdPrefix, States.GettingId, [Actions.NewChild, Actions.ClearId, Actions.AppendId]);
     at_on(waitchild, Events.ClassPrefix, States.GettingClass, [Actions.NewChild, Actions.ClearClass, Actions.AppendClass]);
-    at_on(waitchild, Events.LeftSqBracket, States.AttribValueStart, [Actions.NewChild, Actions.ClearAttrib]);
+    at_on(waitchild, Events.LeftSqBracket, States.AwaitAttribName, Actions.NewChild);
     at_on(waitchild, Events.EndInput, waitchild, Actions.ErrorUnexpectedEnd);
   }
 
+  function _await_attrib_name() {
+    let wait_attrib = States.AwaitAttribName;
+    default_for(wait_attrib, wait_attrib, Actions.ErrorInAttribute);
+    at_on(wait_attrib, Events.LeadLabelChar, States.GettingAttribName, [Actions.ClearAttrib, Actions.AppendAttrib]);
+    at_on(wait_attrib, Events.DescendentSeparator, wait_attrib, Actions.Ignore);
+    at_on(wait_attrib, Events.EndInput, wait_attrib, Actions.ErrorInAttribute);
+  }
+
   function _attrib_name() {
-    let attrib = States.AttribValueStart;
+    let attrib = States.GettingAttribName;
     default_for(attrib, States.StartAwaitSelector, Actions.ErrorInAttribute);
-    // at_on()
+    at_on(attrib, Events.LeadLabelChar, attrib, Actions.AppendAttrib);
+    at_on(attrib, Events.LabelChar, attrib, Actions.AppendAttrib);
+    at_on(attrib, Events.DescendentSeparator, States.AwaitEqualSignOrEnd, Actions.SaveAttrib);
+    at_on(attrib, Events.EqualSign, States.GettingAttribValue, [Actions.SaveAttrib, Actions.ClearAttribValue]);
+    at_on(attrib, Events.RightSqBracket, States.AwaitExtraAttribStart, Actions.SaveAttrib);
+    at_on(attrib, Events.EndInput, attrib, Actions.ErrorInAttribute);
+  }
+
+  function _await_extra_attrib() {
+    let wait_extra = States.AwaitExtraAttribStart;
+    default_for(wait_extra, wait_extra, Actions.ErrorBeforeSelector);
+    at_on(wait_extra, Events.LeftSqBracket, States.AwaitAttribName, Actions.Ignore);
+    at_on(wait_extra, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.Ignore);
+    at_on(wait_extra, Events.ChildSeparator, States.AwaitChildSelector, Actions.Ignore);
+    at_on(wait_extra, Events.EndInput, wait_extra, Actions.Ignore);
   }
 
   initTable(TransitionTable);
@@ -211,6 +240,9 @@ function setup_tables() {
   _class();
   _descendent();
   _child();
+  _await_attrib_name();
+  _attrib_name();
+  _await_extra_attrib();
 } //-- setup_tables
 
 setup_tables();
@@ -255,17 +287,21 @@ function event(_char: string) : number {
   return Events.Illegal;
 }
 
+// --------- Token --------
+export interface AttribInfo {
+  name : string;
+  value ?: string;
+}
+
 export interface SelectorToken {
   _tag ?: string;
   _class ?: string;
   _id ?: string;
-  _attrib ?: {
-    name : string;
-    value ?: string;
-  }
+  _attrib ?: Array<AttribInfo>;
   _child ?: SelectorToken;
   _descendent ?: SelectorToken;
 }
+
 
 export function has_tag(token: SelectorToken)  : boolean { return !! token._tag; }
 export function with_tag(token: SelectorToken, callback: (tag:string)=> void) : void {
@@ -287,6 +323,8 @@ export function with_id(token: SelectorToken, callback: (id: string) => void ) :
     callback(token._id);
   }
 }
+// --------- Token -------------
+
 
 export class SelectorLexer {
   private _root_token: SelectorToken;
@@ -390,11 +428,43 @@ export class SelectorLexer {
     }
   }
 
+  private descendent_actions() : void {
+    this._actionLookup[Actions.NewDescendent] = () => {
+      let new_descendent = {};
+      this._current._descendent = new_descendent;
+      this._current = new_descendent;
+    }
+  }
+
+  private attrib_actions() : void {
+    this._actionLookup[Actions.ClearAttrib] = ()=> {
+      if (this._current._attrib) {
+        let new_attrib : AttribInfo = { name: ''};
+        this._current._attrib.push(new_attrib);
+      } else {
+        this._current._attrib = [{name: ''}];
+      }
+    };
+    this._actionLookup[Actions.AppendAttrib] = ()=> {
+      if (this._current._attrib) {
+        let list = this._current._attrib;
+        let latest_attrib = list[list.length - 1];
+        latest_attrib.name += this._input;
+      } else {
+        this.error(`Can't append attribute name when record undefined for input: '${this._input}'`);
+      }
+    };
+    this._actionLookup[Actions.SaveAttrib] = ()=> {};
+    this._actionLookup[Actions.ErrorInAttribute] = ()=> this.error(`Error in attribute name at character '${this._input}'`);
+  }
+
   private setup_actions() : void {
     this.general_actions();
     this.tag_actions();
     this.class_actions();
     this.id_actions();
     this.child_actions();
+    this.descendent_actions();
+    this.attrib_actions();
   }
 }
