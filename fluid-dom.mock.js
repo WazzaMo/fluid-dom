@@ -951,6 +951,9 @@ function event(_char) {
     return Events.OtherSymbol;
 }
 // --------- Token -------------
+/**
+ * A Lexical Analyser for CSS Selectors.
+ */
 class SelectorLexer {
     get tokens() { return this._selector_set; }
     constructor() {

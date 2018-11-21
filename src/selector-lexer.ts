@@ -365,6 +365,14 @@ export interface AttribInfo {
   value ?: string;
 }
 
+/**
+ * Represents a given selector or linked-list of selectors
+ * in the case of:
+ * - child selectors
+ * - descendent selectors (indirect children)
+ * - adjacent sibling combinator selectors
+ * - general sibling combinator selectors (indirect sibling)
+ */
 export interface SelectorToken {
   _tag ?: string;
   _class ?: string;
@@ -372,11 +380,15 @@ export interface SelectorToken {
   _attrib ?: Array<AttribInfo>;
   _child ?: SelectorToken;
   _descendent ?: SelectorToken;
+  _adjacent_sibling ?: SelectorToken;
+  _general_sibling ?: SelectorToken;
 }
 
 // --------- Token -------------
 
-
+/**
+ * A Lexical Analyser for CSS Selectors.
+ */
 export class SelectorLexer {
   private _selector_set: Array< SelectorToken >;
   private _current: SelectorToken;
