@@ -11,6 +11,7 @@ export declare enum Actions {
     ErrorMultipleChildSeparators = "ERROR-too-many-child-separators",
     ErrorAttribBracketsNotClosed = "ERROR-attribute-bracket-missing",
     ErrorAttribValueQuoteMissing = "ERROR-attrib-value-quote-missing",
+    ErrorIncompleteSelectorList = "ERROR-incomplete-selector-list",
     ClearTag = "CLEAR-TAG",
     AppendTag = "APPEND-TAG",
     SaveTag = "SAVE-TAG",
@@ -27,7 +28,8 @@ export declare enum Actions {
     AppendAttribValue = "APPEND-VALUE",
     SaveAttribValue = "SAVE-VALUE",
     NewChild = "NEW-CHILD-SELECTOR",
-    NewDescendent = "NEW-DESCENDENT-SELECTOR"
+    NewDescendent = "NEW-DESCENDENT-SELECTOR",
+    NewSelectorInSet = "NEW-SELECTOR-IN-SET"
 }
 export interface AttribInfo {
     name: string;
@@ -41,32 +43,29 @@ export interface SelectorToken {
     _child?: SelectorToken;
     _descendent?: SelectorToken;
 }
-export declare function has_tag(token: SelectorToken): boolean;
-export declare function with_tag(token: SelectorToken, callback: (tag: string) => void): void;
-export declare function has_class(token: SelectorToken): boolean;
-export declare function with_class(token: SelectorToken, callback: (_class: string) => void): void;
-export declare function has_id(token: SelectorToken): boolean;
-export declare function with_id(token: SelectorToken, callback: (id: string) => void): void;
 export declare class SelectorLexer {
-    private _root_token;
+    private _selector_set;
     private _current;
     private _state;
     private _event;
     private _actions;
     private _input;
     private _actionLookup;
-    readonly tokens: SelectorToken;
+    readonly tokens: Array<SelectorToken>;
     constructor();
     lex_selector(selector: string, debug?: boolean): void;
     private stimulus;
     private perform_actions;
     private error;
+    private current;
+    private extend_selector_set;
     private general_actions;
     private tag_actions;
     private class_actions;
     private id_actions;
     private child_actions;
     private descendent_actions;
+    private selector_set_actions;
     private attrib_actions;
     private attrib_value_actions;
     private setup_actions;

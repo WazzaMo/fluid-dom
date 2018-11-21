@@ -23,6 +23,7 @@ import { timingSafeEqual } from "crypto";
 
 
 enum Events {
+  SelectorSeparator, // ','
   LeadLabelChar,
   LabelChar,
   ChildSeparator,
@@ -35,6 +36,7 @@ enum Events {
   Quote,
   EndInput,
   Illegal,
+  OtherSymbol, // $ % ! ^ * ( ) etc.
 
   LAST_EVENT
 }
@@ -52,6 +54,8 @@ export enum Actions {
   ErrorMultipleChildSeparators = 'ERROR-too-many-child-separators',
   ErrorAttribBracketsNotClosed = 'ERROR-attribute-bracket-missing',
   ErrorAttribValueQuoteMissing = 'ERROR-attrib-value-quote-missing',
+
+  ErrorIncompleteSelectorList = 'ERROR-incomplete-selector-list',
 
   ClearTag = 'CLEAR-TAG',
   AppendTag = 'APPEND-TAG',
@@ -74,7 +78,8 @@ export enum Actions {
   SaveAttribValue = 'SAVE-VALUE',
 
   NewChild = 'NEW-CHILD-SELECTOR',
-  NewDescendent = 'NEW-DESCENDENT-SELECTOR'
+  NewDescendent = 'NEW-DESCENDENT-SELECTOR',
+  NewSelectorInSet = 'NEW-SELECTOR-IN-SET'
 }
 
 enum States {
@@ -93,6 +98,8 @@ enum States {
   AttribValueEndQuote,
   AwaitAttribEnd,
   AwaitExtraAttribStart,
+
+  GotSelectorSeparatorAwaitNewSelector,
 
   LAST_STATE
 }
@@ -145,6 +152,17 @@ function setup_tables() {
     at_on(start, Events.LeftSqBracket, States.AwaitAttribName, Actions.Ignore);
   }
 
+  function _start_new_selector_in_set() {
+    let new_sel = States.GotSelectorSeparatorAwaitNewSelector;
+    default_for(new_sel, new_sel, Actions.ErrorBeforeSelector);
+    at_on(new_sel, Events.LeadLabelChar, States.GettingTag, [Actions.ClearTag, Actions.AppendTag]);
+    at_on(new_sel, Events.ClassPrefix, States.GettingClass, Actions.ClearClass);
+    at_on(new_sel, Events.IdPrefix, States.GettingId, Actions.ClearId);
+    at_on(new_sel, Events.DescendentSeparator, new_sel, Actions.Ignore);
+    at_on(new_sel, Events.LeftSqBracket, States.AwaitAttribName, Actions.Ignore);
+    at_on(new_sel, Events.EndInput, new_sel, Actions.ErrorIncompleteSelectorList);
+  }
+
   function _tag() {
     let tag = States.GettingTag;
     default_for(tag, tag, Actions.ErrorInTag);
@@ -156,6 +174,7 @@ function setup_tables() {
     at_on(tag, Events.IdPrefix, States.GettingId, [Actions.SaveTag, Actions.ClearId]);
     at_on(tag, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveTag);
     at_on(tag, Events.EndInput, tag, Actions.SaveTag);
+    at_on(tag, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SaveTag, Actions.NewSelectorInSet]);
   }
 
   function _id() {
@@ -168,6 +187,7 @@ function setup_tables() {
     at_on(id, Events.ClassPrefix, States.GettingClass, [Actions.SaveId, Actions.ClearClass]);
     at_on(id, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveId);
     at_on(id, Events.EndInput, id, Actions.SaveId);
+    at_on(id, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SaveId, Actions.NewSelectorInSet]);
   }
 
   function _class() {
@@ -180,6 +200,7 @@ function setup_tables() {
     at_on(classState, Events.IdPrefix, States.GettingId, [Actions.SaveClass, Actions.ClearId]);
     at_on(classState, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveClass);
     at_on(classState, Events.EndInput, classState, Actions.SaveClass);
+    at_on(classState, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SaveClass, Actions.NewSelectorInSet]);
   }
 
   function _descendent() {
@@ -192,6 +213,9 @@ function setup_tables() {
     at_on(descend, Events.ClassPrefix, States.GettingClass, [Actions.NewDescendent, Actions.ClearClass]);
     at_on(descend, Events.LeftSqBracket, States.AwaitAttribName, Actions.NewDescendent);
     at_on(descend, Events.EndInput, descend, Actions.Ignore);
+
+    // not a descendent after all..
+    at_on(descend, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, Actions.NewSelectorInSet);
   }
 
   function _child() {
@@ -259,6 +283,8 @@ function setup_tables() {
     at_on(getvalue, Events.IdPrefix, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.ClassPrefix, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.ChildSeparator, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.OtherSymbol, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.SelectorSeparator, getvalue, Actions.AppendAttribValue);
   }
 
   function _await_attrib_end() {
@@ -271,6 +297,7 @@ function setup_tables() {
   initTable(TransitionTable);
   initTable(ActionTable);
   _start();
+  _start_new_selector_in_set();
   _tag();
   _id();
   _class();
@@ -323,8 +350,13 @@ function event(_char: string) : number {
     case '\t': return Events.DescendentSeparator;
     case '>': return Events.ChildSeparator;
     case '"': return Events.Quote;
+    case ',': return Events.SelectorSeparator;
+
+    case '\n':
+    case '\b':
+      return Events.Illegal;
   }
-  return Events.Illegal;
+  return Events.OtherSymbol;
 }
 
 // --------- Token --------
@@ -342,32 +374,11 @@ export interface SelectorToken {
   _descendent ?: SelectorToken;
 }
 
-
-export function has_tag(token: SelectorToken)  : boolean { return !! token._tag; }
-export function with_tag(token: SelectorToken, callback: (tag:string)=> void) : void {
-  if (!!token._tag) {
-    callback(token._tag);
-  }
-}
-
-export function has_class(token: SelectorToken) : boolean { return !! token._class; }
-export function with_class(token: SelectorToken, callback: (_class: string) => void ) : void {
-  if (!! token._class) {
-    callback(token._class);
-  }
-}
-
-export function has_id(token: SelectorToken) : boolean { return !! token._id; }
-export function with_id(token: SelectorToken, callback: (id: string) => void ) : void {
-  if (!! token._id) {
-    callback(token._id);
-  }
-}
 // --------- Token -------------
 
 
 export class SelectorLexer {
-  private _root_token: SelectorToken;
+  private _selector_set: Array< SelectorToken >;
   private _current: SelectorToken;
   private _state: number;
   private _event: number;
@@ -377,11 +388,11 @@ export class SelectorLexer {
     [action: string]: () => void
   }
 
-  get tokens() : SelectorToken { return this._root_token; }
+  get tokens() : Array<SelectorToken> { return this._selector_set; }
 
   constructor() {
-    this._root_token = {};
-    this._current = this._root_token;
+    this._selector_set = [{}];
+    this._current = this._selector_set[0];
     this._state = States.StartAwaitSelector;
     this._event = Events.LAST_EVENT;
     this._actions = [Actions.Ignore];
@@ -429,6 +440,19 @@ export class SelectorLexer {
     throw new Error(`Error ${message}`);
   }
 
+  private current( new_token?: SelectorToken) : SelectorToken {
+    if (!! new_token) {
+      this._current = new_token;
+    }
+    return this._current;
+  }
+
+  private extend_selector_set() : void {
+    let new_token : SelectorToken = {};
+    this._selector_set.push(new_token);
+    this.current(new_token);
+  }
+
   private general_actions() : void {
     this._actionLookup[Actions.Ignore] = ()=> {};
     this._actionLookup[Actions.ErrorBeforeSelector] = () => this.error(`before selector with character '${this._input}'`);
@@ -436,26 +460,26 @@ export class SelectorLexer {
   }
 
   private tag_actions() : void {
-    this._actionLookup[Actions.ClearTag] = () => this._current._tag = '';
-    this._actionLookup[Actions.AppendTag] = () => this._current._tag += this._input;
+    this._actionLookup[Actions.ClearTag] = () => this.current()._tag = '';
+    this._actionLookup[Actions.AppendTag] = () => this.current()._tag += this._input;
     this._actionLookup[Actions.SaveTag] = () => {
-      let tag = this._current._tag;
-      this._current._tag = !!tag ? tag.toUpperCase() : '';
+      let tag = this.current()._tag;
+      this.current()._tag = !!tag ? tag.toUpperCase() : '';
     };
     this._actionLookup[Actions.ErrorInTag] = () => this.error(`- character '${this._input}' not legal in a tag name.`);
     this._actionLookup[Actions.ErrorAfterTag] = () => this.error(`- character '${this._input}' not legal after a tag name.`);
   }
 
   private class_actions() : void {
-    this._actionLookup[Actions.ClearClass] = () => this._current._class = '';
-    this._actionLookup[Actions.AppendClass] = () => this._current._class += this._input;
+    this._actionLookup[Actions.ClearClass] = () => this.current()._class = '';
+    this._actionLookup[Actions.AppendClass] = () => this.current()._class += this._input;
     this._actionLookup[Actions.SaveClass] = () => {};
     this._actionLookup[Actions.ErrorInClass] = () => this.error(`in class at character '${this._input}'`);
   }
 
   private id_actions() : void {
-    this._actionLookup[Actions.ClearId] = () => this._current._id = '';
-    this._actionLookup[Actions.AppendId] = ()=> this._current._id += this._input;
+    this._actionLookup[Actions.ClearId] = () => this.current()._id = '';
+    this._actionLookup[Actions.AppendId] = ()=> this.current()._id += this._input;
     this._actionLookup[Actions.SaveId] = () => {};
     this._actionLookup[Actions.ErrorInId] = () => this.error(`in ID at character '${this._input}'`);
   }
@@ -463,17 +487,22 @@ export class SelectorLexer {
   private child_actions() : void {
     this._actionLookup[Actions.NewChild] = ()=> {
       let new_child = {};
-      this._current._child = new_child;
-      this._current = new_child;
+      this.current()._child = new_child;
+      this.current( new_child );
     }
   }
 
   private descendent_actions() : void {
     this._actionLookup[Actions.NewDescendent] = () => {
       let new_descendent = {};
-      this._current._descendent = new_descendent;
-      this._current = new_descendent;
+      this.current()._descendent = new_descendent;
+      this.current(new_descendent);
     }
+  }
+
+  private selector_set_actions() : void {
+    this._actionLookup[Actions.NewSelectorInSet] = () => this.extend_selector_set();
+    this._actionLookup[Actions.ErrorIncompleteSelectorList] = ()=> this.error(`list of selectors was incomplete. Expected another selector.`);
   }
 
   private attrib_actions() : void {
@@ -509,6 +538,7 @@ export class SelectorLexer {
     this.id_actions();
     this.child_actions();
     this.descendent_actions();
+    this.selector_set_actions();
     this.attrib_actions();
     this.attrib_value_actions();
   }
@@ -516,17 +546,19 @@ export class SelectorLexer {
   private createAttrib() : AttribInfo {
     let new_attrib: AttribInfo;
     new_attrib = { name: ''};
-    if (this._current._attrib) {
-      this._current._attrib.push(new_attrib);
+    let current_attrib_list = this.current()._attrib;
+    if (current_attrib_list) {
+      current_attrib_list.push(new_attrib);
     } else {
-      this._current._attrib = [new_attrib];
+      this.current()._attrib = [new_attrib];
     }
     return new_attrib;
   }
 
   private getLastAttrib(): AttribInfo {
-    if (this._current._attrib) {
-      let list = this._current._attrib;
+    let current_attrib_list = this.current()._attrib;
+    if (current_attrib_list) {
+      let list = current_attrib_list;
       let latest_attrib = list[list.length - 1];
       return latest_attrib;
     } else {
