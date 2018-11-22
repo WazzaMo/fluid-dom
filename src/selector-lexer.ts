@@ -26,6 +26,7 @@ enum Events {
   SelectorSeparator, // ','
   LeadLabelChar,
   LabelChar,
+  AttribNameChar, // '-'
   ChildSeparator,
   DescendentSeparator,
   ClassPrefix,
@@ -34,9 +35,11 @@ enum Events {
   RightSqBracket,
   EqualSign,
   Quote,
-  EndInput,
-  Illegal,
+  AdjacentSibling,
+  GeneralSibling,
   OtherSymbol, // $ % ! ^ * ( ) etc.
+  Illegal,
+  EndInput,
 
   LAST_EVENT
 }
@@ -54,6 +57,8 @@ export enum Actions {
   ErrorMultipleChildSeparators = 'ERROR-too-many-child-separators',
   ErrorAttribBracketsNotClosed = 'ERROR-attribute-bracket-missing',
   ErrorAttribValueQuoteMissing = 'ERROR-attrib-value-quote-missing',
+  ErrorInAdjacentSibling = 'ERROR-adjacent-sibling',
+  ErrorInGeneralSibling = 'ERROR-general-sibling',
 
   ErrorIncompleteSelectorList = 'ERROR-incomplete-selector-list',
 
@@ -79,7 +84,9 @@ export enum Actions {
 
   NewChild = 'NEW-CHILD-SELECTOR',
   NewDescendent = 'NEW-DESCENDENT-SELECTOR',
-  NewSelectorInSet = 'NEW-SELECTOR-IN-SET'
+  NewSelectorInSet = 'NEW-SELECTOR-IN-SET',
+  NewAdjacentSibling = 'NEW-ADJACENT-SIBLING',
+  NewGeneralSibling = 'NEW-GENERAL-SIBLING'
 }
 
 enum States {
@@ -89,6 +96,8 @@ enum States {
   GettingId,
   AwaitDescendentSelector,
   AwaitChildSelector,
+  AwaitAdjacentSiblingSelector,
+  AwaitGeneralSiblingSelector,
   AwaitAttribName,
   GettingAttribName,
 
@@ -172,8 +181,10 @@ function setup_tables() {
     at_on(tag, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveTag);
     at_on(tag, Events.ClassPrefix, States.GettingClass, [Actions.SaveTag, Actions.ClearClass]);
     at_on(tag, Events.IdPrefix, States.GettingId, [Actions.SaveTag, Actions.ClearId]);
-    at_on(tag, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveTag);
+    at_on(tag, Events.LeftSqBracket, States.AwaitAttribName, Actions.SaveTag);
     at_on(tag, Events.EndInput, tag, Actions.SaveTag);
+    at_on(tag, Events.AdjacentSibling, States.AwaitAdjacentSiblingSelector, Actions.SaveTag)
+    at_on(tag, Events.GeneralSibling, States.AwaitGeneralSiblingSelector, Actions.SaveTag)
     at_on(tag, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SaveTag, Actions.NewSelectorInSet]);
   }
 
@@ -187,6 +198,8 @@ function setup_tables() {
     at_on(id, Events.ClassPrefix, States.GettingClass, [Actions.SaveId, Actions.ClearClass]);
     at_on(id, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveId);
     at_on(id, Events.EndInput, id, Actions.SaveId);
+    at_on(id, Events.AdjacentSibling, States.AwaitAdjacentSiblingSelector, Actions.SaveId)
+    at_on(id, Events.GeneralSibling, States.AwaitGeneralSiblingSelector, Actions.SaveId)
     at_on(id, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SaveId, Actions.NewSelectorInSet]);
   }
 
@@ -200,6 +213,8 @@ function setup_tables() {
     at_on(classState, Events.IdPrefix, States.GettingId, [Actions.SaveClass, Actions.ClearId]);
     at_on(classState, Events.LeftSqBracket, States.GettingAttribName, Actions.SaveClass);
     at_on(classState, Events.EndInput, classState, Actions.SaveClass);
+    at_on(classState, Events.AdjacentSibling, States.AwaitAdjacentSiblingSelector, Actions.SaveClass)
+    at_on(classState, Events.GeneralSibling, States.AwaitGeneralSiblingSelector, Actions.SaveClass)
     at_on(classState, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SaveClass, Actions.NewSelectorInSet]);
   }
 
@@ -212,6 +227,8 @@ function setup_tables() {
     at_on(descend, Events.IdPrefix, States.GettingId, [Actions.NewDescendent, Actions.ClearId]);
     at_on(descend, Events.ClassPrefix, States.GettingClass, [Actions.NewDescendent, Actions.ClearClass]);
     at_on(descend, Events.LeftSqBracket, States.AwaitAttribName, Actions.NewDescendent);
+    at_on(descend, Events.AdjacentSibling, States.AwaitAdjacentSiblingSelector, Actions.Ignore)
+    at_on(descend, Events.GeneralSibling, States.AwaitGeneralSiblingSelector, Actions.Ignore)
     at_on(descend, Events.EndInput, descend, Actions.Ignore);
 
     // not a descendent after all..
@@ -243,6 +260,7 @@ function setup_tables() {
     default_for(attrib, States.StartAwaitSelector, Actions.ErrorInAttribute);
     at_on(attrib, Events.LeadLabelChar, attrib, Actions.AppendAttrib);
     at_on(attrib, Events.LabelChar, attrib, Actions.AppendAttrib);
+    at_on(attrib, Events.AttribNameChar, attrib, Actions.AppendAttrib);
     at_on(attrib, Events.DescendentSeparator, States.AwaitEqualSignOrEnd, Actions.SaveAttrib);
     at_on(attrib, Events.EqualSign, States.AwaitAttribValueStartQuote, [Actions.SaveAttrib, Actions.ClearAttribValue]);
     at_on(attrib, Events.RightSqBracket, States.AwaitExtraAttribStart, Actions.SaveAttrib);
@@ -279,6 +297,7 @@ function setup_tables() {
     at_on(getvalue, Events.Quote, States.AwaitAttribEnd, Actions.SaveAttribValue);
     at_on(getvalue, Events.LeadLabelChar, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.LabelChar, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.AttribNameChar, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.DescendentSeparator, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.IdPrefix, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.ClassPrefix, getvalue, Actions.AppendAttribValue);
@@ -293,6 +312,37 @@ function setup_tables() {
     at_on(wait_end, Events.DescendentSeparator, wait_end, Actions.Ignore);
     at_on(wait_end, Events.RightSqBracket, States.AwaitExtraAttribStart, Actions.Ignore);
   }
+
+  function _await_adjacent_sibling() {
+    let sibling = States.AwaitAdjacentSiblingSelector;
+    default_for(sibling, sibling, Actions.ErrorInAdjacentSibling);
+
+    at_on(sibling, Events.DescendentSeparator, sibling, Actions.Ignore);
+    at_on(sibling, Events.ChildSeparator, States.AwaitChildSelector, Actions.ErrorInAdjacentSibling);
+    at_on(sibling, Events.LeadLabelChar, States.GettingTag, [Actions.NewAdjacentSibling, Actions.ClearTag, Actions.AppendTag]);
+    at_on(sibling, Events.IdPrefix, States.GettingId, [Actions.NewAdjacentSibling, Actions.ClearId]);
+    at_on(sibling, Events.ClassPrefix, States.GettingClass, [Actions.NewAdjacentSibling, Actions.ClearClass]);
+    at_on(sibling, Events.LeftSqBracket, States.AwaitAttribName, Actions.NewAdjacentSibling);
+    at_on(sibling, Events.EndInput, sibling, Actions.ErrorInAdjacentSibling);
+
+    at_on(sibling, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, Actions.ErrorInAdjacentSibling);
+  }
+
+  function _await_general_sibling() {
+    let sibling = States.AwaitGeneralSiblingSelector;
+    default_for(sibling, sibling, Actions.ErrorInGeneralSibling);
+
+    at_on(sibling, Events.DescendentSeparator, sibling, Actions.Ignore);
+    at_on(sibling, Events.ChildSeparator, States.AwaitChildSelector, Actions.ErrorInGeneralSibling);
+    at_on(sibling, Events.LeadLabelChar, States.GettingTag, [Actions.NewGeneralSibling, Actions.ClearTag, Actions.AppendTag]);
+    at_on(sibling, Events.IdPrefix, States.GettingId, [Actions.NewGeneralSibling, Actions.ClearId]);
+    at_on(sibling, Events.ClassPrefix, States.GettingClass, [Actions.NewGeneralSibling, Actions.ClearClass]);
+    at_on(sibling, Events.LeftSqBracket, States.AwaitAttribName, Actions.NewGeneralSibling);
+    at_on(sibling, Events.EndInput, sibling, Actions.ErrorInGeneralSibling);
+
+    at_on(sibling, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, Actions.ErrorInGeneralSibling);
+  }
+
 
   initTable(TransitionTable);
   initTable(ActionTable);
@@ -310,6 +360,8 @@ function setup_tables() {
   _await_attrib_value_start();
   _get_attrib_value();
   _await_attrib_end();
+  _await_adjacent_sibling();
+  _await_general_sibling();
 } //-- setup_tables
 
 setup_tables();
@@ -351,6 +403,10 @@ function event(_char: string) : number {
     case '>': return Events.ChildSeparator;
     case '"': return Events.Quote;
     case ',': return Events.SelectorSeparator;
+    case '+': return Events.AdjacentSibling;
+    case '~': return Events.GeneralSibling;
+
+    case '-': return Events.AttribNameChar;
 
     case '\n':
     case '\b':
@@ -465,6 +521,18 @@ export class SelectorLexer {
     this.current(new_token);
   }
 
+  private make_adjacent_sibling(): void {
+    let new_token : SelectorToken = {};
+    this.current()._adjacent_sibling = new_token;
+    this.current( new_token );
+  }
+
+  private make_general_sibling(): void {
+    let new_token : SelectorToken = {};
+    this.current()._general_sibling = new_token;
+    this.current( new_token );
+  }
+
   private general_actions() : void {
     this._actionLookup[Actions.Ignore] = ()=> {};
     this._actionLookup[Actions.ErrorBeforeSelector] = () => this.error(`before selector with character '${this._input}'`);
@@ -543,6 +611,16 @@ export class SelectorLexer {
     this._actionLookup[Actions.ErrorInAttribValue] = ()=> this.error(`in attribute value at character '${this._input}'`);
   }
 
+  private adjacent_sibling_actions() : void {
+    this._actionLookup[ Actions.NewAdjacentSibling ] = ()=> this.make_adjacent_sibling();
+    this._actionLookup[ Actions.ErrorInAdjacentSibling ]  = ()=> this.error( `specifying adjacent sibling at '${this._input}'`);
+  }
+
+  private general_sibling_actions() : void {
+    this._actionLookup[ Actions.NewGeneralSibling ] = ()=> this.make_general_sibling();
+    this._actionLookup[ Actions.ErrorInGeneralSibling ] = ()=> this.error( `specifying general sibling at '${this._input}'`);
+  }
+
   private setup_actions() : void {
     this.general_actions();
     this.tag_actions();
@@ -553,6 +631,8 @@ export class SelectorLexer {
     this.selector_set_actions();
     this.attrib_actions();
     this.attrib_value_actions();
+    this.adjacent_sibling_actions();
+    this.general_sibling_actions();
   }
 
   private createAttrib() : AttribInfo {

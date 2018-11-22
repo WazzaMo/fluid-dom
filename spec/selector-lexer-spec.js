@@ -161,6 +161,100 @@ describe('selector-lexer', ()=> {
 
     }); // comma sep selectors
 
+    describe('when combining selector types: ', ()=> {
+
+      it ('must handle tag and class specification: ', ()=> {
+        lexer.lex_selector('div[id = "content"]');
+        expect( lexer.tokens[0]._tag).toEqual('DIV');
+        expect( lexer.tokens[0]._attrib).toEqual([{name:'id', value: 'content'}]);
+      });
+
+    });
+
+    describe('when adjacents sibling (+) used to find A followed by B: ', ()=> {
+
+      it ('must recognise adjacent sibling: ', ()=> {
+        lexer.lex_selector('div+p');
+        expect( lexer.tokens[0]._tag ).toEqual('DIV');
+        expect( lexer.tokens[0]._adjacent_sibling).toBeDefined();
+        expect( lexer.tokens[0]._adjacent_sibling._tag ).toEqual('P');
+      });
+
+      it ('must recognise adjacent sibling with spaces: ', ()=> {
+        lexer.lex_selector('div + p');
+        expect( lexer.tokens[0]._tag ).toEqual('DIV');
+        expect( lexer.tokens[0]._adjacent_sibling).toBeDefined();
+        expect( lexer.tokens[0]._adjacent_sibling._tag ).toEqual('P');
+      });
+
+      it ('must recognise ID adjacent sibling: ', ()=> {
+        lexer.lex_selector('#foo+p');
+        expect( lexer.tokens[0]._id ).toEqual('foo');
+        expect( lexer.tokens[0]._adjacent_sibling).toBeDefined();
+        expect( lexer.tokens[0]._adjacent_sibling._tag ).toEqual('P');
+      });
+
+      it ('must recognise class adjacent sibling: ', ()=> {
+        lexer.lex_selector('.main+[data-x="fred"]');
+        expect( lexer.tokens[0]._class ).toEqual('main');
+        expect( lexer.tokens[0]._adjacent_sibling).toBeDefined();
+        expect( lexer.tokens[0]._adjacent_sibling._attrib[0] ).toEqual({name:'data-x', value: 'fred'});
+      });
+
+      it ('must throw error if + appears more than once: ', ()=> {
+        expect( ()=> lexer.lex_selector('div ++ extra') )
+        .toThrowError(`Error specifying adjacent sibling at '+'`);
+      });
+
+      it ('must throw error if general sibling sep appears immediately after adjacent sibling sep (+~): ', ()=> {
+        expect( ()=> lexer.lex_selector('div +~ extra') )
+        .toThrowError(`Error specifying adjacent sibling at '~'`);
+      });
+
+    }); // adjacent siblings
+
+    describe('when general sibling (~) used to find A followed by B: ', ()=> {
+
+      it ('must recognise adjacent sibling: ', ()=> {
+        lexer.lex_selector('div~p');
+        expect( lexer.tokens[0]._tag ).toEqual('DIV');
+        expect( lexer.tokens[0]._general_sibling).toBeDefined();
+        expect( lexer.tokens[0]._general_sibling._tag ).toEqual('P');
+      });
+
+      it ('must recognise adjacent sibling with spaces: ', ()=> {
+        lexer.lex_selector('div ~ p');
+        expect( lexer.tokens[0]._tag ).toEqual('DIV');
+        expect( lexer.tokens[0]._general_sibling).toBeDefined();
+        expect( lexer.tokens[0]._general_sibling._tag ).toEqual('P');
+      });
+
+      it ('must recognise ID adjacent sibling: ', ()=> {
+        lexer.lex_selector('#foo~p');
+        expect( lexer.tokens[0]._id ).toEqual('foo');
+        expect( lexer.tokens[0]._general_sibling).toBeDefined();
+        expect( lexer.tokens[0]._general_sibling._tag ).toEqual('P');
+      });
+
+      it ('must recognise class adjacent sibling: ', ()=> {
+        lexer.lex_selector('.main~[data-x="fred"]');
+        expect( lexer.tokens[0]._class ).toEqual('main');
+        expect( lexer.tokens[0]._general_sibling).toBeDefined();
+        expect( lexer.tokens[0]._general_sibling._attrib[0] ).toEqual({name:'data-x', value: 'fred'});
+      });
+
+      it ('must throw error if ~ appears more than once: ', ()=> {
+        expect( ()=> lexer.lex_selector('div ~~ extra') )
+        .toThrowError(`Error specifying general sibling at '~'`);
+      });
+
+      it ('must throw error if adjacent sibling sep appears immediately after general sibling sep (~+): ', ()=> {
+        expect( ()=> lexer.lex_selector('div ~+ extra') )
+        .toThrowError(`Error specifying general sibling at '+'`);
+      });
+
+    }); // adjacent siblings
+
   }); //-- lex_selector()
 
 });
