@@ -24,14 +24,16 @@
   "files": [
     "fluid-dom*.js",
     "docs/**",
-    "js/*.ts"
+    "js/*.ts",
+    "mock-js/*.ts"
   ],
   "directories": {
     "doc": "docs",
     "live": "docs/live"
   },
   "types": [
-    "type/src/*.d.ts"
+    "js/**/*.d.ts",
+    "mock-js/**/*.d.ts"
   ],
   "keywords": [
     "DOM",

@@ -3,7 +3,8 @@
 
 .vscode/
 
-./*.js
+fluid-dom.mock.js
+fluid-dom*.tgz
 
 dist/
 js/
