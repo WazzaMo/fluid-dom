@@ -3,8 +3,11 @@
 
 .vscode/
 
+./*.js
+
 dist/
 js/
+mock-js/
 type/
 fluid-dom/
 node_modules/
