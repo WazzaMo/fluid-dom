@@ -19,11 +19,14 @@ function anyAttrib() {
   return `attrib_${randomInt()}`;
 }
 
+function dumpList(list) {
+  list.forEach( (item, index) => console.log(`#${index}: ${item}`));
+}
+
 describe("MockSelectorParser", ()=> {
   let doc;
 
   describe("where multiple basic selectors, ", ()=> {
-    let selector;
     let parser;
     let root;
     let subject;
@@ -31,8 +34,7 @@ describe("MockSelectorParser", ()=> {
 
     beforeEach( ()=> {
       doc = fluid.Doc();
-      selector = 'DIV, P';
-      parser = new fluid.MockSelectorParser(selector);
+      parser = new fluid.MockSelectorParser('DIV, P');
       random_text = randomString();
 
       doc.create_child_element('body', undefined, body => {
@@ -53,7 +55,6 @@ describe("MockSelectorParser", ()=> {
   });
 
   describe("when parent and then child selectors: ", () => {
-    let selector;
     let subject;
     let _body, _div, _para;
     let randValuePara, randValueDiv;
@@ -68,6 +69,7 @@ describe("MockSelectorParser", ()=> {
           div.text_value = randValueDiv;
           div.create_child_element('p', undefined, p=> {
             p.text_value = randValuePara;
+            p.attrib('main','message');
             _para = p;
           });
           _div = div;
@@ -78,6 +80,12 @@ describe("MockSelectorParser", ()=> {
 
     it('must find the para element: ', ()=> {
       let parser = new fluid.MockSelectorParser('BODY > DIV> p');
+      subject = parser.parseWith(doc.root_node);
+      expect(subject).toEqual([_para])
+    });
+
+    it('must find the para element by attribute: ', ()=> {
+      let parser = new fluid.MockSelectorParser('BODY > DIV> [main]');
       subject = parser.parseWith(doc.root_node);
       expect(subject).toEqual([_para])
     });

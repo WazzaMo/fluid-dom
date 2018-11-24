@@ -5,14 +5,6 @@
 
 let fluid = require('../fluid-dom.mock');
 
-let {
-  has_tag,
-  with_tag,
-  has_class,
-  with_class,
-  has_id,
-  with_id
-} = fluid;
 
 describe('selector-lexer', ()=> {
   let lexer;
@@ -253,7 +245,42 @@ describe('selector-lexer', ()=> {
         .toThrowError(`Error specifying general sibling at '+'`);
       });
 
-    }); // adjacent siblings
+    }); // general siblings
+
+    describe('when pseudo element: ', ()=>{
+
+      it ('must handle pseudo-element', () => {
+        lexer.lex_selector('p::first-line');
+        expect( lexer.tokens[0]._tag).toEqual('P');
+        expect( lexer.tokens[0]._pseudo_element ).toEqual('first-line');
+      });
+
+      it('must handle pseudo-elements with brackets: ', ()=> {
+        lexer.lex_selector('p::slotted(span)');
+        expect( lexer.tokens[0]._tag ).toEqual('P');
+        expect( lexer.tokens[0]._pseudo_element ).toEqual('slotted(span)');
+      });
+
+      it ('must throw and error on third colon: ', ()=> {
+        expect( ()=> lexer.lex_selector('p:::illegal') )
+        .toThrowError(`Error in pseudo-element at character ':'`);
+      });
+
+    }); // pseudo-element p::first-line
+
+    describe('when pseudo class: ', ()=> {
+      
+      it ('must identify a pseudo class: ', ()=> {
+        lexer.lex_selector('p:nth-child(2n)');
+        expect( lexer.tokens[0]._pseudo_class ).toEqual('nth-child(2n)');
+      });
+
+      it ('must throw an error when child separator after pseudo-class separator: ', ()=>{
+        expect( ()=> lexer.lex_selector('p:>first') )
+        .toThrowError(`Error in pseudo-class at character '>'`);
+      });
+
+    }); // pseudo-class - eg, p:nth-child(1n)
 
   }); //-- lex_selector()
 

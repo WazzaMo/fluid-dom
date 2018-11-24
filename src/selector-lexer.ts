@@ -1,6 +1,3 @@
-import { stringify } from "querystring";
-import { callbackify } from "util";
-import { timingSafeEqual } from "crypto";
 
 /*
  * Fluid DOM for JavaScript
@@ -9,19 +6,11 @@ import { timingSafeEqual } from "crypto";
  */
 
 
-// selector ::= (advanced_selector ',' )* advanced_selector
-// advanced_selector ::= path_selector | composite_selector
-// simple_selector ::= #ID | .CLASS | TAG_NAME
-// name_selector ::= TAG QUALIFIER ATTRIBSET
-// attribset ::= '[' LABEL ']' ATTRIBSET
-// =' '"' VALUE'"'
-// qualifier ::= (CLASS | ID ) QUALIFIER
-//           ::= NONE
-// class ::= '.' LABEL
-// id ::= '#' LABEL
-// tag ::= LABEL
 
-
+/**
+ * The classification of input characters the lexer
+ * is to process. 
+ */
 enum Events {
   SelectorSeparator, // ','
   LeadLabelChar,
@@ -35,16 +24,23 @@ enum Events {
   RightSqBracket,
   EqualSign,
   Quote,
-  AdjacentSibling,
-  GeneralSibling,
-  OtherSymbol, // $ % ! ^ * ( ) etc.
+  Colon,            // ':'
+  LeftParenthesis,  // '('
+  RightParenthesis, // ')'
+  AdjacentSibling,  // '+'
+  GeneralSibling,   // '~'
+  OtherSymbol,      // $ % ! ^ * ( ) etc.
   Illegal,
   EndInput,
 
   LAST_EVENT
 }
 
-export enum Actions {
+/**
+ * The types of actions that the lexer is to take
+ * to process the input characters of a selector.
+ */
+enum Actions {
   Ignore = 'IGNORE',
   ErrorBeforeSelector = 'ERROR-before-selector',
   ErrorInTag = 'ERROR-in-tag',
@@ -59,12 +55,22 @@ export enum Actions {
   ErrorAttribValueQuoteMissing = 'ERROR-attrib-value-quote-missing',
   ErrorInAdjacentSibling = 'ERROR-adjacent-sibling',
   ErrorInGeneralSibling = 'ERROR-general-sibling',
+  ErrorInPseudoClass = 'ERROR-pseudo-class',
+  ErrorInPseudoElement = 'ERROR-pseudo-element',
 
   ErrorIncompleteSelectorList = 'ERROR-incomplete-selector-list',
 
   ClearTag = 'CLEAR-TAG',
   AppendTag = 'APPEND-TAG',
   SaveTag = 'SAVE-TAG',
+
+  ClearPseudoElementName = 'CLEAR-PSEUDO-ELEMENT',
+  AppendPseudoElementName = 'APPEND-PSEUDO-ELEMENT',
+  SavePseudoElementName = 'SAVE-PSEUDO-ELEMENT',
+
+  ClearPseudoClassName = 'CLEAR-PSEUDO-CLASS',
+  AppendPseudoClassName = 'APPEND-PSEUDO-CLASS',
+  SavePseudoClassName = 'SAVE-PSEUDO-CLASS',
 
   ClearClass = 'CLEAR-CLASS',
   AppendClass = 'APPEND-CLASS',
@@ -89,11 +95,19 @@ export enum Actions {
   NewGeneralSibling = 'NEW-GENERAL-SIBLING'
 }
 
+/**
+ * The states that the Lexer can be in at different
+ * stages of analysing a selector.
+ */
 enum States {
   StartAwaitSelector,
   GettingTag,
   GettingClass,
   GettingId,
+  AwaitPseudoElementName,
+  GettingPseudoElementName,
+  AwaitPseudoClassName,
+  GettingPseudoClassName,
   AwaitDescendentSelector,
   AwaitChildSelector,
   AwaitAdjacentSiblingSelector,
@@ -113,21 +127,49 @@ enum States {
   LAST_STATE
 }
 
+/**
+ * One part of the state machine lookup tables - the
+ * tables will have two parts.
+ * This type supports the mapping of the current state to the
+ * second part of the lookup table.
+ */
 interface StateLookup<T> {
   [state: number]: T;
 }
 
+/**
+ * The second part (of 2) of the state machine lookup tables.
+ * This represents the mapping of an event to a data item.
+ * In general, the data will either be the next state
+ * or it will be the action to take.
+ */
 interface EventLookup<T> {
   [event: number]: T;
 }
 
+/**
+ * Global State Transition Lookup Table.
+ */
 const TransitionTable: StateLookup<EventLookup<number>> = {};
+/**
+ * Global State to Action Lookup Table.
+ */
 const ActionTable: StateLookup<EventLookup<Array<string>>> = {};
 
+/**
+ * Helper function to determine if an object is a string.
+ * @param s - a candidate string object.
+ */
 function isString(s: any) : s is string {
   return typeof s === "string";
 }
 
+/**
+ * Sets up the global state machine tables with the right
+ * state transition and state-event-action mappings and makes
+ * it relatively easy to extend the state machine. Has internal
+ * functions that are not to be used in any other context.
+ */
 function setup_tables() {
   function initState<T>() : EventLookup<T> {
     return {};
@@ -177,6 +219,7 @@ function setup_tables() {
     default_for(tag, tag, Actions.ErrorInTag);
     at_on(tag, Events.LabelChar, tag, Actions.AppendTag);
     at_on(tag, Events.LeadLabelChar, tag, Actions.AppendTag);
+    at_on(tag, Events.Colon, States.AwaitPseudoClassName, Actions.SaveTag);
     at_on(tag, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SaveTag);
     at_on(tag, Events.ChildSeparator, States.AwaitChildSelector, Actions.SaveTag);
     at_on(tag, Events.ClassPrefix, States.GettingClass, [Actions.SaveTag, Actions.ClearClass]);
@@ -186,6 +229,62 @@ function setup_tables() {
     at_on(tag, Events.AdjacentSibling, States.AwaitAdjacentSiblingSelector, Actions.SaveTag)
     at_on(tag, Events.GeneralSibling, States.AwaitGeneralSiblingSelector, Actions.SaveTag)
     at_on(tag, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SaveTag, Actions.NewSelectorInSet]);
+  }
+
+  function _wait_pseudo_class() {
+    let wait_pc = States.AwaitPseudoClassName;
+    default_for(wait_pc, wait_pc, Actions.ErrorInPseudoClass);
+    at_on(wait_pc, Events.Colon, States.AwaitPseudoElementName, Actions.Ignore);
+    at_on(wait_pc, Events.LeadLabelChar, States.GettingPseudoClassName, [Actions.ClearPseudoClassName, Actions.AppendPseudoClassName] );
+  }
+
+  function _get_pseudo_class() {
+    let getpc = States.GettingPseudoClassName;
+    default_for(getpc, getpc, Actions.ErrorInPseudoClass);
+
+    at_on(getpc, Events.LeadLabelChar, getpc, Actions.AppendPseudoClassName );
+    at_on(getpc, Events.LabelChar, getpc, Actions.AppendPseudoClassName );
+    at_on(getpc, Events.AttribNameChar, getpc, Actions.AppendPseudoClassName );
+    at_on(getpc, Events.LeftParenthesis, getpc, Actions.AppendPseudoClassName );
+    at_on(getpc, Events.RightParenthesis, getpc, Actions.AppendPseudoClassName );
+
+    at_on(getpc, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SavePseudoClassName);
+    at_on(getpc, Events.ChildSeparator, States.AwaitChildSelector, Actions.SavePseudoClassName);
+    at_on(getpc, Events.ClassPrefix, States.GettingClass, [Actions.SavePseudoClassName, Actions.ClearClass]);
+    at_on(getpc, Events.IdPrefix, States.GettingId, [Actions.SavePseudoClassName, Actions.ClearId]);
+    at_on(getpc, Events.LeftSqBracket, States.AwaitAttribName, Actions.SavePseudoClassName);
+    at_on(getpc, Events.EndInput, getpc, Actions.SavePseudoClassName);
+    at_on(getpc, Events.AdjacentSibling, States.AwaitAdjacentSiblingSelector, Actions.SavePseudoClassName)
+    at_on(getpc, Events.GeneralSibling, States.AwaitGeneralSiblingSelector, Actions.SavePseudoClassName)
+    at_on(getpc, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SavePseudoClassName, Actions.NewSelectorInSet]);
+  }
+
+  function _wait_pseudo_element() {
+    let wait_pe = States.AwaitPseudoElementName;
+    default_for(wait_pe, wait_pe, Actions.ErrorInPseudoElement);
+
+    at_on(wait_pe, Events.LeadLabelChar, States.GettingPseudoElementName, [Actions.ClearPseudoElementName, Actions.AppendPseudoElementName]);
+  }
+
+  function _get_pseudo_element() {
+    let get_pe = States.GettingPseudoElementName;
+    default_for(get_pe, get_pe, Actions.ErrorInPseudoElement);
+
+    at_on(get_pe, Events.LeadLabelChar, States.GettingPseudoElementName, Actions.AppendPseudoElementName);
+    at_on(get_pe, Events.LabelChar, States.GettingPseudoElementName, Actions.AppendPseudoElementName);
+    at_on(get_pe, Events.AttribNameChar, States.GettingPseudoElementName, Actions.AppendPseudoElementName);
+    at_on(get_pe, Events.LeftParenthesis, get_pe, Actions.AppendPseudoElementName);
+    at_on(get_pe, Events.RightParenthesis, get_pe, Actions.AppendPseudoElementName);
+
+    at_on(get_pe, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.SavePseudoElementName);
+    at_on(get_pe, Events.ChildSeparator, States.AwaitChildSelector, Actions.SavePseudoElementName);
+    at_on(get_pe, Events.ClassPrefix, States.GettingClass, [Actions.SavePseudoElementName, Actions.ClearClass]);
+    at_on(get_pe, Events.IdPrefix, States.GettingId, [Actions.SavePseudoElementName, Actions.ClearId]);
+    at_on(get_pe, Events.LeftSqBracket, States.AwaitAttribName, Actions.SavePseudoElementName);
+    at_on(get_pe, Events.EndInput, get_pe, Actions.SavePseudoElementName);
+    at_on(get_pe, Events.AdjacentSibling, States.AwaitAdjacentSiblingSelector, Actions.SavePseudoElementName)
+    at_on(get_pe, Events.GeneralSibling, States.AwaitGeneralSiblingSelector, Actions.SavePseudoElementName)
+    at_on(get_pe, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, [Actions.SavePseudoElementName, Actions.NewSelectorInSet]);
   }
 
   function _id() {
@@ -298,11 +397,18 @@ function setup_tables() {
     at_on(getvalue, Events.LeadLabelChar, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.LabelChar, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.AttribNameChar, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.LeftSqBracket, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.RightSqBracket, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.AdjacentSibling, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.GeneralSibling, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.LeftParenthesis, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.RightParenthesis, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.DescendentSeparator, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.IdPrefix, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.ClassPrefix, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.ChildSeparator, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.OtherSymbol, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.Colon, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.SelectorSeparator, getvalue, Actions.AppendAttribValue);
   }
 
@@ -349,6 +455,10 @@ function setup_tables() {
   _start();
   _start_new_selector_in_set();
   _tag();
+  _wait_pseudo_class();
+  _get_pseudo_class();
+  _wait_pseudo_element();
+  _get_pseudo_element();
   _id();
   _class();
   _descendent();
@@ -364,24 +474,46 @@ function setup_tables() {
   _await_general_sibling();
 } //-- setup_tables
 
+// Setup the global state transition tables NOW.
 setup_tables();
 
+/**
+ * Is the character an uppercase or lowercase, English character?
+ * @param _char - character to check.
+ */
 function isAlpha(_char: string) : boolean {
   return (_char >= 'a' && _char <= 'z') || (_char >= 'A' && _char <= 'Z');
 }
 
+/**
+ * Is the character valid for the lead character of a label?
+ * @param _char - character to check.
+ */
 function isLabelLead(_char: string) : boolean {
   return _char === '_' || isAlpha(_char);
 }
 
+/**
+ * Is the character numeric?
+ * @param _char - character to check.
+ */
 function isNumeric(_char: string) : boolean {
   return _char >= '0' && _char <= '9';
 }
 
+/**
+ * Is the character valid in a label after the first?
+ * @param _char - character to check.
+ */
 function isLabelContinuer(_char: string) : boolean {
   return isNumeric(_char) || isLabelLead(_char);
 }
 
+/**
+ * Classify the character from a selector as some type
+ * of state machine event.
+ * @param _char - character to classify.
+ */
 function event(_char: string) : number {
   if (_char.length != 1) {
     throw new Error("Can only determine an event for a single character!");
@@ -405,6 +537,9 @@ function event(_char: string) : number {
     case ',': return Events.SelectorSeparator;
     case '+': return Events.AdjacentSibling;
     case '~': return Events.GeneralSibling;
+    case ':': return Events.Colon;
+    case '(': return Events.LeftParenthesis;
+    case ')': return Events.RightParenthesis;
 
     case '-': return Events.AttribNameChar;
 
@@ -431,6 +566,8 @@ export interface AttribInfo {
  */
 export interface SelectorToken {
   _tag ?: string;
+  _pseudo_element ?: string;
+  _pseudo_class ?: string;
   _class ?: string;
   _id ?: string;
   _attrib ?: Array<AttribInfo>;
@@ -621,6 +758,20 @@ export class SelectorLexer {
     this._actionLookup[ Actions.ErrorInGeneralSibling ] = ()=> this.error( `specifying general sibling at '${this._input}'`);
   }
 
+  private pseudo_element_actions() : void {
+    this._actionLookup[ Actions.ClearPseudoElementName ] = ()=> this.clearPseudoElement();
+    this._actionLookup[ Actions.AppendPseudoElementName ] = ()=> this.appendPseudoElement();
+    this._actionLookup[ Actions.SavePseudoElementName ] = ()=> this.savePseudoElement();
+    this._actionLookup[ Actions.ErrorInPseudoElement ] = ()=> this.error( `in pseudo-element at character '${this._input}'`);
+  }
+
+  private pseudo_class_actions() : void {
+    this._actionLookup[ Actions.ClearPseudoClassName ] = ()=> this.clearPseudoClass();
+    this._actionLookup[ Actions.AppendPseudoClassName ] = ()=> this.appendPseudoClass();
+    this._actionLookup[ Actions.SavePseudoClassName ] = ()=> this.savePseudoClass();
+    this._actionLookup[ Actions.ErrorInPseudoClass ] = ()=> this.error( `in pseudo-class at character '${this._input}'`);
+  }
+
   private setup_actions() : void {
     this.general_actions();
     this.tag_actions();
@@ -633,6 +784,8 @@ export class SelectorLexer {
     this.attrib_value_actions();
     this.adjacent_sibling_actions();
     this.general_sibling_actions();
+    this.pseudo_element_actions();
+    this.pseudo_class_actions();
   }
 
   private createAttrib() : AttribInfo {
@@ -657,5 +810,25 @@ export class SelectorLexer {
       throw new Error(`Can't append attribute name when record undefined for input: '${this._input}'`);
     }   
   }
+
+  private clearPseudoElement() : void {
+    this.current()._pseudo_element = '';
+  }
+
+  private appendPseudoElement() : void {
+    this.current()._pseudo_element += this._input;
+  }
+
+  private savePseudoElement() : void {}
+
+  private clearPseudoClass() : void {
+    this.current()._pseudo_class = '';
+  }
+
+  private appendPseudoClass() : void {
+    this.current()._pseudo_class += this._input;
+  }
+
+  private savePseudoClass() : void {}
 
 }

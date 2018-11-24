@@ -10,199 +10,169 @@ import {
   MockNodeType,
   IMockDocNode
 } from './mock-document-nodes';
-import { find } from 'shelljs';
 
-/*
-selector ::= (advanced_selector ',' )* advanced_selector
-advanced_selector ::= path_selector | composite_selector
-simple_selector ::= #ID | .CLASS | TAG_NAME
-name_selector ::= TAG QUALIFIER ATTRIBSET
-attribset ::= '[' LABEL ']' ATTRIBSET
-=' '"' VALUE'"'
-qualifier ::= (CLASS | ID ) QUALIFIER
-          ::= NONE
-class ::= '.' LABEL
-id ::= '#' LABEL
-tag ::= LABEL
- */
+import {
+  AttribInfo,
+  SelectorLexer,
+  SelectorToken
+} from './selector-lexer';
+import { match } from 'minimatch';
 
-//export type ParseCommand = (parser: MockSelectorParser, element:ElementNode) => ParseDecision;
+type ElementOrNot = ElementNode | undefined;
+type CollectorFilter = (element: ElementNode, root: ElementNode) => ElementOrNot;
 
-interface ParseDecision {
-  next_step?: ParseStep;
-  outcome?: ParseOutput;
+function hasTag(selector: SelectorToken) : boolean { return !! selector._tag; }
+
+function isTagMatch(selector:SelectorToken | undefined, element: ElementNode) : boolean {
+  return !! selector ? (element.tag.toUpperCase() === selector._tag) : false;
 }
 
-type ParseOutput = (element: ElementNode) => Array<ElementNode>;
-type ParseStep = (element: ElementNode) => ParseDecision;
-// ----------
+function hasAttribute(selector: SelectorToken) : boolean { return !! selector._attrib && selector._attrib.length> 0; }
 
-function ChildrenByTag(tag:string) : ParseOutput {
-  let finder: ParseOutput = (element: ElementNode) => {
-    let nodeList = element.children
-      .filter( (node: IMockDocNode) => node.nodeType == MockNodeType.ElementNode)
-      .filter( (child_node: IMockDocNode) => {
-        let child = <ElementNode> child_node;
-        return child.tag.toUpperCase() == tag.toUpperCase();
-      });
-    return nodeList.map( (item: IMockDocNode)=> <ElementNode>item);
-  };
-  return finder;
-}
-
-function AttributeSelector(selector: string) : ParseOutput {
-  interface AttribPair { name: string, value?: string | undefined};
-
-  function HasTag(tag: string) : boolean {
-    return (!!tag) && tag.length > 0;
-  }
-
-  function toPairs(attribList:Array<string>): Array<AttribPair> {
-    let attribs : Array<AttribPair> = [];
-
-    attribList.forEach( (part: string)=>{
-      let nameOnly, nameValue;
-      nameOnly = part.match(/(\w+)/);
-      nameValue = part.match(/(\w+).*="(.*)"/);
-      if (nameValue) {
-        let  [_all, name, value] = nameValue;
-        attribs.push( <AttribPair>{name,value} );
-      } else if (nameOnly) {
-        let [_all, name] = nameOnly;
-        attribs.push( <AttribPair> { name } );
-      }
-    });
-    return attribs;
-  }
-
-  function isMatch(
-    tag:string, pairList: Array<AttribPair>, element: ElementNode
-  ): boolean {
-    let matchesAttrib: boolean = pairList.every( (pair: AttribPair)=> {
-      if (pair.value) {
-        return element.attrib(pair.name) === pair.value;
+function isAttributeMatch( selector: SelectorToken | undefined, element: ElementNode) : boolean {
+  if (!! selector && selector._attrib && selector._attrib.length > 0) {
+    let isMatch = true;
+    for(var index = 0; index < selector._attrib.length && isMatch; index++) {
+      let attr = selector._attrib[index];
+      let {name, value} = attr;
+      let element_attr = element.attrib(name);
+      if (element_attr && value) {
+        isMatch = isMatch && element_attr === value;
       } else {
-        return !! element.attrib(pair.name);
-      }
-    });
-    let matchesTag = HasTag(tag) 
-      ? tag.toUpperCase() === element.tag.toUpperCase()
-      : true;
-    return matchesTag && matchesAttrib;
-  }
-
-  function addAllMatches(
-    tag: string,
-    attribs: Array<AttribPair>,
-    element: ElementNode,
-    collection: Array<ElementNode>
-  ) : void {
-    if (isMatch(tag, attribs, element)) {
-      collection.push(element);
-    }
-    if (element.children) {
-      element.children.forEach( (child: IMockDocNode) => {
-        if (child.nodeType == MockNodeType.ElementNode) {
-          addAllMatches(tag, attribs, <ElementNode>child, collection)
-        }
-      });
-    }
-  }
-
-  const OPT_TAG_AND_ATTRIBUTE_PATTERN = /(\w*)\W*\[(.*)\]/;
-  let _match = selector.match(OPT_TAG_AND_ATTRIBUTE_PATTERN);
-  let _all, tag: string, attribs: string | undefined;
-
-  if (_match) {
-    [_all, tag, attribs] = _match;
-
-    let attribList = (!! attribs) ? toPairs( attribs.split('][') ) : [];
-    return (element: ElementNode) => {
-      let collection: Array<ElementNode> = [];
-      addAllMatches(tag, attribList, element, collection);
-      return collection;
-    }
-  } else {
-    return ChildrenByTag(selector);
-  }
-
-} // -- AttributeSelector
-
-function SingleSelector(selector: string) : ParseOutput {
-  return AttributeSelector(selector);
-}
-
-function HierarchySelector(selector: string): ParseOutput {
-  return (element: ElementNode) => {
-    let pathList = selector.split('>')
-      .map( (part:string)=> part.trim() )
-      .map( (sub: string) => SingleSelector(sub));
-    let task = ApplyRecursiveElementForBestMatch(pathList);
-    return task(element);
-  }
-}
-
-function ApplyRecursiveElementForBestMatch(list: Array<ParseOutput>) : ParseOutput {
-
-  function goDeeper(
-    command_list: Array<ParseOutput>,
-    element: ElementNode,
-    results: Array<ElementNode>
-  ) : void {
-    let command = command_list.pop();
-    if (command) {
-      let possibles = command(element);
-      if (command_list.length == 0) {
-        possibles.forEach( (item: ElementNode) => results.push(item));
-      } else {
-        possibles.forEach( (item: ElementNode) => goDeeper(command_list, item, results));
+        isMatch = isMatch && !! element_attr;
       }
     }
-  } //-- goDeeper --
-
-  let trail : ParseOutput = (root: ElementNode) => {
-    list.reverse();
-    let results: Array<ElementNode> = [];
-    goDeeper(list, root, results);
-    return results;
-  };
-  return trail;
-}
-
-function ApplySameElementToList(list: Array<ParseOutput>) : ParseOutput {
-  let task : ParseOutput = (element: ElementNode) => {
-    let result: Array<ElementNode> = [];
-    list.forEach( (output: ParseOutput) => result = result.concat(output(element)));
-    return result;
-  };
-  return task;
-}
-
-function SelectorList(selector: string) : ParseOutput {
-  return (element: ElementNode) => {
-    let list = selector.split(',')
-      .map( (s:string) => s.trim() )
-      .map( (sub_selector:string ) => SingleSelector(sub_selector));
-    let task = ApplySameElementToList(list);
-    return task(element);
+    return isMatch;
   }
+  return false;
 }
 
-function HierarchyOrOther(selector: string) : ParseOutput {
-  if (selector.includes('>')) {
-    return HierarchySelector(selector);
+function isSelectorMatch(selector: SelectorToken | undefined, element: ElementNode) : boolean {
+  if (!! selector) {
+    let isMatch: boolean = true;
+    if (hasTag( selector) ) {
+      isMatch = isMatch && isTagMatch(selector, element);
+    }
+    if (hasAttribute(selector)) {
+      isMatch = isMatch && isAttributeMatch(selector, element);
+    }
+    return isMatch;
   } else {
-    return SingleSelector(selector);
+    return false;
   }
 }
 
-function ListOrOther(selector: string) : ParseOutput {
-  if (selector.includes(',')) {
-    return SelectorList(selector);
-  } else {
-    return HierarchyOrOther(selector);
+function MakeTagFilter(selector: SelectorToken) : CollectorFilter {
+  return (element: ElementNode, root: ElementNode) => {
+    return isTagMatch(selector, element) ? element : undefined;
   }
 }
+
+function MakeAttributeFilter(selector: SelectorToken) : CollectorFilter {
+  return (element: ElementNode, root: ElementNode) => {
+    return isAttributeMatch(selector, element) ? element : undefined;
+  }
+}
+
+function hasChild(selector: SelectorToken) : boolean { return !! selector._child; }
+
+function ListElementsFromDescendentToRoot(descendent: ElementNode, root: ElementNode) : Array<ElementNode> {
+  let list: Array<ElementNode> = [];
+  let current = descendent;
+
+  while(!!current && current != root && (!!current.parent) ) {
+    list.push(current);
+    current = current.parent;
+  }
+  return list;
+}
+
+function ListSelectorTokensLeafChildToRoot(root: SelectorToken): Array<SelectorToken> {
+  let tokens : Array<SelectorToken> = [];
+  let current : SelectorToken | undefined = root;
+
+  while(!!current ) {
+    tokens.push(current);
+    current = current._child;
+  }
+  return tokens.reverse();
+}
+
+function MakeParentChildFilter(selector: SelectorToken) : CollectorFilter {
+  let selectorChain = ListSelectorTokensLeafChildToRoot(selector);
+
+  return (element: ElementNode, root: ElementNode) => {
+    let descendentToRoot = ListElementsFromDescendentToRoot(element, root);
+    if (selectorChain.length > descendentToRoot.length) {
+      return undefined;
+    } else {
+      let isOkToContinue = true;
+
+      for(var index = 0; isOkToContinue && index < selectorChain.length; index++) {
+        let tokenToMatch = selectorChain[index];
+        let elementToCheck = descendentToRoot[index];
+
+        isOkToContinue = isSelectorMatch(tokenToMatch, elementToCheck);
+      }
+      return isOkToContinue ? element : undefined;
+    }
+  }
+}
+
+function MakeSingleElementFilter(selector: SelectorToken) : CollectorFilter {
+  return (element: ElementNode, root: ElementNode) => {
+    return isSelectorMatch(selector, element) ? element : undefined;
+  }
+}
+
+function MakeSingleSelectorFilter(selector: SelectorToken) : CollectorFilter {
+
+  // if ( hasTag( selector ) && ! hasChild( selector) ) {
+  //   return MakeTagFilter(selector);
+  // }
+  if ( hasChild(selector) ) {
+    return MakeParentChildFilter(selector);
+  } else {
+    return MakeSingleElementFilter(selector);
+  }
+  return (e: ElementNode) => { return undefined;};
+}
+
+function MakeSelectorListFilter(selectors: Array<SelectorToken>) : CollectorFilter {
+  return (element: ElementNode, root: ElementNode) => {
+    let isMatch : ElementOrNot = undefined;
+    let filters = selectors.map( (sel: SelectorToken) => MakeSingleSelectorFilter(sel));
+    for( var index = 0; ! isMatch && index< filters.length; index++) {
+      isMatch = filters[index](element, root);
+    }
+    return isMatch;
+  }
+}
+
+function getElementChildrenFrom(element: ElementNode) : Array<ElementNode> {
+  return element.children
+        .filter( (node: IMockDocNode) => node.nodeType === MockNodeType.ElementNode)
+        .map( (element: IMockDocNode) => <ElementNode> element);
+}
+
+function selector(
+  filter: CollectorFilter,
+  collection: Array<ElementNode>,
+  root: ElementNode,
+  current: ElementNode | undefined
+) : void {
+  if (current) {
+    let collectable = filter(current, root);
+    if (!! collectable) {
+      collection.push( collectable );
+    }
+    let children : Array<ElementNode> = getElementChildrenFrom(current);
+    for(var child of children) {
+      selector(filter, collection, root, child);
+    }
+  }
+}
+
 
 /**
  * Parses a selector to create a parse plan that can be
@@ -216,7 +186,13 @@ export class MockSelectorParser {
   }
 
   parseWith(element: ElementNode) : Array<ElementNode> {
-    let output = ListOrOther(this.selector);
-    return output(element);
+    let list : Array<ElementNode> = [];
+    let lexer = new SelectorLexer();
+    lexer.lex_selector(this.selector);
+
+    let filter = MakeSelectorListFilter(lexer.tokens);
+
+    selector(filter, list, element, element);
+    return list;
   }
 }

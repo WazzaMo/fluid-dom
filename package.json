@@ -7,7 +7,7 @@
   "scripts": {
     "test": "run-s dist test-message",
     "test-message": "echo \"Open the HTML files in the tests directory to run the tests.\" ",
-    "test-mock": "npm run build-commonjs-mock && jasmine",
+    "test-mock": "npm run build-commonjs-mock && jasmine || echo ERROR",
     "dist": "npm run typescript && npm run build-dev && npm run build && npm run post-dist",
     "typescript": "tsc",
     "build": "run-s build-bundle build-commonjs build-commonjs-mock",
