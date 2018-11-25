@@ -556,6 +556,11 @@ export interface AttribInfo {
   value ?: string;
 }
 
+function attribToString(a: AttribInfo) : string {
+  let opt_value = a.value ? `="${a.value}"` : '';
+  return `[${a.name}${opt_value}]`;
+}
+
 /**
  * Represents a given selector or linked-list of selectors
  * in the case of:
@@ -576,6 +581,22 @@ export interface SelectorToken {
   _adjacent_sibling ?: SelectorToken;
   _general_sibling ?: SelectorToken;
 }
+
+export function selectorTokentoString(token: SelectorToken) : string {
+  let text = '';
+  text += token._tag ? `${token._tag}` : '';
+  text += token._pseudo_element ? `::${token._pseudo_element}` : '';
+  text += token._pseudo_class ? `:${token._pseudo_class}` : '';
+  text += token._class ? `.${token._class}` : '';
+  text += token._id ? `#${token._id}` : '';
+  text += token._attrib ? token._attrib.map((a:AttribInfo)=>attribToString(a)).reduce( (a:string, b:string)=> (a)+(b)) : '';
+  text += token._child ? `>${selectorTokentoString(token._child)}` : '';
+  text += token._descendent ? ` ${selectorTokentoString(token._descendent)}` : '';
+  text += token._adjacent_sibling ? `+${token._adjacent_sibling}` : '';
+  text += token._general_sibling ? `~${token._general_sibling}` : '';
+  return text;
+}
+
 
 // --------- Token -------------
 

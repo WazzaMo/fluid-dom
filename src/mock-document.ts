@@ -46,10 +46,9 @@ export class MockDocument implements IElementNodeFactory, IFluidDocument {
 
   create_child_element(
     child_tag: string,
-    id: string | undefined,
     callback: ((mock: ElementNode) => void ) | undefined
   ): IElementNodeFactory {
-    this.root_node.create_child_element(child_tag, id, callback);
+    this.root_node.create_child_element(child_tag, callback);
     return this;
   }
 

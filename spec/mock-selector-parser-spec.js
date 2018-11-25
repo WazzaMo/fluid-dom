@@ -37,9 +37,9 @@ describe("MockSelectorParser", ()=> {
       parser = new fluid.MockSelectorParser('DIV, P');
       random_text = randomString();
 
-      doc.create_child_element('body', undefined, body => {
+      doc.create_child_element('body', body => {
         body.create_child_element( 'DIV');
-        body.create_child_element( 'P', undefined, p => p.text_value = random_text );
+        body.create_child_element( 'P', p => p.text_value = random_text );
         root = body;
       });
 
@@ -50,7 +50,9 @@ describe("MockSelectorParser", ()=> {
 
     it('must return DIV for the first element', ()=> expect(subject[0].tag).toBe('DIV') );
     it('must return P for the second element', ()=> expect(subject[1].tag).toBe('P') );
-    it('must have given text_value on P element', ()=> expect(subject[1].text_value).toBe( random_text ));
+    it('must have given text_value on P element', ()=> {
+      expect(subject[1].text_value).toBe( random_text )
+    });
 
   });
 
@@ -64,10 +66,10 @@ describe("MockSelectorParser", ()=> {
       randValuePara = randomString();
       randValueDiv = randomString();
 
-      doc.create_child_element('body', undefined, body => {
-        body.create_child_element('div', undefined, div => {
+      doc.create_child_element('body', body => {
+        body.create_child_element('div', div => {
           div.text_value = randValueDiv;
-          div.create_child_element('p', undefined, p=> {
+          div.create_child_element('p', p=> {
             p.text_value = randValuePara;
             p.attrib('main','message');
             _para = p;
@@ -93,7 +95,10 @@ describe("MockSelectorParser", ()=> {
     it('must find two paragraphs if a second is added before parsing:', ()=>{
       let parser = new fluid.MockSelectorParser('body > div > p');
       let para2;
-      _div.create_child_element('p', 'second', p => para2 = p);
+      _div.create_child_element('p', p => {
+        para2 = p;
+        p.id('second');
+      });
       subject = parser.parseWith(doc.root_node);
       expect(subject).toEqual([_para, para2]);
     });
@@ -101,7 +106,10 @@ describe("MockSelectorParser", ()=> {
     it('must find a second div if it is added before parsing: ', ()=> {
       let parser = new fluid.MockSelectorParser('body>div');
       let div2;
-      _body.create_child_element('div', '2nd-div', d => div2 = d);
+      _body.create_child_element('div', d => {
+        div2 = d;
+        d.id('2nd-div');
+      });
       subject = parser.parseWith(doc.root_node);
       expect(subject).toEqual([_div, div2]);
     });
@@ -121,15 +129,15 @@ describe("MockSelectorParser", ()=> {
 
     beforeEach( ()=> {
       doc = fluid.Doc();
-      doc.create_child_element('body', undefined, body => {
-        body.create_child_element('div', undefined, div => {
-          div.create_child_element('p', undefined, p => {
+      doc.create_child_element('body', body => {
+        body.create_child_element('div', div => {
+          div.create_child_element('p', p => {
             attrib = anyAttrib();
             attrib_value = randomString();
             p.attrib(attrib, attrib_value);
             para_with_attrib = p;
           });
-          div.create_child_element('p', undefined, p => para_basic = p);
+          div.create_child_element('p', p => para_basic = p);
         });
       });
     });
@@ -155,4 +163,137 @@ describe("MockSelectorParser", ()=> {
     });
 
   }); //-- when using attributes
+
+  describe('when seeking descendents: ', ()=> {
+    let subject;
+    let expected;
+
+    beforeEach( ()=> {
+      doc = fluid.Doc();
+      doc.create_child_element('body', body=> {
+        body.create_child_element('div', div_main => {
+          div_main.id('main');
+          div_main.create_child_element('descendent', desc => {
+            expected = desc;
+            desc.attrib('main', 'main');
+          });
+        });
+      })
+    });
+
+    it ('must find the descendent: ', ()=> {
+      let parser = new fluid.MockSelectorParser(`body descendent`);
+      subject = parser.parseWith( doc.root_node);
+      expect( subject ).toEqual([expected]);
+    });
+
+    it ('must find descendent by attribute: ', ()=> {
+      let parser = new fluid.MockSelectorParser('body [main]');
+      subject = parser.parseWith( doc.root_node );
+      expect( subject ).toEqual( [expected] );
+    });
+
+  }); //--- descendents
+
+  describe('where mismatch happens early: ', ()=> {
+
+    let subject;
+
+    
+    beforeEach( ()=> {
+      doc = fluid.Doc();
+      doc.create_child_element('body', body=> {
+        body.create_child_element('content', content => {
+          _content = content;
+          content.create_child_element('p', p=> {
+            _pMain = p;
+            p.attrib('main', 'main');
+          });
+        });
+      });
+    });
+
+    it ('must not match on mismatched tag: ', ()=> {
+      let mp = new fluid.MockSelectorParser('nonexistent');
+      subject = mp.parseWith(doc.root_node);
+      expect( subject ).toEqual( [] );
+    });
+
+    it ('must not match correct child of mismatched ancestor: ', ()=> {
+      let mp = new fluid.MockSelectorParser('nonexistent>[main]');
+      subject = mp.parseWith(doc.root_node);
+      expect( subject ).toEqual( [] );
+    });
+
+    it ('must not match correct descendent of mismatched ancestor: ', ()=> {
+      let mp = new fluid.MockSelectorParser('nonexistent [main]');
+      subject = mp.parseWith(doc.root_node);
+      expect( subject ).toEqual( [] );
+    });
+
+  }); //-- early mismatch
+
+  describe( 'where changing child / descendent navigation: ', () => {
+
+    let subject;
+    let _head, _content, _footer;
+    let _pMain, _pOther;
+    let list_li;
+    
+    beforeEach( ()=> {
+      doc = fluid.Doc();
+      doc.create_child_element('body', body=> {
+        body.create_child_element('head', head=> {
+          _head = head;
+        });
+        body.create_child_element('content', content => {
+          _content = content;
+          content.create_child_element('p', p=> {
+            _pMain = p;
+            p.attrib('main', 'main');
+          });
+          content.create_child_element('p', p=> {
+            _pOther = p;
+            p.id('other');
+          });
+
+          content.create_child_element('div', div=> {
+            div.id('nav');
+            div.create_child_element('ul', ul=> {
+              list_li = [];
+              ul.create_child_element('li', li=> {
+                li.id('first');
+                list_li.push(li);
+              });
+              ul.create_child_element('li', li=> {
+                li.id('second');
+                list_li.push(li);
+              });
+              ul.create_child_element('li', li=> {
+                li.id('third');
+                list_li.push(li);
+              });
+            })
+          })
+        });
+        body.create_child_element('footer', footer => {
+          _footer = footer;
+        });
+      });
+    });
+
+    it ('must find target from parent>child descendent target: ', ()=> {
+      let mp = new fluid.MockSelectorParser('html>body p');
+      subject = mp.parseWith( doc.root_node );
+      expect( subject ).toEqual( [_pMain, _pOther] );
+    });
+
+    it ('must find target from parent>child descendent parent>child target: ', ()=> {
+      let mp = new fluid.MockSelectorParser('content ul>li');
+      subject = mp.parseWith( doc.root_node );
+      expect( subject ).toEqual( list_li );
+    });
+
+  }); //-- changing child / descendent nav
+
 });

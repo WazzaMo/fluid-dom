@@ -8,48 +8,82 @@ import {
   ElementNode,
   IMockNodeAttributes,
   MockNodeType,
-  IMockDocNode
+  IMockDocNode,
+  getElementChildrenFrom
 } from './mock-document-nodes';
 
 import {
   AttribInfo,
   SelectorLexer,
-  SelectorToken
+  SelectorToken,
+  selectorTokentoString
 } from './selector-lexer';
-import { match } from 'minimatch';
 
-type ElementOrNot = ElementNode | undefined;
-type CollectorFilter = (element: ElementNode, root: ElementNode) => ElementOrNot;
+import { merge_array } from './util';
 
+
+
+enum MatchResults {
+  NoMatch = 'no-match',
+  AncestorMatch = 'ancestor-element-match',
+  TargetMatch = 'target-element-match',
+  AncestorMismatch = 'ancestor-element-MISMATCH'
+}
+
+interface MatchOutcome {
+  result: MatchResults;
+  target ?: Array<ElementNode>;
+  ancestor_candidates ?: Array<ElementNode>;
+}
+
+type CollectorFilter = (element: ElementNode, root: ElementNode) => MatchOutcome;
+
+    //---// Selector Token Functions //---//
 function hasTag(selector: SelectorToken) : boolean { return !! selector._tag; }
+
+function hasAttribute(selector: SelectorToken) : boolean { return !! selector._attrib && selector._attrib.length> 0; }
+
+function hasDescendent(selector: SelectorToken) : boolean { return !! selector._descendent; }
+
+function hasChild(selector: SelectorToken) : boolean { return !! selector._child; }
+
+function isTargetToken(selector: SelectorToken) : boolean {
+  return ! selector._child && ! selector._descendent
+    && ! selector._adjacent_sibling && ! selector._general_sibling;
+}
+
+function isTraversalSelector(selector: SelectorToken) : boolean {
+  return (!!selector._child )
+    || (!! selector._descendent )
+    || (!! selector._adjacent_sibling )
+    || (!! selector._general_sibling );
+}
+
+function ListSelectorsFollowing(
+  selector: SelectorToken, next: (sel: SelectorToken)=>SelectorToken | undefined
+) : Array<SelectorToken> {
+  let list : Array<SelectorToken> = [];
+  let current : SelectorToken | undefined = selector;
+  do {
+    if (current) {
+      list.push(current);
+      current = next(current);
+    }
+  } while(!! current);
+  return list;
+}
+    //---// Selector Token Functions //---//
+
+
+    //---// Match Helper Functions //---//
 
 function isTagMatch(selector:SelectorToken | undefined, element: ElementNode) : boolean {
   return !! selector ? (element.tag.toUpperCase() === selector._tag) : false;
 }
 
-function hasAttribute(selector: SelectorToken) : boolean { return !! selector._attrib && selector._attrib.length> 0; }
-
-function isAttributeMatch( selector: SelectorToken | undefined, element: ElementNode) : boolean {
-  if (!! selector && selector._attrib && selector._attrib.length > 0) {
-    let isMatch = true;
-    for(var index = 0; index < selector._attrib.length && isMatch; index++) {
-      let attr = selector._attrib[index];
-      let {name, value} = attr;
-      let element_attr = element.attrib(name);
-      if (element_attr && value) {
-        isMatch = isMatch && element_attr === value;
-      } else {
-        isMatch = isMatch && !! element_attr;
-      }
-    }
-    return isMatch;
-  }
-  return false;
-}
-
 function isSelectorMatch(selector: SelectorToken | undefined, element: ElementNode) : boolean {
   if (!! selector) {
-    let isMatch: boolean = true;
+    let isMatch: boolean = hasTag(selector) || hasAttribute(selector);
     if (hasTag( selector) ) {
       isMatch = isMatch && isTagMatch(selector, element);
     }
@@ -62,21 +96,33 @@ function isSelectorMatch(selector: SelectorToken | undefined, element: ElementNo
   }
 }
 
-function MakeTagFilter(selector: SelectorToken) : CollectorFilter {
-  return (element: ElementNode, root: ElementNode) => {
-    return isTagMatch(selector, element) ? element : undefined;
+/**
+ * Checks if element has all expected attribute properties.
+ * Must have confirmed the selector is valid before calling.
+ * @param selector - verified, valid selector token object
+ * @param element - element to compare with.
+ * @see hasAttribute
+ */
+function isAttributeMatch( selector: SelectorToken | undefined, element: ElementNode) : boolean {
+  let isMatch = true;
+  let attribs = !!selector ? <Array<AttribInfo>> selector._attrib : [];
+  for(var index = 0; index < attribs.length && isMatch; index++) {
+    let attr = attribs[index];
+    let {name, value} = attr;
+    let element_attr = element.attrib(name);
+    if (element_attr && value) {
+      isMatch = isMatch && element_attr === value;
+    } else {
+      isMatch = isMatch && !! element_attr;
+    }
   }
+  return isMatch;
 }
 
-function MakeAttributeFilter(selector: SelectorToken) : CollectorFilter {
-  return (element: ElementNode, root: ElementNode) => {
-    return isAttributeMatch(selector, element) ? element : undefined;
-  }
-}
+        //---// Match Helper Functions //---//
 
-function hasChild(selector: SelectorToken) : boolean { return !! selector._child; }
 
-function ListElementsFromDescendentToRoot(descendent: ElementNode, root: ElementNode) : Array<ElementNode> {
+function ListElementsFromUltimateChildToRoot(descendent: ElementNode, root: ElementNode) : Array<ElementNode> {
   let list: Array<ElementNode> = [];
   let current = descendent;
 
@@ -87,73 +133,203 @@ function ListElementsFromDescendentToRoot(descendent: ElementNode, root: Element
   return list;
 }
 
+
 function ListSelectorTokensLeafChildToRoot(root: SelectorToken): Array<SelectorToken> {
+  let tokens : Array<SelectorToken> = [];
+
+  tokens = ListSelectorTokens(root, (token:SelectorToken ) => token._child );
+  return tokens.reverse();
+}
+
+function ListSelectorTokens(
+  root: SelectorToken,
+  next: (token: SelectorToken)=> SelectorToken | undefined
+): Array<SelectorToken> {
   let tokens : Array<SelectorToken> = [];
   let current : SelectorToken | undefined = root;
 
   while(!!current ) {
     tokens.push(current);
-    current = current._child;
+    current = next( current );
   }
-  return tokens.reverse();
+  return tokens;
 }
 
-function MakeParentChildFilter(selector: SelectorToken) : CollectorFilter {
-  let selectorChain = ListSelectorTokensLeafChildToRoot(selector);
+function navigate_descendents(element: ElementNode, token: SelectorToken) : MatchOutcome {
+  let filter = MakeSingleElementFilter(token);
+  let list: Array<ElementNode> = [];
+  selector(filter, list, element, element);
+  console.log(`navigate_descendents: e: ${element} S: ${selectorTokentoString(token)} Len: ${list.length}`);
 
-  return (element: ElementNode, root: ElementNode) => {
-    let descendentToRoot = ListElementsFromDescendentToRoot(element, root);
-    if (selectorChain.length > descendentToRoot.length) {
-      return undefined;
-    } else {
-      let isOkToContinue = true;
-
-      for(var index = 0; isOkToContinue && index < selectorChain.length; index++) {
-        let tokenToMatch = selectorChain[index];
-        let elementToCheck = descendentToRoot[index];
-
-        isOkToContinue = isSelectorMatch(tokenToMatch, elementToCheck);
+  if (list.length> 0) {
+    if (token._descendent) {
+      let result_list: Array<ElementNode> = [];
+  
+      for(var child of list) {
+        let candidate = navigate_descendents(child, token._descendent);
+        console.log(`navigate_descendents: ${candidate.result} ${candidate.target}`);
+        if (candidate.result === MatchResults.TargetMatch && candidate.target) {
+          result_list = merge_array(result_list, candidate.target);
+        }
       }
-      return isOkToContinue ? element : undefined;
+      console.log(`navigate_descendents: selector ${selectorTokentoString(token)} = ${result_list.length} results`);
+      return (result_list.length > 0)
+        ? { result: MatchResults.TargetMatch, target: result_list }
+        : { result: MatchResults.AncestorMismatch };
+    } else if (token._child) {
+      let result: Array<ElementNode> = [];
+      for(var child of list) {
+        let outcome = navigate_children(child, token);
+        if (outcome.target) {
+          result = merge_array(result, outcome.target);
+        }
+      }
+      if (result.length > 0) {
+        return { result: MatchResults.TargetMatch, target: result };
+      }
+    } else {
+      return { result: MatchResults.TargetMatch, target: list };
     }
+  }
+  return { result: MatchResults.AncestorMismatch };
+}
+
+function navigate_children(element: ElementNode, selector: SelectorToken): MatchOutcome {
+  console.log(`navigate_children: ${element} | selector ${selectorTokentoString( selector)}`);
+  if (isSelectorMatch(selector, element)) {
+    if (selector._child ) {
+      let children = getElementChildrenFrom(element);
+      let matchedTargets : Array<ElementNode> = [];
+      for(var child of children) {
+        let outcome = navigate_children(child, selector._child);
+        if (outcome.result === MatchResults.TargetMatch && outcome.target) {
+          matchedTargets = merge_array(matchedTargets, outcome.target);
+        }
+      }
+      if (matchedTargets.length > 0) {
+        return { result: MatchResults.TargetMatch, target: matchedTargets };
+      }
+    } else if (selector._descendent) {
+      console.log(`navigate_children - going to descendents: e: ${element} s: ${selectorTokentoString(selector._descendent)}`);
+      return navigate_descendents(element, selector._descendent);
+    }
+    else {
+      return { result: MatchResults.TargetMatch, target: [ element ]};
+    }
+  }
+
+  return { result: MatchResults.AncestorMismatch };
+}
+
+function follow(element: ElementNode, next_selector: SelectorToken) : MatchOutcome {
+  if (next_selector._descendent) {
+    return navigate_descendents(element, next_selector);
+  } else if (next_selector._child) {
+    return navigate_children(element, next_selector);
+  }
+
+  if (isTargetToken(next_selector) && isSelectorMatch(next_selector, element)) {
+    return { result: MatchResults.TargetMatch, target: [ element ]};
+  } else {
+    return { result: MatchResults.NoMatch };
+  }
+}
+
+/**
+ * A CollectorFilter factory for parent->child relationship.
+ * @param selector - selector to match
+ */
+function MakeParentChildFilter(selector: SelectorToken) : CollectorFilter {
+  return (element: ElementNode, root: ElementNode) : MatchOutcome => {
+    if (isTargetToken(selector)) {
+      return { result: MatchResults.TargetMatch, target: [ element ]};
+    } else {
+      if (isTraversalSelector(selector) && isSelectorMatch(selector, element)) {
+        return follow(element, selector);
+      } else {
+        return { result: MatchResults.AncestorMismatch };
+      }
+    }
+  }
+}
+
+
+function MakeParentDescendentFilter(token: SelectorToken) : CollectorFilter {
+
+  function getCandidates(element: ElementNode, next_selector: SelectorToken) : MatchOutcome {
+    let list: Array<ElementNode> = [];
+    let filter = MakeSingleElementFilter(next_selector);
+    selector(filter, list, element, element);
+    if (next_selector._descendent) {
+      let result_list: Array<ElementNode> = [];
+
+      for(var child of list) {
+        let candidate = getCandidates(child, next_selector._descendent);
+        console.log(`getCandidates: ${candidate.result} ${candidate.target}`);
+        if (candidate.result === MatchResults.TargetMatch && candidate.target) {
+          result_list = merge_array(result_list, candidate.target);
+        }
+      }
+      console.log(`getCandidates: selector ${selectorTokentoString(next_selector)} = ${result_list.length} results`);
+      return (result_list.length > 0) ? { result: MatchResults.TargetMatch, target: result_list } : { result: MatchResults.NoMatch };
+    }
+    if (list.length > 0) {
+      console.log(`getCandidates: TargetMatch - ${list.length} values`);
+      return { result: MatchResults.TargetMatch, target: list};
+    } else {
+      console.log(`getCandidates: leaf - no match`);
+      return { result: MatchResults.NoMatch };
+    }
+  }
+
+  return (element: ElementNode, root: ElementNode) : MatchOutcome => {
+    // return getCandidates(element, token);
+    // return navigate_descendents(element, token);
+    return follow(element, token);
   }
 }
 
 function MakeSingleElementFilter(selector: SelectorToken) : CollectorFilter {
   return (element: ElementNode, root: ElementNode) => {
-    return isSelectorMatch(selector, element) ? element : undefined;
+
+    // console.log(` selector ${selectorTokentoString(selector)} <==> element ${element} ? ${isSelectorMatch(selector, element)}`);
+
+    return isSelectorMatch(selector, element)
+    ? { result: MatchResults.TargetMatch, target: [element] }
+    : { result: MatchResults.NoMatch };
   }
 }
 
 function MakeSingleSelectorFilter(selector: SelectorToken) : CollectorFilter {
-
-  // if ( hasTag( selector ) && ! hasChild( selector) ) {
-  //   return MakeTagFilter(selector);
-  // }
   if ( hasChild(selector) ) {
     return MakeParentChildFilter(selector);
+  } else if (hasDescendent(selector)) {
+    return MakeParentDescendentFilter(selector);
   } else {
     return MakeSingleElementFilter(selector);
   }
-  return (e: ElementNode) => { return undefined;};
 }
 
 function MakeSelectorListFilter(selectors: Array<SelectorToken>) : CollectorFilter {
   return (element: ElementNode, root: ElementNode) => {
-    let isMatch : ElementOrNot = undefined;
+    let targets_matched : Array<ElementNode> = [];
+    let outcome : MatchOutcome = {result: MatchResults.NoMatch};
+
     let filters = selectors.map( (sel: SelectorToken) => MakeSingleSelectorFilter(sel));
-    for( var index = 0; ! isMatch && index< filters.length; index++) {
-      isMatch = filters[index](element, root);
+    for( var index = 0; index< filters.length; index++) {
+      outcome = filters[index](element, root);
+      if (outcome.result === MatchResults.TargetMatch && outcome.target) {
+        targets_matched = targets_matched.concat(outcome.target);
+
+        console.warn(`Element: ${element}, Token:"${selectorTokentoString(selectors[index])}" -- Adding ${outcome.target.length} to total (${targets_matched.length})`);
+      }
     }
-    return isMatch;
+    return targets_matched.length > 0
+      ? { result: MatchResults.TargetMatch, target: targets_matched }
+      : { result: MatchResults.NoMatch };
   }
 }
 
-function getElementChildrenFrom(element: ElementNode) : Array<ElementNode> {
-  return element.children
-        .filter( (node: IMockDocNode) => node.nodeType === MockNodeType.ElementNode)
-        .map( (element: IMockDocNode) => <ElementNode> element);
-}
 
 function selector(
   filter: CollectorFilter,
@@ -162,13 +338,21 @@ function selector(
   current: ElementNode | undefined
 ) : void {
   if (current) {
-    let collectable = filter(current, root);
-    if (!! collectable) {
-      collection.push( collectable );
-    }
-    let children : Array<ElementNode> = getElementChildrenFrom(current);
-    for(var child of children) {
-      selector(filter, collection, root, child);
+    let outcome = filter(current, root);
+    if (outcome.result === MatchResults.TargetMatch && outcome.target ) {
+      for(var target of outcome.target) {
+        collection.push(target);
+      }
+    } else if (outcome.result != MatchResults.AncestorMismatch) {
+      let children : Array<ElementNode> = getElementChildrenFrom(current);
+      for(var child of children) {
+        selector(filter, collection, root, child);
+      }
+    } else if (outcome.result === MatchResults.AncestorMismatch) {
+      console.warn(`!!! Ancestor Mismatch - length ${collection.length}`);
+      while(collection.length > 0) {
+        collection.pop();
+      }
     }
   }
 }

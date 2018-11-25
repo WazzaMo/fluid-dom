@@ -22,7 +22,6 @@ export interface IElementNodeFactory {
 
   create_child_element(
     child_tag: string,
-    id ?: string,
     callback ?: (mock:ElementNode) => void
   ) : IElementNodeFactory;
 }
@@ -96,6 +95,22 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
       this._attributes[name] = value;
     }
     return this._attributes[name];
+  }
+
+  id(value ?: string) : void | string {
+    if (value) {
+      this.attrib('id', value);
+    } else {
+      return this.attrib('id');
+    }
+  }
+
+  _class(value ?: string) : void | string {
+    if (value) {
+      this.attrib('class', value);
+    } else {
+      return this.attrib('class');
+    }
   }
 
   /**
@@ -196,10 +211,9 @@ export class ElementNode implements IMockDocNode, IElementNodeFactory {
 
   create_child_element(
     child_tag: string,
-    id?: string | undefined,
     callback?: ((mock: ElementNode) => void ) | undefined
   ): IElementNodeFactory {
-    let element = new ElementNode(child_tag, this, id);
+    let element = new ElementNode(child_tag, this);
     this.addChild(element);
     if (callback) {
       callback(element);
@@ -265,4 +279,15 @@ export function toHtml( element: ElementNode) : string {
     </${element.tag}>
   `;
   return as_html;
+}
+
+/**
+ * Takes an element and finds any and all element children in its possession.
+ * @param element - element from which to make a list of element children
+ * @returns array of element nodes.
+ */
+export function getElementChildrenFrom(element: ElementNode) : Array<ElementNode> {
+  return element.children
+        .filter( (node: IMockDocNode) => node.nodeType === MockNodeType.ElementNode)
+        .map( (element: IMockDocNode) => <ElementNode> element);
 }

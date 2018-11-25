@@ -33,3 +33,10 @@ export function providesOne(list: Array<string>, args: any) {
 export function logWarning(message: string) {
   console.warn("FluidDOM: " + message)
 }
+
+export function merge_array<T>(a1: Array<T>, a2: Array<T>) {
+  let final : Array<T> = [];
+  final = final.concat(a1);
+  final = final.concat(a2);
+  return final;
+}

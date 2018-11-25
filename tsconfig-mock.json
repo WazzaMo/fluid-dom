@@ -28,6 +28,7 @@
         "src/mock-selector-parser.ts",
         "src/option.ts",
         "src/selector-lexer.ts",
+        "src/util.ts",
 
         "tests/mock-test.ts"
     ],

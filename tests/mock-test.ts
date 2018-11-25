@@ -13,10 +13,7 @@ let doc = new mockfluid.MockDocument();
 doc.create_child_element(
   'body', '_body',
   (body: any)=> {
-    body.create_child_element(
-      'div',
-      'top-line',
-      (div_nav: any)=> {
+    body.create_child_element( 'div', (div_nav: any)=> {
         div_nav.create_child_element('p', 'para1',
           (p:any) =>p.text_value = 'hi there'
         );
@@ -25,10 +22,8 @@ doc.create_child_element(
       }
     );
 
-    body.create_child_element(
-      'div', '_div_2',
-      (div_2: any) => {
-        div_2.create_child_element('p', 'para2', (p:any)=> p.text_value = 'Second');
+    body.create_child_element( 'div', (div_2: any) => {
+        div_2.create_child_element('p', (p:any)=> p.text_value = 'Second');
         div_2.attrib('class', 'highlight');
       }
     );
