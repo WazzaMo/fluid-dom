@@ -136,6 +136,15 @@ describe('selector-lexer', ()=> {
         expect(lexer.tokens[0]._attrib[1].name).toEqual('Name2');
         expect(lexer.tokens[0]._attrib[1].value).toEqual('n2 % ()_--');
       });
+      
+      it (`must handle 'li[main][id="first"]' : `, ()=> {
+        let id_attrib = {name: 'id', value: 'first'};
+        let main_attrib = {name: 'main'};
+        let li = {_tag: 'LI', _attrib: [main_attrib, id_attrib] };
+
+        lexer.lex_selector( 'li[main][id="first"]' );
+        expect( lexer.tokens ).toEqual( [li] );
+      });
 
     }); // attributes & values
 
@@ -281,6 +290,19 @@ describe('selector-lexer', ()=> {
       });
 
     }); // pseudo-class - eg, p:nth-child(1n)
+
+    describe( 'selectors that broke it: ',() => {
+
+      it (`must handle this 'head,content li[id="first"], footer': `,()=> {
+        let head = {_tag: 'HEAD'};
+        let li_first = {_tag: 'LI', _attrib: [{name: 'id', value: 'first'}] };
+        let content = {_tag: 'CONTENT', _descendent: li_first };
+        let footer = {_tag: 'FOOTER'};
+        lexer.lex_selector('head,content li[id="first"], footer');
+        expect(lexer.tokens).toEqual([head, content, footer]);
+      });
+
+    }); ////// Bug Fixing
 
   }); //-- lex_selector()
 

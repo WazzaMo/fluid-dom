@@ -373,6 +373,7 @@ function setup_tables() {
     at_on(wait_extra, Events.DescendentSeparator, States.AwaitDescendentSelector, Actions.Ignore);
     at_on(wait_extra, Events.ChildSeparator, States.AwaitChildSelector, Actions.Ignore);
     at_on(wait_extra, Events.EndInput, wait_extra, Actions.Ignore);
+    at_on(wait_extra, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, Actions.NewSelectorInSet);
   }
 
   function _await_attrib_equals() {
@@ -398,7 +399,7 @@ function setup_tables() {
     at_on(getvalue, Events.LabelChar, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.AttribNameChar, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.LeftSqBracket, getvalue, Actions.AppendAttribValue);
-    at_on(getvalue, Events.RightSqBracket, getvalue, Actions.AppendAttribValue);
+    at_on(getvalue, Events.RightSqBracket, getvalue, Actions.AppendAttribValue); // within quotes!
     at_on(getvalue, Events.AdjacentSibling, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.GeneralSibling, getvalue, Actions.AppendAttribValue);
     at_on(getvalue, Events.LeftParenthesis, getvalue, Actions.AppendAttribValue);
@@ -534,7 +535,6 @@ function event(_char: string) : number {
     case '\t': return Events.DescendentSeparator;
     case '>': return Events.ChildSeparator;
     case '"': return Events.Quote;
-    case ',': return Events.SelectorSeparator;
     case '+': return Events.AdjacentSibling;
     case '~': return Events.GeneralSibling;
     case ':': return Events.Colon;
@@ -542,6 +542,8 @@ function event(_char: string) : number {
     case ')': return Events.RightParenthesis;
 
     case '-': return Events.AttribNameChar;
+
+    case ',': return Events.SelectorSeparator;
 
     case '\n':
     case '\b':

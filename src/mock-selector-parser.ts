@@ -19,8 +19,10 @@ import {
   selectorTokentoString
 } from './selector-lexer';
 
-import { merge_array } from './util';
-
+import {
+  merge_array,
+  empty_array
+} from './util';
 
 
 enum MatchResults {
@@ -59,19 +61,6 @@ function isTraversalSelector(selector: SelectorToken) : boolean {
     || (!! selector._general_sibling );
 }
 
-function ListSelectorsFollowing(
-  selector: SelectorToken, next: (sel: SelectorToken)=>SelectorToken | undefined
-) : Array<SelectorToken> {
-  let list : Array<SelectorToken> = [];
-  let current : SelectorToken | undefined = selector;
-  do {
-    if (current) {
-      list.push(current);
-      current = next(current);
-    }
-  } while(!! current);
-  return list;
-}
     //---// Selector Token Functions //---//
 
 
@@ -121,72 +110,53 @@ function isAttributeMatch( selector: SelectorToken | undefined, element: Element
 
         //---// Match Helper Functions //---//
 
+/**
+ * Internal to navigateDescendents().
+ * Applies a matching callback or function to a list of candidate element nodes
+ * and collect the matches.
+ * @param elementList 
+ * @param selector 
+ * @param callback 
+ * @returns MatchOutcome with list of matching element nodes (if matched).
+ * @see navigateDescendents
+ */
+function applyToElementsInListAndCollectMatches(
+  elementList: Array<ElementNode>,
+  selector: SelectorToken,
+  callback: (child: ElementNode, selector: SelectorToken) => MatchOutcome
+) : MatchOutcome {
+  let result: Array<ElementNode> = [];
 
-function ListElementsFromUltimateChildToRoot(descendent: ElementNode, root: ElementNode) : Array<ElementNode> {
-  let list: Array<ElementNode> = [];
-  let current = descendent;
-
-  while(!!current && current != root && (!!current.parent) ) {
-    list.push(current);
-    current = current.parent;
+  for(var child of elementList) {
+    let outcome = callback(child, selector);
+    if (outcome.target) {
+      result = merge_array(result, outcome.target);
+    }
   }
-  return list;
-}
-
-
-function ListSelectorTokensLeafChildToRoot(root: SelectorToken): Array<SelectorToken> {
-  let tokens : Array<SelectorToken> = [];
-
-  tokens = ListSelectorTokens(root, (token:SelectorToken ) => token._child );
-  return tokens.reverse();
-}
-
-function ListSelectorTokens(
-  root: SelectorToken,
-  next: (token: SelectorToken)=> SelectorToken | undefined
-): Array<SelectorToken> {
-  let tokens : Array<SelectorToken> = [];
-  let current : SelectorToken | undefined = root;
-
-  while(!!current ) {
-    tokens.push(current);
-    current = next( current );
+  if (result.length > 0) {
+    return { result: MatchResults.TargetMatch, target: result };
+  } else {
+    return { result: MatchResults.NoMatch };
   }
-  return tokens;
 }
 
-function navigate_descendents(element: ElementNode, token: SelectorToken) : MatchOutcome {
+/**
+ * Internal function that applies a recursive tree node exploration approach
+ * to finding descendent element nodes.
+ * @param element - top-level node from which to start search.
+ * @param token - selector token to use for search.
+ */
+function navigateDescendents(element: ElementNode, token: SelectorToken) : MatchOutcome {
   let filter = MakeSingleElementFilter(token);
   let list: Array<ElementNode> = [];
-  selector(filter, list, element, element);
-  console.log(`navigate_descendents: e: ${element} S: ${selectorTokentoString(token)} Len: ${list.length}`);
+
+  exploreNodeTreeByFilterAndCollectMatches(filter, list, element, element);
 
   if (list.length> 0) {
     if (token._descendent) {
-      let result_list: Array<ElementNode> = [];
-  
-      for(var child of list) {
-        let candidate = navigate_descendents(child, token._descendent);
-        console.log(`navigate_descendents: ${candidate.result} ${candidate.target}`);
-        if (candidate.result === MatchResults.TargetMatch && candidate.target) {
-          result_list = merge_array(result_list, candidate.target);
-        }
-      }
-      console.log(`navigate_descendents: selector ${selectorTokentoString(token)} = ${result_list.length} results`);
-      return (result_list.length > 0)
-        ? { result: MatchResults.TargetMatch, target: result_list }
-        : { result: MatchResults.AncestorMismatch };
+      return applyToElementsInListAndCollectMatches(list, token._descendent, navigateDescendents);
     } else if (token._child) {
-      let result: Array<ElementNode> = [];
-      for(var child of list) {
-        let outcome = navigate_children(child, token);
-        if (outcome.target) {
-          result = merge_array(result, outcome.target);
-        }
-      }
-      if (result.length > 0) {
-        return { result: MatchResults.TargetMatch, target: result };
-      }
+      return applyToElementsInListAndCollectMatches(list, token, navigate_children);
     } else {
       return { result: MatchResults.TargetMatch, target: list };
     }
@@ -194,36 +164,78 @@ function navigate_descendents(element: ElementNode, token: SelectorToken) : Matc
   return { result: MatchResults.AncestorMismatch };
 }
 
-function navigate_children(element: ElementNode, selector: SelectorToken): MatchOutcome {
-  console.log(`navigate_children: ${element} | selector ${selectorTokentoString( selector)}`);
-  if (isSelectorMatch(selector, element)) {
-    if (selector._child ) {
-      let children = getElementChildrenFrom(element);
-      let matchedTargets : Array<ElementNode> = [];
-      for(var child of children) {
+/**
+ * Internal function that applies a callback to each child that represents
+ * an element node.
+ * @param parent - parent element to find element children
+ * @param callback - callback to apply
+ */
+function applyToEachChildElement(
+  parent: ElementNode,
+  callback: (element:ElementNode)=>void
+) : void {
+  let children = getElementChildrenFrom(parent);
+  for(var child of children) {
+    callback(child);
+  }
+}
+
+/**
+ * Internal to navigate_children() this takes each child of the current
+ * element and calls navigate_children() recursively.
+ * @param element - parent that matched, children of this will be used.
+ * @param selector - matched selector, child of this will be used.
+ * @see navigate_children
+ */
+function recurse_to_children_and_return_match_list(
+  element: ElementNode,
+  selector: SelectorToken
+) : Array<ElementNode> {
+  let matchedTargets : Array<ElementNode> = [];
+  applyToEachChildElement(element,
+    (child: ElementNode) : void => {
+      if (selector._child) {
         let outcome = navigate_children(child, selector._child);
         if (outcome.result === MatchResults.TargetMatch && outcome.target) {
           matchedTargets = merge_array(matchedTargets, outcome.target);
         }
       }
+    }
+  );
+  return matchedTargets;
+}
+
+/**
+ * Attempts a parent->child match and if matched at the parent level, will explore
+ * the selector path as far as it can maintain matches. Supports switching from
+ * parent->child to parent-...-> desendent as may happen but calls navigateDescendents().
+ * @param element - top level element to match against and descend from.
+ * @param selector - selector that may have children or other traversal criteria.
+ * @see navigateDescendents
+ */
+function navigate_children(element: ElementNode, selector: SelectorToken): MatchOutcome {
+  console.log(`navigate_children: ${element} | selector ${selectorTokentoString( selector)}`);
+  if (isSelectorMatch(selector, element)) {
+    if (selector._child ) {
+      let matchedTargets = recurse_to_children_and_return_match_list(element, selector);
       if (matchedTargets.length > 0) {
         return { result: MatchResults.TargetMatch, target: matchedTargets };
       }
     } else if (selector._descendent) {
       console.log(`navigate_children - going to descendents: e: ${element} s: ${selectorTokentoString(selector._descendent)}`);
-      return navigate_descendents(element, selector._descendent);
+      return navigateDescendents(element, selector._descendent);
     }
     else {
       return { result: MatchResults.TargetMatch, target: [ element ]};
     }
   }
 
-  return { result: MatchResults.AncestorMismatch };
+  return { result: MatchResults.NoMatch };
 }
 
-function follow(element: ElementNode, next_selector: SelectorToken) : MatchOutcome {
+function traverseDocumentWithPathLikeSelectorTokens(element: ElementNode, next_selector: SelectorToken) : MatchOutcome {
   if (next_selector._descendent) {
-    return navigate_descendents(element, next_selector);
+    return navigateDescendents(element, next_selector);
   } else if (next_selector._child) {
     return navigate_children(element, next_selector);
   }
@@ -245,9 +257,10 @@ function MakeParentChildFilter(selector: SelectorToken) : CollectorFilter {
       return { result: MatchResults.TargetMatch, target: [ element ]};
     } else {
       if (isTraversalSelector(selector) && isSelectorMatch(selector, element)) {
-        return follow(element, selector);
+        return traverseDocumentWithPathLikeSelectorTokens(element, selector);
       } else {
-        return { result: MatchResults.AncestorMismatch };
+        console.log(`MakeParentChildFilter: e=${element}  s=${selectorTokentoString(selector)}`);
+        return { result: MatchResults.NoMatch };
       }
     }
   }
@@ -256,43 +269,15 @@ function MakeParentChildFilter(selector: SelectorToken) : CollectorFilter {
 
 function MakeParentDescendentFilter(token: SelectorToken) : CollectorFilter {
 
-  function getCandidates(element: ElementNode, next_selector: SelectorToken) : MatchOutcome {
-    let list: Array<ElementNode> = [];
-    let filter = MakeSingleElementFilter(next_selector);
-    selector(filter, list, element, element);
-    if (next_selector._descendent) {
-      let result_list: Array<ElementNode> = [];
-
-      for(var child of list) {
-        let candidate = getCandidates(child, next_selector._descendent);
-        console.log(`getCandidates: ${candidate.result} ${candidate.target}`);
-        if (candidate.result === MatchResults.TargetMatch && candidate.target) {
-          result_list = merge_array(result_list, candidate.target);
-        }
-      }
-      console.log(`getCandidates: selector ${selectorTokentoString(next_selector)} = ${result_list.length} results`);
-      return (result_list.length > 0) ? { result: MatchResults.TargetMatch, target: result_list } : { result: MatchResults.NoMatch };
-    }
-    if (list.length > 0) {
-      console.log(`getCandidates: TargetMatch - ${list.length} values`);
-      return { result: MatchResults.TargetMatch, target: list};
-    } else {
-      console.log(`getCandidates: leaf - no match`);
-      return { result: MatchResults.NoMatch };
-    }
-  }
-
   return (element: ElementNode, root: ElementNode) : MatchOutcome => {
-    // return getCandidates(element, token);
-    // return navigate_descendents(element, token);
-    return follow(element, token);
+    return traverseDocumentWithPathLikeSelectorTokens(element, token);
   }
 }
 
 function MakeSingleElementFilter(selector: SelectorToken) : CollectorFilter {
   return (element: ElementNode, root: ElementNode) => {
 
-    // console.log(` selector ${selectorTokentoString(selector)} <==> element ${element} ? ${isSelectorMatch(selector, element)}`);
+    console.log(` selector ${selectorTokentoString(selector)} <==> element ${element} ? ${isSelectorMatch(selector, element)}`);
 
     return isSelectorMatch(selector, element)
     ? { result: MatchResults.TargetMatch, target: [element] }
@@ -310,28 +295,14 @@ function MakeSingleSelectorFilter(selector: SelectorToken) : CollectorFilter {
   }
 }
 
-function MakeSelectorListFilter(selectors: Array<SelectorToken>) : CollectorFilter {
-  return (element: ElementNode, root: ElementNode) => {
-    let targets_matched : Array<ElementNode> = [];
-    let outcome : MatchOutcome = {result: MatchResults.NoMatch};
-
-    let filters = selectors.map( (sel: SelectorToken) => MakeSingleSelectorFilter(sel));
-    for( var index = 0; index< filters.length; index++) {
-      outcome = filters[index](element, root);
-      if (outcome.result === MatchResults.TargetMatch && outcome.target) {
-        targets_matched = targets_matched.concat(outcome.target);
-
-        console.warn(`Element: ${element}, Token:"${selectorTokentoString(selectors[index])}" -- Adding ${outcome.target.length} to total (${targets_matched.length})`);
-      }
-    }
-    return targets_matched.length > 0
-      ? { result: MatchResults.TargetMatch, target: targets_matched }
-      : { result: MatchResults.NoMatch };
-  }
-}
-
-
-function selector(
+/**
+ * 
+ * @param filter 
+ * @param collection 
+ * @param root 
+ * @param current 
+ */
+function exploreNodeTreeByFilterAndCollectMatches(
   filter: CollectorFilter,
   collection: Array<ElementNode>,
   root: ElementNode,
@@ -343,16 +314,11 @@ function selector(
       for(var target of outcome.target) {
         collection.push(target);
       }
-    } else if (outcome.result != MatchResults.AncestorMismatch) {
-      let children : Array<ElementNode> = getElementChildrenFrom(current);
-      for(var child of children) {
-        selector(filter, collection, root, child);
-      }
     } else if (outcome.result === MatchResults.AncestorMismatch) {
       console.warn(`!!! Ancestor Mismatch - length ${collection.length}`);
-      while(collection.length > 0) {
-        collection.pop();
-      }
+      empty_array(collection);
+    } else {
+      applyToEachChildElement(current, (child: ElementNode)=> exploreNodeTreeByFilterAndCollectMatches(filter, collection, root, child) );
     }
   }
 }
@@ -374,9 +340,14 @@ export class MockSelectorParser {
     let lexer = new SelectorLexer();
     lexer.lex_selector(this.selector);
 
-    let filter = MakeSelectorListFilter(lexer.tokens);
+    let idea = lexer.tokens.map( (token: SelectorToken)=> selectorTokentoString(token));
+    console.log(`parseWith: ${lexer.tokens.length} tokens ${idea.join('|')}`);
 
-    selector(filter, list, element, element);
+    let filter_list = lexer.tokens.map( (sel: SelectorToken) => MakeSingleSelectorFilter(sel));
+
+    for(var filter of filter_list) {
+      exploreNodeTreeByFilterAndCollectMatches(filter, list, element, element);
+    }
     return list;
   }
 }

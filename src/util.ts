@@ -40,3 +40,9 @@ export function merge_array<T>(a1: Array<T>, a2: Array<T>) {
   final = final.concat(a2);
   return final;
 }
+
+export function empty_array<T>(array: Array<T>) : void {
+  while( !! array && array.length > 0) {
+    array.pop();
+  }
+}
