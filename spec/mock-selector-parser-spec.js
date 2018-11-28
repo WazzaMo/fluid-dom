@@ -26,35 +26,35 @@ function dumpList(list) {
 describe("MockSelectorParser", ()=> {
   let doc;
 
-  // describe("where multiple basic selectors, ", ()=> {
-  //   let parser;
-  //   let root;
-  //   let subject;
-  //   let random_text;
+  describe("where multiple basic selectors, ", ()=> {
+    let parser;
+    let root;
+    let subject;
+    let random_text;
 
-  //   beforeEach( ()=> {
-  //     doc = fluid.Doc();
-  //     parser = new fluid.MockSelectorParser('DIV, P');
-  //     random_text = randomString();
+    beforeEach( ()=> {
+      doc = fluid.Doc();
+      parser = new fluid.MockSelectorParser('DIV, P');
+      random_text = randomString();
 
-  //     doc.create_child_element('body', body => {
-  //       body.create_child_element( 'DIV');
-  //       body.create_child_element( 'P', p => p.text_value = random_text );
-  //       root = body;
-  //     });
+      doc.create_child_element('body', body => {
+        body.create_child_element( 'DIV');
+        body.create_child_element( 'P', p => p.text_value = random_text );
+        root = body;
+      });
 
-  //     subject = parser.parseWith( root );
-  //   }); // -- where multiple basic selectors
+      subject = parser.parseWith( root );
+    }); // -- where multiple basic selectors
 
-  //   it('must return two elements', ()=> expect(subject.length).toBe(2) );
+    it('must return two elements', ()=> expect(subject.length).toBe(2) );
 
-  //   it('must return DIV for the first element', ()=> expect(subject[0].tag).toBe('DIV') );
-  //   it('must return P for the second element', ()=> expect(subject[1].tag).toBe('P') );
-  //   it('must have given text_value on P element', ()=> {
-  //     expect(subject[1].text_value).toBe( random_text )
-  //   });
+    it('must return DIV for the first element', ()=> expect(subject[0].tag).toBe('DIV') );
+    it('must return P for the second element', ()=> expect(subject[1].tag).toBe('P') );
+    it('must have given text_value on P element', ()=> {
+      expect(subject[1].text_value).toBe( random_text )
+    });
 
-  // });
+  });
 
   describe("when parent and then child selectors: ", () => {
     let subject;
@@ -237,7 +237,7 @@ describe("MockSelectorParser", ()=> {
     let subject;
     let _head, _content, _footer;
     let _pMain, _pOther;
-    let list_li, li_first;
+    let list_li, li_first, li_third;
     
     beforeEach( ()=> {
       doc = fluid.Doc();
@@ -272,6 +272,7 @@ describe("MockSelectorParser", ()=> {
               ul.create_child_element('li', li=> {
                 li.id('third');
                 list_li.push(li);
+                li_third = li;
               });
             })
           })
@@ -310,6 +311,12 @@ describe("MockSelectorParser", ()=> {
       let mp = new fluid.MockSelectorParser('head,content li[id="first"], footer');
       subject = mp.parseWith(doc.root_node);
       expect( subject ).toEqual( [_head, li_first, _footer] );
+    });
+
+    it ('must find list of selectors with one having parent-child path: ', ()=> {
+      let mp = new fluid.MockSelectorParser('head,div>ul>li[id="third"], content>[main]');
+      subject = mp.parseWith(doc.root_node);
+      expect( subject ).toEqual( [_head, li_third, _pMain] );
     });
 
   }); //-- changing child / descendent nav
