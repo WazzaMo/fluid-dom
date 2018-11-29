@@ -302,6 +302,22 @@ describe('selector-lexer', ()=> {
         expect(lexer.tokens).toEqual([head, content, footer]);
       });
 
+      it (`must handle 'p[main]+p#other' :`, ()=>{
+        let pMain = { _tag: 'P', _attrib: [{ name:'main'}]};
+        let pOther = { _tag: 'P', _id: 'other' };
+        pMain._adjacent_sibling = pOther;
+        lexer.lex_selector( 'p[main]+p#other' );
+        expect( lexer.tokens ).toEqual( [pMain] );
+      });
+
+      it (`must handle 'p[main]~p#general' :`, ()=>{
+        let pMain = { _tag: 'P', _attrib: [{ name:'main'}]};
+        let pOther = { _tag: 'P', _id: 'general' };
+        pMain._general_sibling = pOther;
+        lexer.lex_selector( 'p[main]~p#general' );
+        expect( lexer.tokens ).toEqual( [pMain] );
+      });
+
     }); ////// Bug Fixing
 
   }); //-- lex_selector()

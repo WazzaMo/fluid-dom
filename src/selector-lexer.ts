@@ -374,6 +374,8 @@ function setup_tables() {
     at_on(wait_extra, Events.ChildSeparator, States.AwaitChildSelector, Actions.Ignore);
     at_on(wait_extra, Events.EndInput, wait_extra, Actions.Ignore);
     at_on(wait_extra, Events.SelectorSeparator, States.GotSelectorSeparatorAwaitNewSelector, Actions.NewSelectorInSet);
+    at_on(wait_extra, Events.AdjacentSibling, States.AwaitAdjacentSiblingSelector, Actions.Ignore );
+    at_on(wait_extra, Events.GeneralSibling, States.AwaitGeneralSiblingSelector, Actions.Ignore );
   }
 
   function _await_attrib_equals() {
@@ -594,8 +596,8 @@ export function selectorTokentoString(token: SelectorToken) : string {
   text += token._attrib ? token._attrib.map((a:AttribInfo)=>attribToString(a)).reduce( (a:string, b:string)=> (a)+(b)) : '';
   text += token._child ? `>${selectorTokentoString(token._child)}` : '';
   text += token._descendent ? ` ${selectorTokentoString(token._descendent)}` : '';
-  text += token._adjacent_sibling ? `+${token._adjacent_sibling}` : '';
-  text += token._general_sibling ? `~${token._general_sibling}` : '';
+  text += token._adjacent_sibling ? `+${selectorTokentoString(token._adjacent_sibling) }` : '';
+  text += token._general_sibling ? `~${selectorTokentoString(token._general_sibling)}` : '';
   return text;
 }
 
