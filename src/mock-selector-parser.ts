@@ -45,9 +45,14 @@ function hasTag(selector: SelectorToken) : boolean { return !! selector._tag; }
 
 function hasAttribute(selector: SelectorToken) : boolean { return !! selector._attrib && selector._attrib.length> 0; }
 
+function hasId(selector: SelectorToken): boolean { return !! selector._id; }
+
 function hasDescendent(selector: SelectorToken) : boolean { return !! selector._descendent; }
 
 function hasChild(selector: SelectorToken) : boolean { return !! selector._child; }
+
+function hasAdjacentSibling( selector: SelectorToken ) : boolean { return !! selector._adjacent_sibling; }
+function hasGeneralSibling( selector: SelectorToken ) : boolean { return !! selector._general_sibling; }
 
 function isTargetToken(selector: SelectorToken) : boolean {
   return ! selector._child && ! selector._descendent
@@ -70,11 +75,25 @@ function isTagMatch(selector:SelectorToken | undefined, element: ElementNode) : 
   return !! selector ? (element.tag.toUpperCase() === selector._tag) : false;
 }
 
+function isIdMatch(selector: SelectorToken | undefined, element: ElementNode) : boolean {
+  let result = false;
+  if (selector && selector._id) {
+    let id = element.attrib('id');
+    if (!! id) {
+      result = id  === selector._id;
+    }
+  }
+  return result;
+}
+
 function isSelectorMatch(selector: SelectorToken | undefined, element: ElementNode) : boolean {
   if (!! selector) {
-    let isMatch: boolean = hasTag(selector) || hasAttribute(selector);
+    let isMatch: boolean = hasTag(selector) || hasAttribute(selector) || hasId(selector);
     if (hasTag( selector) ) {
       isMatch = isMatch && isTagMatch(selector, element);
+    }
+    if (hasId( selector )) {
+      isMatch = isMatch && isIdMatch(selector, element);
     }
     if (hasAttribute(selector)) {
       isMatch = isMatch && isAttributeMatch(selector, element);
@@ -231,6 +250,116 @@ function navigateChildren(element: ElementNode, selector: SelectorToken): MatchO
   return { result: MatchResults.NoMatch };
 }
 
+function findAdjacentSiblingFor(
+  selector: SelectorToken,
+  primarySibling: ElementNode
+) : ElementNode | undefined {
+  if (!! primarySibling.parent) {
+    let siblings = getElementChildrenFrom( primarySibling.parent );
+    let target = selector._adjacent_sibling;
+    let indexPrimary = siblings.indexOf( primarySibling );
+    let indexAdjacent = indexPrimary + 1;
+    if (indexAdjacent < siblings.length) {
+      let candidate = siblings[indexAdjacent];
+      if (isSelectorMatch(target, candidate)) {
+        return candidate;
+      }
+    }
+  }
+  return undefined;
+}
+
+
+function matchAdjacentSiblings(
+  current_selector: SelectorToken | undefined,
+  primary: ElementNode,
+  all_siblings: Array<ElementNode>
+) : Array< ElementNode > {
+  let primary_index = all_siblings.indexOf(primary);
+  let adjacent_index = primary_index + 1;
+  let matches: Array<ElementNode> = [];
+
+  // console.log(`Starting from primary #${primary_index}, first adjacent #${adjacent_index} of ${all_siblings.length} ${primary}`);
+
+  while( adjacent_index < all_siblings.length && !! current_selector) {
+    let adjacent : ElementNode | undefined;
+
+    adjacent = all_siblings[adjacent_index];
+    if (isSelectorMatch(current_selector, adjacent)) {
+      if ( hasAdjacentSibling( current_selector ) ) {
+        current_selector = current_selector._adjacent_sibling;
+        adjacent_index++;
+      } else {
+        matches.push( adjacent );
+        current_selector = undefined;
+      }
+    } else {
+      current_selector = undefined;
+    }
+  }
+  return matches;
+}
+
+function matchGeneralSiblings(
+  current_selector: SelectorToken | undefined,
+  primary: ElementNode,
+  all_siblings: Array<ElementNode>
+) : Array< ElementNode > {
+  let primary_index = all_siblings.indexOf(primary);
+  let general_index = primary_index + 1;
+  let matches: Array<ElementNode> = [];
+
+  console.log(`matchGeneralSiblings-- Starting from primary #${primary_index}, first adjacent #${general_index} of ${all_siblings.length} ${primary}`);
+
+  while( general_index < all_siblings.length && !! current_selector) {
+    let general : ElementNode | undefined;
+
+    general = all_siblings[general_index];
+    if (isSelectorMatch(current_selector, general)) {
+      if ( hasAdjacentSibling( current_selector ) ) {
+        current_selector = current_selector._general_sibling;
+        general_index++;
+      } else {
+        matches.push( general );
+        current_selector = undefined;
+      }
+    } else {
+      general_index++;
+    }
+  }
+  return matches;
+}
+
+function navigateParentsForSiblings(selector: SelectorToken, parent: ElementNode) : MatchOutcome {
+  let outcome: MatchOutcome = { result: MatchResults.NoMatch };
+  let primary_siblings : Array<ElementNode> = [];
+  let findPrimary = MakeSingleElementFilter(selector);
+  exploreNodeTreeByFilterAndCollectMatches(findPrimary, primary_siblings, parent, parent);
+
+  // console.log(`navigateParentsforSiblings - found ${primary_siblings.length} siblings`);
+
+  if (primary_siblings.length > 0) {
+    let matches : Array<ElementNode> = [];
+
+    for(var primary of primary_siblings) {
+      let all_siblings = (!! primary.parent) ? getElementChildrenFrom(primary.parent) : [];
+      if (selector._adjacent_sibling) {
+        let siblings = matchAdjacentSiblings(selector._adjacent_sibling, primary, all_siblings);
+        matches = merge_array(matches, siblings);
+      } else if (selector._general_sibling) {
+        let siblings = matchGeneralSiblings(selector._general_sibling, primary, all_siblings);
+        matches = merge_array(matches, siblings);
+      }
+    }
+    if (matches.length > 0) {
+      outcome = { result: MatchResults.TargetMatch, target: matches };
+    }
+  }
+  return outcome;
+}
+
+
+
 /**
  * Worker function that does much heavy lifting for either the parent-child filter
  * or the parent descendent filter.
@@ -244,6 +373,8 @@ function traverseDocumentWithPathLikeSelectorTokens(element: ElementNode, next_s
     return navigateDescendents(element, next_selector);
   } else if (next_selector._child) {
     return navigateChildren(element, next_selector);
+  } else if (next_selector._adjacent_sibling) {
+    return navigateParentsForSiblings(next_selector, element);
   }
 
   if (isTargetToken(next_selector) && isSelectorMatch(next_selector, element)) {
@@ -283,6 +414,12 @@ function MakeParentDescendentFilter(token: SelectorToken) : CollectorFilter {
   }
 }
 
+function MakeAdjacentSiblingFilter(selector: SelectorToken) : CollectorFilter {
+  return (element: ElementNode, root: ElementNode) : MatchOutcome => {
+    return traverseDocumentWithPathLikeSelectorTokens(element, selector);
+  }
+}
+
 /**
  * CollectorFilter factory for handling a selector that does not require
  * traversal and should be used to match the given element without looking any further.
@@ -307,6 +444,8 @@ function MakeSingleSelectorFilter(selector: SelectorToken) : CollectorFilter {
     return MakeParentChildFilter(selector);
   } else if (hasDescendent(selector)) {
     return MakeParentDescendentFilter(selector);
+  } else if (hasAdjacentSibling(selector)) {
+    return MakeAdjacentSiblingFilter(selector);
   } else {
     return MakeSingleElementFilter(selector);
   }

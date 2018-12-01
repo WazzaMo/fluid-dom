@@ -136,6 +136,7 @@ describe("MockSelectorParser", ()=> {
             attrib_value = randomString();
             p.attrib(attrib, attrib_value);
             para_with_attrib = p;
+            p.id('fred');
           });
           div.create_child_element('p', p => para_basic = p);
         });
@@ -161,6 +162,12 @@ describe("MockSelectorParser", ()=> {
       subject = parser.parseWith(doc.root_node);
       expect( subject ).toEqual( [para_with_attrib, para_basic] );
     });
+
+    it ('must match ID: ', ()=> {
+      let mp = new fluid.MockSelectorParser(`p#fred`);
+      subject = mp.parseWith(doc.root_node);
+      expect( subject ).toEqual( [para_with_attrib] );
+    })
 
   }); //-- when using attributes
 
@@ -320,5 +327,167 @@ describe("MockSelectorParser", ()=> {
     });
 
   }); //-- changing child / descendent nav
+
+  describe ('when seeking adjacent siblings: ', ()=> {
+   
+    let subject;
+    let _content;
+    let _pMain, _pOther;
+    let list_li, li_first, li_third;
+    let _ul;
+    
+    beforeEach( ()=> {
+      doc = fluid.Doc();
+      doc.create_child_element('body', body=> {
+        body.create_child_element('content', content => {
+          _content = content;
+          content.create_child_element('p', p=> {
+            _pMain = p;
+            p.attrib('main', 'main');
+          });
+          content.create_child_element('p', p=> {
+            _pOther = p;
+            p.id('other');
+          });
+
+          content.create_child_element('div', div=> {
+            div.id('nav');
+            div.create_child_element('ul', ul=> {
+              _ul = ul;
+              list_li = [];
+              ul.create_child_element('li', li=> {
+                li.id('first');
+                li_first = li;
+                list_li.push(li);
+              });
+              ul.create_child_element('li', li=> {
+                li.id('second');
+                list_li.push(li);
+              });
+              ul.create_child_element('li', li=> {
+                li.id('third');
+                list_li.push(li);
+                li_third = li;
+              });
+            })
+          })
+        });
+      });
+    });
+
+    it ('must find chain of LI tags to find third one: ', ()=> {
+      let mp = new fluid.MockSelectorParser(`li+li+li`);
+      subject = mp.parseWith( doc.root_node );
+      expect( subject.length ).toEqual( 1 );
+      expect( subject ).toEqual( [li_third] );
+    });
+
+    it (`must find 'P' tags main then other: `, ()=>{
+      let mp = new fluid.MockSelectorParser(`p[main]+p#other`);
+      subject = mp.parseWith(doc.root_node);
+      expect( subject.length ).toEqual(1);
+      expect( subject ).toEqual( [ _pOther ]);
+    });
+
+    it (`must find 3 'LI' tags of 5 when 3 siblings needed: `, ()=>{
+      let li1 = li_third, li2, li3;
+
+      let mp = new fluid.MockSelectorParser(`li+li+li`);
+      _ul.create_child_element('LI', li => {
+        li2 = li;
+        li.attrib('num', '2');
+      });
+      _ul.create_child_element('LI', li => {
+        li3 = li;
+        li.attrib('num', '3');
+      });
+      subject = mp.parseWith(doc.root_node);
+      expect( subject.length ).toEqual(3);
+      expect( subject ).toEqual( [ li1, li2, li3 ]);
+    });
+
+  }); // adjacent siblings
+
+  describe ('when seeking general siblings: ', ()=> {
+   
+    let subject;
+    let _content;
+    let _pMain, _pOther;
+    let _divNav;
+    let list_li, li_first, li_third;
+    let _ul;
+    
+    beforeEach( ()=> {
+      doc = fluid.Doc();
+      doc.create_child_element('body', body=> {
+        body.create_child_element('content', content => {
+          _content = content;
+          content.create_child_element('p', p=> {
+            _pMain = p;
+            p.attrib('main', 'main');
+          });
+          content.create_child_element('p', p=> {
+            _pOther = p;
+            p.id('other');
+          });
+
+          content.create_child_element('div', div=> {
+            _divNav = div;
+            div.id('nav');
+            div.create_child_element('ul', ul=> {
+              _ul = ul;
+              list_li = [];
+              ul.create_child_element('li', li=> {
+                li.id('first');
+                li_first = li;
+                list_li.push(li);
+              });
+              ul.create_child_element('li', li=> {
+                li.id('second');
+                list_li.push(li);
+              });
+              ul.create_child_element('li', li=> {
+                li.id('third');
+                list_li.push(li);
+                li_third = li;
+              });
+            })
+          })
+        });
+      });
+    });
+
+    // it ('must find chain of LI tags to find third one: ', ()=> {
+    //   let mp = new fluid.MockSelectorParser(`li+li+li`);
+    //   subject = mp.parseWith( doc.root_node );
+    //   expect( subject.length ).toEqual( 1 );
+    //   expect( subject ).toEqual( [li_third] );
+    // });
+
+    it (`must find 'P' then div: `, ()=>{
+      let mp = new fluid.MockSelectorParser(`p~div`);
+      subject = mp.parseWith(doc.root_node);
+      expect( subject.length ).toEqual(1);
+      expect( subject ).toEqual( [ _divNav ]);
+    });
+
+    // it (`must find 3 'LI' tags of 5 when 3 siblings needed: `, ()=>{
+    //   let li1 = li_third, li2, li3;
+
+    //   let mp = new fluid.MockSelectorParser(`li+li+li`);
+    //   _ul.create_child_element('LI', li => {
+    //     li2 = li;
+    //     li.attrib('num', '2');
+    //   });
+    //   _ul.create_child_element('LI', li => {
+    //     li3 = li;
+    //     li.attrib('num', '3');
+    //   });
+    //   subject = mp.parseWith(doc.root_node);
+    //   expect( subject.length ).toEqual(3);
+    //   expect( subject ).toEqual( [ li1, li2, li3 ]);
+    // });
+
+  }); // general siblings
 
 });
