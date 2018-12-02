@@ -20,16 +20,22 @@ import {
   MockNodeType,
 } from './mock-document-nodes';
 
+import { MockSelectorParser } from './mock-selector-parser';
+
 export class MockElement implements IElement {
   private _element : Option<ElementNode>;
+  private _selector_parser: Option<MockSelectorParser>;
 
   constructor(element?: ElementNode) {
     if (element) {
+      console.log(`MockElement: ${element}`);
       this._element = new Option<ElementNode>(element);
+      this._selector_parser = new Option<MockSelectorParser>(new MockSelectorParser(element));
     } else {
+      console.log('Null MOckElement');
       this._element = new Option<ElementNode>();
+      this._selector_parser = new Option<MockSelectorParser>();
     }
-    // this._classes = new MockClasses(this);
   }
 
   isValid(): boolean {
@@ -63,6 +69,7 @@ export class MockElement implements IElement {
     let elements: Array<ElementNode> = fromList
       .filter( (node:IMockDocNode) => node.nodeType == MockNodeType.ElementNode)
       .map( (elementNode: IMockDocNode) => <ElementNode> elementNode);
+
     return elements.map( (ele: ElementNode) => new MockElement(ele));
   }
 
@@ -70,7 +77,7 @@ export class MockElement implements IElement {
     if (this._element.isValid) {
       let element = this._element.Value;
       if (element.tag.toUpperCase() !== tagName.toUpperCase()) {
-        console.trace(`Expected ${tagName} but actual value was ${element.tag}`);
+        throw new Error(`Expected ${tagName} but actual value was ${element.tag}`);
       }
     }
     return this;
@@ -80,7 +87,7 @@ export class MockElement implements IElement {
     if (this._element.isValid) {
       let element = this._element.Value;
 
-      let id = element.attrib('id');
+      let id = element.id();
       if (id) {
         return id;
       }
@@ -96,28 +103,46 @@ export class MockElement implements IElement {
     return this._element.isValid;
   }
 
-  findAll(elementListLocation: ElementListSource): IElement[] {
+  findAll(elementListSource: ElementListSource): IElement[] {
     let results: Array<ElementNode> = [];
-    if (elementListLocation.class && this._element.isValid) {
-      this._element.Value.queryByClass(elementListLocation.class, results);
+    if (elementListSource.class && this._element.isValid) {
+      this._element.Value.queryByClass(elementListSource.class, results);
+      
       return this.makeElementList(results);
-    } else if ( elementListLocation.tagName && this._element.isValid ) {
-      this._element.Value.queryByTag(elementListLocation.tagName, results);
+    } else if ( elementListSource.tagName && this._element.isValid ) {
+      this._element.Value.queryByTag(elementListSource.tagName, results);
       return this.makeElementList(results);
+    } else if ( elementListSource.selector && this._selector_parser.isValid ) {
+      let parser = this._selector_parser.Value;
+      let outcome = parser.parseWith(elementListSource.selector);
+      return this.makeElementList(outcome);
     }
     
     throw new Error("Method not implemented.");
   }
   
   selectFirst(selector: string): IElement {
-    throw new Error("Method not implemented.");
+    if (this._selector_parser.isValid) {
+      let parser = this._selector_parser.Value;
+      let results = parser.parseWith(selector);
+      if (results.length > 0) {
+        return new MockElement(results[0]);
+      }
+    }
+    return new MockElement();
   }
+
   selectorPath(): string {
     throw new Error("Method not implemented.");
   }
+
   tagName(): string {
-    throw new Error("Method not implemented.");
+    if (this._element.isValid) {
+      return this._element.Value.tag.toUpperCase();
+    }
+    throw new Error("Null MockElement - no tagName");
   }
+
   text(_text?: string | undefined): string | IElement {
     throw new Error("Method not implemented.");
   }
@@ -144,5 +169,14 @@ export class MockElement implements IElement {
   }
   value(): string | undefined {
     throw new Error("Method not implemented.");
+  }
+
+  toString(): string {
+    let element: ElementNode;
+    if (this._element.isValid) {
+      element = this._element.Value;
+      return element.toString();
+    }
+    return 'NULL-MockElement';
   }
 }
