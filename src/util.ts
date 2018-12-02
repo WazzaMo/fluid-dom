@@ -34,6 +34,13 @@ export function logWarning(message: string) {
   console.warn("FluidDOM: " + message)
 }
 
+/**
+ * Takes any two arrays and creates a new
+ * merged array. Does not de-duplicate.
+ * @param a1 - first array to merge
+ * @param a2 - second array to merge
+ * @returns - new array with merged data.
+ */
 export function merge_array<T>(a1: Array<T>, a2: Array<T>) {
   let final : Array<T> = [];
   final = final.concat(a1);
@@ -41,8 +48,39 @@ export function merge_array<T>(a1: Array<T>, a2: Array<T>) {
   return final;
 }
 
+/**
+ * Takes an array reference and empties all
+ * content from that array. Can be used to
+ * empty an array reference held by another object.
+ * @param array - array to empty out.
+ */
 export function empty_array<T>(array: Array<T>) : void {
   while( !! array && array.length > 0) {
     array.pop();
   }
+}
+
+/**
+ * Looks for duplicate object references in an
+ * array and returns a new array without the
+ * duplicates. Not very efficient 
+ * - this is O(n^2)
+ * @param array - array to examine.
+ */
+export function remove_dups<T>(
+  array: Array<T>
+) : Array<T> {
+  let dedup : Array<T> = [];
+
+  function doesNotHaveRefEqualObject(x:T) {
+    return dedup.indexOf(x) < 0;
+  }
+
+  for(var index = 0; index < array.length; index++) {
+    let item = array[index];
+    if (doesNotHaveRefEqualObject(item)) {
+      dedup.push(item);
+    }
+  }
+  return dedup;
 }

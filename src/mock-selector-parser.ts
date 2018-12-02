@@ -21,7 +21,8 @@ import {
 
 import {
   merge_array,
-  empty_array
+  empty_array,
+  remove_dups
 } from './util';
 
 
@@ -250,25 +251,6 @@ function navigateChildren(element: ElementNode, selector: SelectorToken): MatchO
   return { result: MatchResults.NoMatch };
 }
 
-function findAdjacentSiblingFor(
-  selector: SelectorToken,
-  primarySibling: ElementNode
-) : ElementNode | undefined {
-  if (!! primarySibling.parent) {
-    let siblings = getElementChildrenFrom( primarySibling.parent );
-    let target = selector._adjacent_sibling;
-    let indexPrimary = siblings.indexOf( primarySibling );
-    let indexAdjacent = indexPrimary + 1;
-    if (indexAdjacent < siblings.length) {
-      let candidate = siblings[indexAdjacent];
-      if (isSelectorMatch(target, candidate)) {
-        return candidate;
-      }
-    }
-  }
-  return undefined;
-}
-
 
 function matchAdjacentSiblings(
   current_selector: SelectorToken | undefined,
@@ -278,8 +260,6 @@ function matchAdjacentSiblings(
   let primary_index = all_siblings.indexOf(primary);
   let adjacent_index = primary_index + 1;
   let matches: Array<ElementNode> = [];
-
-  // console.log(`Starting from primary #${primary_index}, first adjacent #${adjacent_index} of ${all_siblings.length} ${primary}`);
 
   while( adjacent_index < all_siblings.length && !! current_selector) {
     let adjacent : ElementNode | undefined;
@@ -309,14 +289,12 @@ function matchGeneralSiblings(
   let general_index = primary_index + 1;
   let matches: Array<ElementNode> = [];
 
-  console.log(`matchGeneralSiblings-- Starting from primary #${primary_index}, first adjacent #${general_index} of ${all_siblings.length} ${primary}`);
-
   while( general_index < all_siblings.length && !! current_selector) {
     let general : ElementNode | undefined;
 
     general = all_siblings[general_index];
     if (isSelectorMatch(current_selector, general)) {
-      if ( hasAdjacentSibling( current_selector ) ) {
+      if ( hasGeneralSibling( current_selector ) ) {
         current_selector = current_selector._general_sibling;
         general_index++;
       } else {
@@ -336,8 +314,6 @@ function navigateParentsForSiblings(selector: SelectorToken, parent: ElementNode
   let findPrimary = MakeSingleElementFilter(selector);
   exploreNodeTreeByFilterAndCollectMatches(findPrimary, primary_siblings, parent, parent);
 
-  // console.log(`navigateParentsforSiblings - found ${primary_siblings.length} siblings`);
-
   if (primary_siblings.length > 0) {
     let matches : Array<ElementNode> = [];
 
@@ -349,6 +325,7 @@ function navigateParentsForSiblings(selector: SelectorToken, parent: ElementNode
       } else if (selector._general_sibling) {
         let siblings = matchGeneralSiblings(selector._general_sibling, primary, all_siblings);
         matches = merge_array(matches, siblings);
+        matches = remove_dups(matches);
       }
     }
     if (matches.length > 0) {
@@ -357,7 +334,6 @@ function navigateParentsForSiblings(selector: SelectorToken, parent: ElementNode
   }
   return outcome;
 }
-
 
 
 /**
@@ -374,6 +350,8 @@ function traverseDocumentWithPathLikeSelectorTokens(element: ElementNode, next_s
   } else if (next_selector._child) {
     return navigateChildren(element, next_selector);
   } else if (next_selector._adjacent_sibling) {
+    return navigateParentsForSiblings(next_selector, element);
+  } else if (next_selector._general_sibling) {
     return navigateParentsForSiblings(next_selector, element);
   }
 
@@ -414,7 +392,13 @@ function MakeParentDescendentFilter(token: SelectorToken) : CollectorFilter {
   }
 }
 
-function MakeAdjacentSiblingFilter(selector: SelectorToken) : CollectorFilter {
+/**
+ * CollectorFilter factory for handling selectors with either a general
+ * sibling or adjacent sibling selection, or a selection that switches
+ * from one to the other.
+ * @param selector - the selector with any sibling references.
+ */
+function MakeSiblingFilter(selector: SelectorToken) : CollectorFilter {
   return (element: ElementNode, root: ElementNode) : MatchOutcome => {
     return traverseDocumentWithPathLikeSelectorTokens(element, selector);
   }
@@ -444,8 +428,8 @@ function MakeSingleSelectorFilter(selector: SelectorToken) : CollectorFilter {
     return MakeParentChildFilter(selector);
   } else if (hasDescendent(selector)) {
     return MakeParentDescendentFilter(selector);
-  } else if (hasAdjacentSibling(selector)) {
-    return MakeAdjacentSiblingFilter(selector);
+  } else if (hasAdjacentSibling(selector) || hasGeneralSibling(selector)) {
+    return MakeSiblingFilter(selector);
   } else {
     return MakeSingleElementFilter(selector);
   }

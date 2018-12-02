@@ -457,36 +457,37 @@ describe("MockSelectorParser", ()=> {
       });
     });
 
-    // it ('must find chain of LI tags to find third one: ', ()=> {
-    //   let mp = new fluid.MockSelectorParser(`li+li+li`);
-    //   subject = mp.parseWith( doc.root_node );
-    //   expect( subject.length ).toEqual( 1 );
-    //   expect( subject ).toEqual( [li_third] );
-    // });
-
     it (`must find 'P' then div: `, ()=>{
       let mp = new fluid.MockSelectorParser(`p~div`);
       subject = mp.parseWith(doc.root_node);
+
       expect( subject.length ).toEqual(1);
       expect( subject ).toEqual( [ _divNav ]);
     });
 
-    // it (`must find 3 'LI' tags of 5 when 3 siblings needed: `, ()=>{
-    //   let li1 = li_third, li2, li3;
+    it ('must find general sibling chain of 3 LI tags to find third: ', ()=> {
+      let mp = new fluid.MockSelectorParser(`li~li~li`);
+      subject = mp.parseWith( doc.root_node );
+      expect( subject.length ).toEqual( 1 );
+      expect( subject ).toEqual( [li_third] );
+    });
 
-    //   let mp = new fluid.MockSelectorParser(`li+li+li`);
-    //   _ul.create_child_element('LI', li => {
-    //     li2 = li;
-    //     li.attrib('num', '2');
-    //   });
-    //   _ul.create_child_element('LI', li => {
-    //     li3 = li;
-    //     li.attrib('num', '3');
-    //   });
-    //   subject = mp.parseWith(doc.root_node);
-    //   expect( subject.length ).toEqual(3);
-    //   expect( subject ).toEqual( [ li1, li2, li3 ]);
-    // });
+    it (`must find 3rd, 4th and 5th 'LI' tags of 5 for li~li~li: `, ()=>{
+      let li1 = li_third, li2, li3;
+
+      let mp = new fluid.MockSelectorParser(`li~li~li`);
+      _ul.create_child_element('LI', li => {
+        li2 = li;
+        li.attrib('num', '2');
+      });
+      _ul.create_child_element('LI', li => {
+        li3 = li;
+        li.attrib('num', '3');
+      });
+      subject = mp.parseWith(doc.root_node);
+      expect( subject.length ).toEqual(3);
+      expect( subject ).toEqual( [ li1, li2, li3 ]);
+    });
 
   }); // general siblings
 
