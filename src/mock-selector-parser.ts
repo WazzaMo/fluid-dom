@@ -468,23 +468,23 @@ function exploreNodeTreeByFilterAndCollectMatches(
  * executed using the @see parseWith method.
  */
 export class MockSelectorParser {
-  selector: string;
+  private element: ElementNode;
 
-  constructor(selector: string) {
-    this.selector = selector;
+  constructor(element: ElementNode) {
+    this.element = element;
   }
 
-  parseWith(element: ElementNode) : Array<ElementNode> {
+  parseWith(selector: string) : Array<ElementNode> {
     let list : Array<ElementNode> = [];
     let lexer = new SelectorLexer();
-    lexer.lex_selector(this.selector);
+    lexer.lex_selector(selector);
 
     let idea = lexer.tokens.map( (token: SelectorToken)=> selectorTokentoString(token));
 
     let filter_list = lexer.tokens.map( (sel: SelectorToken) => MakeSingleSelectorFilter(sel));
 
     for(var filter of filter_list) {
-      exploreNodeTreeByFilterAndCollectMatches(filter, list, element, element);
+      exploreNodeTreeByFilterAndCollectMatches(filter, list, this.element, this.element);
     }
     return list;
   }

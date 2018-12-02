@@ -34,7 +34,6 @@ describe("MockSelectorParser", ()=> {
 
     beforeEach( ()=> {
       doc = fluid.Doc();
-      parser = new fluid.MockSelectorParser('DIV, P');
       random_text = randomString();
 
       doc.create_child_element('body', body => {
@@ -43,7 +42,8 @@ describe("MockSelectorParser", ()=> {
         root = body;
       });
 
-      subject = parser.parseWith( root );
+      parser = new fluid.MockSelectorParser(root);
+      subject = parser.parseWith( 'DIV, P' );
     }); // -- where multiple basic selectors
 
     it('must return two elements', ()=> expect(subject.length).toBe(2) );
@@ -81,42 +81,42 @@ describe("MockSelectorParser", ()=> {
     });
 
     it('must find the para element: ', ()=> {
-      let parser = new fluid.MockSelectorParser('BODY > DIV> p');
-      subject = parser.parseWith(doc.root_node);
+      let parser = new fluid.MockSelectorParser(doc.root_node );
+      subject = parser.parseWith('BODY > DIV> p');
       expect(subject).toEqual([_para])
     });
 
     it('must find the para element by attribute: ', ()=> {
-      let parser = new fluid.MockSelectorParser('BODY > DIV> [main]');
-      subject = parser.parseWith(doc.root_node);
+      let parser = new fluid.MockSelectorParser(doc.root_node);
+      subject = parser.parseWith('BODY > DIV> [main]');
       expect(subject).toEqual([_para])
     });
 
     it('must find two paragraphs if a second is added before parsing:', ()=>{
-      let parser = new fluid.MockSelectorParser('body > div > p');
+      let parser = new fluid.MockSelectorParser(doc.root_node);
       let para2;
       _div.create_child_element('p', p => {
         para2 = p;
         p.id('second');
       });
-      subject = parser.parseWith(doc.root_node);
+      subject = parser.parseWith('body > div > p');
       expect(subject).toEqual([_para, para2]);
     });
 
     it('must find a second div if it is added before parsing: ', ()=> {
-      let parser = new fluid.MockSelectorParser('body>div');
+      let parser = new fluid.MockSelectorParser(doc.root_node);
       let div2;
       _body.create_child_element('div', d => {
         div2 = d;
         d.id('2nd-div');
       });
-      subject = parser.parseWith(doc.root_node);
+      subject = parser.parseWith('body>div');
       expect(subject).toEqual([_div, div2]);
     });
 
     it('The paragraph found must have correct text: ', ()=>{
-      let parser = new fluid.MockSelectorParser('body>div>p');
-      subject = parser.parseWith(doc.root_node);
+      let parser = new fluid.MockSelectorParser(doc.root_node);
+      subject = parser.parseWith('body>div>p');
       expect(subject[0].text_value).toEqual(randValuePara);
     });
 
@@ -144,28 +144,28 @@ describe("MockSelectorParser", ()=> {
     });
 
     it('must find para using attrib name only', ()=> {
-      let parser = new fluid.MockSelectorParser(`p[${attrib}]`);
-      subject = parser.parseWith(doc.root_node);
+      let parser = new fluid.MockSelectorParser(doc.root_node);
+      subject = parser.parseWith(`p[${attrib}]`);
       expect(subject).toEqual([para_with_attrib]);
     });
 
     it('must match attrib by name and value:', () => {
-      let parser = new fluid.MockSelectorParser(`p[${attrib}="${attrib_value}"]`);
+      let parser = new fluid.MockSelectorParser(doc.root_node);
       para_basic.attrib(attrib, "1");
-      subject = parser.parseWith(doc.root_node);
+      subject = parser.parseWith(`p[${attrib}="${attrib_value}"]`);
       expect( subject ).toEqual( [para_with_attrib] );
     });
 
     it('must match all elements with specified attrib name:', () => {
-      let parser = new fluid.MockSelectorParser(`p[${attrib}]`);
+      let parser = new fluid.MockSelectorParser(doc.root_node);
       para_basic.attrib(attrib, "1");
-      subject = parser.parseWith(doc.root_node);
+      subject = parser.parseWith(`p[${attrib}]`);
       expect( subject ).toEqual( [para_with_attrib, para_basic] );
     });
 
     it ('must match ID: ', ()=> {
-      let mp = new fluid.MockSelectorParser(`p#fred`);
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith(`p#fred`);
       expect( subject ).toEqual( [para_with_attrib] );
     })
 
@@ -189,14 +189,14 @@ describe("MockSelectorParser", ()=> {
     });
 
     it ('must find the descendent: ', ()=> {
-      let parser = new fluid.MockSelectorParser(`body descendent`);
-      subject = parser.parseWith( doc.root_node);
+      let parser = new fluid.MockSelectorParser(doc.root_node);
+      subject = parser.parseWith( `body descendent`);
       expect( subject ).toEqual([expected]);
     });
 
     it ('must find descendent by attribute: ', ()=> {
-      let parser = new fluid.MockSelectorParser('body [main]');
-      subject = parser.parseWith( doc.root_node );
+      let parser = new fluid.MockSelectorParser(doc.root_node);
+      subject = parser.parseWith( 'body [main]' );
       expect( subject ).toEqual( [expected] );
     });
 
@@ -220,20 +220,20 @@ describe("MockSelectorParser", ()=> {
     });
 
     it ('must not match on mismatched tag: ', ()=> {
-      let mp = new fluid.MockSelectorParser('nonexistent');
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith('nonexistent');
       expect( subject ).toEqual( [] );
     });
 
     it ('must not match correct child of mismatched ancestor: ', ()=> {
-      let mp = new fluid.MockSelectorParser('nonexistent>[main]');
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith('nonexistent>[main]');
       expect( subject ).toEqual( [] );
     });
 
     it ('must not match correct descendent of mismatched ancestor: ', ()=> {
-      let mp = new fluid.MockSelectorParser('nonexistent [main]');
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith('nonexistent [main]');
       expect( subject ).toEqual( [] );
     });
 
@@ -291,38 +291,38 @@ describe("MockSelectorParser", ()=> {
     });
 
     it ('must find target from parent>child descendent target: ', ()=> {
-      let mp = new fluid.MockSelectorParser('html>body p');
-      subject = mp.parseWith( doc.root_node );
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith( 'html>body p' );
       expect( subject ).toEqual( [_pMain, _pOther] );
     });
 
     it ('must find target from parent>child descendent parent>child target: ', ()=> {
-      let mp = new fluid.MockSelectorParser('content ul>li');
-      subject = mp.parseWith( doc.root_node );
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith( 'content ul>li' );
       expect( subject ).toEqual( list_li );
     });
 
     it ('must find series of descendents and then find a child: ', () => {
-      let mp = new fluid.MockSelectorParser('html content ul>li');
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith('html content ul>li');
       expect( subject ).toEqual( list_li );
     });
 
     it ('must find series of children then descendent: ', ()=> {
-      let mp = new fluid.MockSelectorParser('body>content>div li');
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith('body>content>div li');
       expect( subject ).toEqual( list_li );
     });
 
     it ('must find list of selectors with one having descendents by attrib: ', ()=> {
-      let mp = new fluid.MockSelectorParser('head,content li[id="first"], footer');
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith('head,content li[id="first"], footer');
       expect( subject ).toEqual( [_head, li_first, _footer] );
     });
 
     it ('must find list of selectors with one having parent-child path: ', ()=> {
-      let mp = new fluid.MockSelectorParser('head,div>ul>li[id="third"], content>[main]');
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith('head,div>ul>li[id="third"], content>[main]');
       expect( subject ).toEqual( [_head, li_third, _pMain] );
     });
 
@@ -376,15 +376,15 @@ describe("MockSelectorParser", ()=> {
     });
 
     it ('must find chain of LI tags to find third one: ', ()=> {
-      let mp = new fluid.MockSelectorParser(`li+li+li`);
-      subject = mp.parseWith( doc.root_node );
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith( `li+li+li` );
       expect( subject.length ).toEqual( 1 );
       expect( subject ).toEqual( [li_third] );
     });
 
     it (`must find 'P' tags main then other: `, ()=>{
-      let mp = new fluid.MockSelectorParser(`p[main]+p#other`);
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith(`p[main]+p#other`);
       expect( subject.length ).toEqual(1);
       expect( subject ).toEqual( [ _pOther ]);
     });
@@ -392,7 +392,7 @@ describe("MockSelectorParser", ()=> {
     it (`must find 3 'LI' tags of 5 when 3 siblings needed: `, ()=>{
       let li1 = li_third, li2, li3;
 
-      let mp = new fluid.MockSelectorParser(`li+li+li`);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
       _ul.create_child_element('LI', li => {
         li2 = li;
         li.attrib('num', '2');
@@ -401,7 +401,7 @@ describe("MockSelectorParser", ()=> {
         li3 = li;
         li.attrib('num', '3');
       });
-      subject = mp.parseWith(doc.root_node);
+      subject = mp.parseWith(`li+li+li`);
       expect( subject.length ).toEqual(3);
       expect( subject ).toEqual( [ li1, li2, li3 ]);
     });
@@ -458,16 +458,16 @@ describe("MockSelectorParser", ()=> {
     });
 
     it (`must find 'P' then div: `, ()=>{
-      let mp = new fluid.MockSelectorParser(`p~div`);
-      subject = mp.parseWith(doc.root_node);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith(`p~div`);
 
       expect( subject.length ).toEqual(1);
       expect( subject ).toEqual( [ _divNav ]);
     });
 
     it ('must find general sibling chain of 3 LI tags to find third: ', ()=> {
-      let mp = new fluid.MockSelectorParser(`li~li~li`);
-      subject = mp.parseWith( doc.root_node );
+      let mp = new fluid.MockSelectorParser(doc.root_node);
+      subject = mp.parseWith( `li~li~li` );
       expect( subject.length ).toEqual( 1 );
       expect( subject ).toEqual( [li_third] );
     });
@@ -475,7 +475,7 @@ describe("MockSelectorParser", ()=> {
     it (`must find 3rd, 4th and 5th 'LI' tags of 5 for li~li~li: `, ()=>{
       let li1 = li_third, li2, li3;
 
-      let mp = new fluid.MockSelectorParser(`li~li~li`);
+      let mp = new fluid.MockSelectorParser(doc.root_node);
       _ul.create_child_element('LI', li => {
         li2 = li;
         li.attrib('num', '2');
@@ -484,7 +484,7 @@ describe("MockSelectorParser", ()=> {
         li3 = li;
         li.attrib('num', '3');
       });
-      subject = mp.parseWith(doc.root_node);
+      subject = mp.parseWith(`li~li~li`);
       expect( subject.length ).toEqual(3);
       expect( subject ).toEqual( [ li1, li2, li3 ]);
     });
