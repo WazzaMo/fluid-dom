@@ -88,4 +88,52 @@ describe ('MockElement', ()=> {
 
   }); //-- findAll
 
+  describe('text(): ', ()=> {
+    let _bold;
+    let _p;
+    let _div1;
+
+    beforeEach(()=>{
+      root.create_child_element('body', body=> {
+        body.create_child_element('div', div=> {
+          div.id('div1');
+          _div1 = div;
+          div.create_child_element('p', p=> {
+            p.create_child_text('hi there');
+            p.create_child_element('b', b=> {
+              b.create_child_text('Fred');
+              _bold = b;
+            });
+            p.create_child_text('Yay');
+            _p = p;
+          });
+        });
+      });
+    });
+
+    it ('returns the text of single text value:', ()=>{
+      let bold = new fluid.MockElement(_bold);
+      expect(bold.text()).toEqual('Fred\n');
+    });
+
+    it ('returns the text child of an element', ()=>{
+      let all_text = 'hi there\n' + 'Fred\n' + 'Yay\n';
+      let p = new fluid.MockElement(_p);
+      expect( p.text() ).toEqual( all_text );
+    });
+
+    it ('returns the appended text of all text children', ()=>{
+      let all_text = 'hi there\n' + 'Fred\n' + 'Yay\n';
+      let div = new fluid.MockElement(_div1);
+      expect( div.text() ).toEqual( all_text );
+    });
+
+    it ('sets the text value, replacing all children if given text param', ()=>{
+      let div = new fluid.MockElement( _div1 );
+      div.text('new text');
+      expect(div.text()).toEqual('new text\n');
+    });
+
+  }); //--- text()
+
 }); // MockElement

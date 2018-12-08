@@ -14,13 +14,17 @@ import { MockAttributeSet, MockAttributes } from './mock-attributes';
 import { MockClasses } from './mock-classes';
 import { Option } from './option';
 
+import { NonElement } from './non-element';
+
 import {
   IMockDocNode,
   ElementNode,
   MockNodeType,
+  TextNode,
 } from './mock-document-nodes';
 
 import { MockSelectorParser } from './mock-selector-parser';
+import { empty_array } from './util';
 
 export class MockElement implements IElement {
   private _element : Option<ElementNode>;
@@ -28,11 +32,9 @@ export class MockElement implements IElement {
 
   constructor(element?: ElementNode) {
     if (element) {
-      console.log(`MockElement: ${element}`);
       this._element = new Option<ElementNode>(element);
       this._selector_parser = new Option<MockSelectorParser>(new MockSelectorParser(element));
     } else {
-      console.log('Null MOckElement');
       this._element = new Option<ElementNode>();
       this._selector_parser = new Option<MockSelectorParser>();
     }
@@ -144,11 +146,32 @@ export class MockElement implements IElement {
   }
 
   text(_text?: string | undefined): string | IElement {
-    throw new Error("Method not implemented.");
+    if (! _text && this._element.isValid) {
+      let element = this._element.Value;
+      let text_summary: string = '';
+      for(var node of element.children) {
+        if (node.nodeType === MockNodeType.ElementNode) {
+          let child : ElementNode= <ElementNode>node;
+          let childElement = new MockElement(child);
+          text_summary += childElement.text();
+        } else {
+          text_summary += node.text_value + '\n';
+        }
+      }
+      return text_summary;
+    } else if (this._element.isValid) {
+      let node = new TextNode(_text);
+      empty_array( this._element.Value.children );
+      this._element.Value.children.push(node);
+      return this;
+    }
+    return new NonElement();
   }
+
   html(_html?: string | undefined): string | IElement {
     throw new Error("Method not implemented.");
   }
+
   append(_html: string): IElement {
     throw new Error("Method not implemented.");
   }
@@ -167,6 +190,7 @@ export class MockElement implements IElement {
   on(args: EventHandlerInfo): void {
     throw new Error("Method not implemented.");
   }
+
   value(): string | undefined {
     throw new Error("Method not implemented.");
   }

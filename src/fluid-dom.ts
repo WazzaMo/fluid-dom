@@ -26,10 +26,13 @@ export { HttpResponseType } from "./http-response-type";
 export { HttpProtocol } from "./http-protocol";
 export { HttpResponse } from "./http-response";
 
+/**
+ * List of events for convenience with intelli-sense.
+ */
 export const Events = EVENT_LIST;
 
 
-class DOM implements IFluidDocument {
+class DomFluidDocument implements IFluidDocument {
 
   constructor() {
   }
@@ -76,6 +79,10 @@ class DOM implements IFluidDocument {
 
 }
 
+/**
+ * Factory function that creates the Browser implementation
+ * of Fluid DOM.
+ */
 export function Doc() : IFluidDocument {
-  return new DOM();
+  return new DomFluidDocument();
 }
