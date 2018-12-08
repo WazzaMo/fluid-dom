@@ -24,7 +24,7 @@
 
 * [add](_dom_attributes_.domattributes.md#add)
 * [attributeNames](_dom_attributes_.domattributes.md#attributenames)
-* [each](_dom_attributes_.domattributes.md#each)
+* [forEach](_dom_attributes_.domattributes.md#foreach)
 * [get](_dom_attributes_.domattributes.md#get)
 * [has](_dom_attributes_.domattributes.md#has)
 * [remove](_dom_attributes_.domattributes.md#remove)
@@ -41,7 +41,7 @@
 
 ⊕ **new DomAttributes**(_webElement: *`Element`*): [DomAttributes](_dom_attributes_.domattributes.md)
 
-*Defined in [dom-attributes.ts:15](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L15)*
+*Defined in [dom-attributes.ts:15](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L15)*
 
 **Parameters:**
 
@@ -61,7 +61,7 @@ ___
 
 **● _webElement**: *`Element`*
 
-*Defined in [dom-attributes.ts:15](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L15)*
+*Defined in [dom-attributes.ts:15](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L15)*
 
 ___
 
@@ -71,18 +71,18 @@ ___
 
 ###  add
 
-▸ **add**(name: *`string`*, value: *`any`*): [IAttributes](../interfaces/_i_attributes_.iattributes.md)
+▸ **add**(name: *`string`*, value: *`string`*): [IAttributes](../interfaces/_i_attributes_.iattributes.md)
 
 *Implementation of [IAttributes](../interfaces/_i_attributes_.iattributes.md).[add](../interfaces/_i_attributes_.iattributes.md#add)*
 
-*Defined in [dom-attributes.ts:37](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L37)*
+*Defined in [dom-attributes.ts:37](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L37)*
 
 **Parameters:**
 
 | Name | Type |
 | ------ | ------ |
 | name | `string` |
-| value | `any` |
+| value | `string` |
 
 **Returns:** [IAttributes](../interfaces/_i_attributes_.iattributes.md)
 
@@ -95,18 +95,18 @@ ___
 
 *Implementation of [IAttributes](../interfaces/_i_attributes_.iattributes.md).[attributeNames](../interfaces/_i_attributes_.iattributes.md#attributenames)*
 
-*Defined in [dom-attributes.ts:28](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L28)*
+*Defined in [dom-attributes.ts:28](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L28)*
 
 **Returns:** `Array`<`string`>
 
 ___
-<a id="each"></a>
+<a id="foreach"></a>
 
-###  each
+###  forEach
 
-▸ **each**(callback: *`function`*): `this`
+▸ **forEach**(callback: *`function`*): `this`
 
-*Defined in [dom-attributes.ts:21](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L21)*
+*Defined in [dom-attributes.ts:21](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L21)*
 
 **Parameters:**
 
@@ -125,7 +125,7 @@ ___
 
 *Implementation of [IAttributes](../interfaces/_i_attributes_.iattributes.md).[get](../interfaces/_i_attributes_.iattributes.md#get)*
 
-*Defined in [dom-attributes.ts:52](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L52)*
+*Defined in [dom-attributes.ts:52](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L52)*
 
 **Parameters:**
 
@@ -144,7 +144,7 @@ ___
 
 *Implementation of [IAttributes](../interfaces/_i_attributes_.iattributes.md).[has](../interfaces/_i_attributes_.iattributes.md#has)*
 
-*Defined in [dom-attributes.ts:56](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L56)*
+*Defined in [dom-attributes.ts:56](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L56)*
 
 **Parameters:**
 
@@ -163,7 +163,7 @@ ___
 
 *Implementation of [IAttributes](../interfaces/_i_attributes_.iattributes.md).[remove](../interfaces/_i_attributes_.iattributes.md#remove)*
 
-*Defined in [dom-attributes.ts:60](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L60)*
+*Defined in [dom-attributes.ts:60](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L60)*
 
 **Parameters:**
 
@@ -178,18 +178,18 @@ ___
 
 ###  set
 
-▸ **set**(name: *`string`*, value: *`any`*): [IAttributes](../interfaces/_i_attributes_.iattributes.md)
+▸ **set**(name: *`string`*, value: *`string`*): [IAttributes](../interfaces/_i_attributes_.iattributes.md)
 
 *Implementation of [IAttributes](../interfaces/_i_attributes_.iattributes.md).[set](../interfaces/_i_attributes_.iattributes.md#set)*
 
-*Defined in [dom-attributes.ts:41](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L41)*
+*Defined in [dom-attributes.ts:41](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L41)*
 
 **Parameters:**
 
 | Name | Type |
 | ------ | ------ |
 | name | `string` |
-| value | `any` |
+| value | `string` |
 
 **Returns:** [IAttributes](../interfaces/_i_attributes_.iattributes.md)
 
@@ -200,7 +200,7 @@ ___
 
 ▸ **with**(name: *`string`*, callback: *`function`*): [IAttributes](../interfaces/_i_attributes_.iattributes.md)
 
-*Defined in [dom-attributes.ts:46](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L46)*
+*Defined in [dom-attributes.ts:46](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L46)*
 
 **Parameters:**
 

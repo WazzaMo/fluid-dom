@@ -26,7 +26,7 @@
 **● id**: * `undefined` &#124; `string`
 *
 
-*Defined in [element-source.ts:12](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/element-source.ts#L12)*
+*Defined in [element-source.ts:12](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/element-source.ts#L12)*
 
 ___
 <a id="selector"></a>
@@ -36,7 +36,7 @@ ___
 **● selector**: * `undefined` &#124; `string`
 *
 
-*Defined in [element-source.ts:13](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/element-source.ts#L13)*
+*Defined in [element-source.ts:13](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/element-source.ts#L13)*
 
 ___
 

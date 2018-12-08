@@ -15,6 +15,7 @@ Represents a container of class names attached to an element.
 ## Implemented by
 
 * [DomClasses](../classes/_dom_classes_.domclasses.md)
+* [MockClasses](../classes/_mock_classes_.mockclasses.md)
 * [NonClasses](../classes/_non_classes_.nonclasses.md)
 
 ## Index
@@ -22,7 +23,7 @@ Represents a container of class names attached to an element.
 ### Methods
 
 * [add](_i_classes_.iclasses.md#add)
-* [each](_i_classes_.iclasses.md#each)
+* [forEach](_i_classes_.iclasses.md#foreach)
 * [has](_i_classes_.iclasses.md#has)
 * [remove](_i_classes_.iclasses.md#remove)
 * [set](_i_classes_.iclasses.md#set)
@@ -38,7 +39,7 @@ Represents a container of class names attached to an element.
 
 ▸ **add**(_class: *`string`*): [IClasses](_i_classes_.iclasses.md)
 
-*Defined in [i-classes.ts:38](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/i-classes.ts#L38)*
+*Defined in [i-classes.ts:38](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/i-classes.ts#L38)*
 
 Adds the class name to the element.
 
@@ -51,13 +52,13 @@ Adds the class name to the element.
 **Returns:** [IClasses](_i_classes_.iclasses.md)
 
 ___
-<a id="each"></a>
+<a id="foreach"></a>
 
-###  each
+###  forEach
 
-▸ **each**(callback: *`function`*): [IClasses](_i_classes_.iclasses.md)
+▸ **forEach**(callback: *`function`*): [IClasses](_i_classes_.iclasses.md)
 
-*Defined in [i-classes.ts:21](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/i-classes.ts#L21)*
+*Defined in [i-classes.ts:21](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/i-classes.ts#L21)*
 
 Iterate through each HTML class.
 
@@ -76,7 +77,7 @@ ___
 
 ▸ **has**(name: *`string`*): `boolean`
 
-*Defined in [i-classes.ts:23](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/i-classes.ts#L23)*
+*Defined in [i-classes.ts:23](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/i-classes.ts#L23)*
 
 **Parameters:**
 
@@ -93,7 +94,7 @@ ___
 
 ▸ **remove**(_class: *`string`*): [IClasses](_i_classes_.iclasses.md)
 
-*Defined in [i-classes.ts:41](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/i-classes.ts#L41)*
+*Defined in [i-classes.ts:41](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/i-classes.ts#L41)*
 
 Removes an HTML class name from an element.
 
@@ -112,7 +113,7 @@ ___
 
 ▸ **set**(_class: *`string`*): [IClasses](_i_classes_.iclasses.md)
 
-*Defined in [i-classes.ts:48](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/i-classes.ts#L48)*
+*Defined in [i-classes.ts:48](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/i-classes.ts#L48)*
 
 An alternate name for 'add.'
 *__see__*: add
@@ -132,7 +133,7 @@ ___
 
 ▸ **whenHas**(name: *`string`*, callback: *`function`*): [IClasses](_i_classes_.iclasses.md)
 
-*Defined in [i-classes.ts:32](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/i-classes.ts#L32)*
+*Defined in [i-classes.ts:32](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/i-classes.ts#L32)*
 
 Calls the given function if-and-only-if the named class is on the element. The function is called with the (fluid) element object to allow things to be done with it. Returns self.
 

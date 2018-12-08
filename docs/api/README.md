@@ -71,14 +71,14 @@ To iterate through the list items and add a class called "fancy"...
 var dom = new fluid.DOM()
 dom.findElement({id:'iteration'})
     .findAll({selector:'ul>li'})
-    .each( li => li.classes().add('fancy') )
+    .forEach( li => li.classes().add('fancy') )
 ```
 
 Or if you want to add 'mouseover' events to the List Items and use a selector to get all the list items...
 
 ```js
 dom.findAll({selector:'#iteration>ul>li'})
-    .each(item => item.on({
+    .forEach(item => item.on({
         event: dom.events.MOUSEOVER,
         handler: () => alert('Mouse over list item')
     }))
@@ -99,7 +99,7 @@ And if you wanted to hide any LI member that had the word 'yay' in their text...
 
 ```js
 dom.findAll({tagName: 'li'})
-    .each(item => item.text( item.text().replace(/yay/,'boo') ))
+    .forEach(item => item.text( item.text().replace(/yay/,'boo') ))
 ```
 
 And finally, if you need to use the regular DOM API for some reason, that's available to you as well. The `element` property on an Element object gives you the standard HTMLElement object.
@@ -139,10 +139,20 @@ dom.findElement({id: 'iteration'})
 * ["i-attributes"](modules/_i_attributes_.md)
 * ["i-classes"](modules/_i_classes_.md)
 * ["i-element"](modules/_i_element_.md)
+* ["i-fluid-document"](modules/_i_fluid_document_.md)
 * ["index"](modules/_index_.md)
 * ["later-or-now"](modules/_later_or_now_.md)
+* ["mock-attributes"](modules/_mock_attributes_.md)
+* ["mock-classes"](modules/_mock_classes_.md)
+* ["mock-document"](modules/_mock_document_.md)
+* ["mock-document-nodes"](modules/_mock_document_nodes_.md)
+* ["mock-element"](modules/_mock_element_.md)
+* ["mock-selector-parser"](modules/_mock_selector_parser_.md)
+* ["non-attributes"](modules/_non_attributes_.md)
 * ["non-classes"](modules/_non_classes_.md)
+* ["non-element"](modules/_non_element_.md)
 * ["option"](modules/_option_.md)
+* ["selector-lexer"](modules/_selector_lexer_.md)
 * ["util"](modules/_util_.md)
 
 ---

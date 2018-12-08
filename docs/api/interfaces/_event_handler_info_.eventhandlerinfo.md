@@ -25,7 +25,7 @@
 
 **● event**: *`string`*
 
-*Defined in [event-handler-info.ts:9](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/event-handler-info.ts#L9)*
+*Defined in [event-handler-info.ts:9](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/event-handler-info.ts#L9)*
 
 ___
 <a id="handler"></a>
@@ -34,7 +34,7 @@ ___
 
 **● handler**: *`function`*
 
-*Defined in [event-handler-info.ts:10](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/event-handler-info.ts#L10)*
+*Defined in [event-handler-info.ts:10](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/event-handler-info.ts#L10)*
 
 #### Type declaration
 ▸(event: *`any`*): `void`
@@ -55,7 +55,7 @@ ___
 **● id**: * `undefined` &#124; `string`
 *
 
-*Defined in [event-handler-info.ts:8](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/event-handler-info.ts#L8)*
+*Defined in [event-handler-info.ts:8](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/event-handler-info.ts#L8)*
 
 ___
 <a id="keepdefault"></a>
@@ -65,7 +65,7 @@ ___
 **● keepDefault**: * `undefined` &#124; `false` &#124; `true`
 *
 
-*Defined in [event-handler-info.ts:11](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/event-handler-info.ts#L11)*
+*Defined in [event-handler-info.ts:11](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/event-handler-info.ts#L11)*
 
 ___
 

@@ -20,7 +20,7 @@
 
 **FILE**:  = "file"
 
-*Defined in [http-protocol.ts:11](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-protocol.ts#L11)*
+*Defined in [http-protocol.ts:11](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-protocol.ts#L11)*
 
 ___
 <a id="http"></a>
@@ -29,7 +29,7 @@ ___
 
 **HTTP**:  = "http"
 
-*Defined in [http-protocol.ts:9](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-protocol.ts#L9)*
+*Defined in [http-protocol.ts:9](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-protocol.ts#L9)*
 
 ___
 <a id="https"></a>
@@ -38,7 +38,7 @@ ___
 
 **HTTPS**:  = "https"
 
-*Defined in [http-protocol.ts:10](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-protocol.ts#L10)*
+*Defined in [http-protocol.ts:10](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-protocol.ts#L10)*
 
 ___
 

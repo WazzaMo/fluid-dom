@@ -10,71 +10,37 @@
 
 ### Variables
 
-* [EVENT_LIST](_fluid_dom_.md#event_list)
 * [Events](_fluid_dom_.md#events)
 
 ### Functions
 
-* [createEventHash](_fluid_dom_.md#createeventhash)
+* [Doc](_fluid_dom_.md#doc)
 
 ---
 
 ## Variables
 
-<a id="event_list"></a>
-
-### `<Const>` EVENT_LIST
-
-**● EVENT_LIST**: *`string`[]* =  [
-  'abort', 'afterscriptexecute',
-  'animationcancel', 'animationend', 'animationiteration',
-  'auxclick',
-  'beforescriptexecute', 'blur',
-  'change', 'click', 'close', 'contextmenu',
-  'dblclick',
-  'error',
-  'focus', 'fullscreenchange', 'fullscreenerror',
-  'gotpointercapture',
-  'input',
-  'keydown', 'keypress', 'keyup',
-  'load', 'loadend', 'loadstart', 'lostpointercapture',
-  'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
-  'offline', 'online',
-  'pointercancel', 'pointerdown', 'pointerenter', 'pointerleave',
-  'pointermove', 'pointerout', 'pointerover', 'pointerup', 
-  'reset', 'resize',
-  'scroll', 'select', 'selectionchange', 'selectionchange',
-  'selectstart', 'submit', 
-  'touchcancel', 'touchmove', 'touchstart',
-  'transitioncancel', 'transitionend',
-  'visibilitychange',
-  'wheel'
-]
-
-*Defined in [fluid-dom.ts:18](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/fluid-dom.ts#L18)*
-
-___
 <a id="events"></a>
 
 ### `<Const>` Events
 
-**● Events**: *`any`*
+**● Events**: *`string`[]* =  EVENT_LIST
 
-*Defined in [fluid-dom.ts:109](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/fluid-dom.ts#L109)*
+*Defined in [fluid-dom.ts:29](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/fluid-dom.ts#L29)*
 
 ___
 
 ## Functions
 
-<a id="createeventhash"></a>
+<a id="doc"></a>
 
-###  createEventHash
+###  Doc
 
-▸ **createEventHash**(): `any`
+▸ **Doc**(): [IFluidDocument](../interfaces/_i_fluid_document_.ifluiddocument.md)
 
-*Defined in [fluid-dom.ts:44](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/fluid-dom.ts#L44)*
+*Defined in [fluid-dom.ts:79](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/fluid-dom.ts#L79)*
 
-**Returns:** `any`
+**Returns:** [IFluidDocument](../interfaces/_i_fluid_document_.ifluiddocument.md)
 
 ___
 

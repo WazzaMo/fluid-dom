@@ -26,7 +26,7 @@
 
 **CONNECT**:  = "CONNECT"
 
-*Defined in [http-method.ts:8](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L8)*
+*Defined in [http-method.ts:8](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L8)*
 
 ___
 <a id="delete"></a>
@@ -35,7 +35,7 @@ ___
 
 **DELETE**:  = "DELETE"
 
-*Defined in [http-method.ts:9](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L9)*
+*Defined in [http-method.ts:9](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L9)*
 
 ___
 <a id="get"></a>
@@ -44,7 +44,7 @@ ___
 
 **GET**:  = "GET"
 
-*Defined in [http-method.ts:10](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L10)*
+*Defined in [http-method.ts:10](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L10)*
 
 ___
 <a id="head"></a>
@@ -53,7 +53,7 @@ ___
 
 **HEAD**:  = "HEAD"
 
-*Defined in [http-method.ts:11](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L11)*
+*Defined in [http-method.ts:11](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L11)*
 
 ___
 <a id="options"></a>
@@ -62,7 +62,7 @@ ___
 
 **OPTIONS**:  = "OPTIONS"
 
-*Defined in [http-method.ts:12](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L12)*
+*Defined in [http-method.ts:12](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L12)*
 
 ___
 <a id="patch"></a>
@@ -71,7 +71,7 @@ ___
 
 **PATCH**:  = "PATCH"
 
-*Defined in [http-method.ts:13](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L13)*
+*Defined in [http-method.ts:13](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L13)*
 
 ___
 <a id="post"></a>
@@ -80,7 +80,7 @@ ___
 
 **POST**:  = "POST"
 
-*Defined in [http-method.ts:14](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L14)*
+*Defined in [http-method.ts:14](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L14)*
 
 ___
 <a id="put"></a>
@@ -89,7 +89,7 @@ ___
 
 **PUT**:  = "PUT"
 
-*Defined in [http-method.ts:15](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L15)*
+*Defined in [http-method.ts:15](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L15)*
 
 ___
 <a id="trace"></a>
@@ -98,7 +98,7 @@ ___
 
 **TRACE**:  = "TRACE"
 
-*Defined in [http-method.ts:16](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-method.ts#L16)*
+*Defined in [http-method.ts:16](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-method.ts#L16)*
 
 ___
 

@@ -6,15 +6,15 @@
 
 **DOM**
 
+## Implements
+
+* [IFluidDocument](../interfaces/_i_fluid_document_.ifluiddocument.md)
+
 ## Index
 
 ### Constructors
 
 * [constructor](_fluid_dom_.dom.md#constructor)
-
-### Properties
-
-* [events](_fluid_dom_.dom.md#events)
 
 ### Methods
 
@@ -32,21 +32,9 @@
 
 ⊕ **new DOM**(): [DOM](_fluid_dom_.dom.md)
 
-*Defined in [fluid-dom.ts:61](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/fluid-dom.ts#L61)*
+*Defined in [fluid-dom.ts:32](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/fluid-dom.ts#L32)*
 
 **Returns:** [DOM](_fluid_dom_.dom.md)
-
-___
-
-## Properties
-
-<a id="events"></a>
-
-###  events
-
-**● events**: *`any`*
-
-*Defined in [fluid-dom.ts:61](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/fluid-dom.ts#L61)*
 
 ___
 
@@ -58,7 +46,9 @@ ___
 
 ▸ **buttonOn**(eventInfo: *[EventHandlerInfo](../interfaces/_event_handler_info_.eventhandlerinfo.md)*): `void`
 
-*Defined in [fluid-dom.ts:99](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/fluid-dom.ts#L99)*
+*Implementation of [IFluidDocument](../interfaces/_i_fluid_document_.ifluiddocument.md).[buttonOn](../interfaces/_i_fluid_document_.ifluiddocument.md#buttonon)*
+
+*Defined in [fluid-dom.ts:69](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/fluid-dom.ts#L69)*
 
 **Parameters:**
 
@@ -75,7 +65,9 @@ ___
 
 ▸ **findAll**(arg: *[ElementListSource](../interfaces/_element_list_source_.elementlistsource.md)*): `Array`<[IElement](../interfaces/_i_element_.ielement.md)>
 
-*Defined in [fluid-dom.ts:80](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/fluid-dom.ts#L80)*
+*Implementation of [IFluidDocument](../interfaces/_i_fluid_document_.ifluiddocument.md).[findAll](../interfaces/_i_fluid_document_.ifluiddocument.md#findall)*
+
+*Defined in [fluid-dom.ts:50](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/fluid-dom.ts#L50)*
 
 **Parameters:**
 
@@ -92,7 +84,9 @@ ___
 
 ▸ **findElement**(arg: *[ElementSource](../interfaces/_element_source_.elementsource.md)*): [IElement](../interfaces/_i_element_.ielement.md)
 
-*Defined in [fluid-dom.ts:67](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/fluid-dom.ts#L67)*
+*Implementation of [IFluidDocument](../interfaces/_i_fluid_document_.ifluiddocument.md).[findElement](../interfaces/_i_fluid_document_.ifluiddocument.md#findelement)*
+
+*Defined in [fluid-dom.ts:37](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/fluid-dom.ts#L37)*
 
 **Parameters:**
 

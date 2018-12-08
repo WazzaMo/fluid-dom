@@ -24,7 +24,7 @@ Is a nil-effect IClasses instance to return in any situation where the IElement 
 ### Methods
 
 * [add](_non_classes_.nonclasses.md#add)
-* [each](_non_classes_.nonclasses.md#each)
+* [forEach](_non_classes_.nonclasses.md#foreach)
 * [has](_non_classes_.nonclasses.md#has)
 * [remove](_non_classes_.nonclasses.md#remove)
 * [set](_non_classes_.nonclasses.md#set)
@@ -40,7 +40,7 @@ Is a nil-effect IClasses instance to return in any situation where the IElement 
 
 ⊕ **new NonClasses**(): [NonClasses](_non_classes_.nonclasses.md)
 
-*Defined in [non-classes.ts:18](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/non-classes.ts#L18)*
+*Defined in [non-classes.ts:18](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/non-classes.ts#L18)*
 
 **Returns:** [NonClasses](_non_classes_.nonclasses.md)
 
@@ -56,7 +56,7 @@ ___
 
 *Implementation of [IClasses](../interfaces/_i_classes_.iclasses.md).[add](../interfaces/_i_classes_.iclasses.md#add)*
 
-*Defined in [non-classes.ts:33](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/non-classes.ts#L33)*
+*Defined in [non-classes.ts:33](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/non-classes.ts#L33)*
 
 **Parameters:**
 
@@ -67,13 +67,13 @@ ___
 **Returns:** [IClasses](../interfaces/_i_classes_.iclasses.md)
 
 ___
-<a id="each"></a>
+<a id="foreach"></a>
 
-###  each
+###  forEach
 
-▸ **each**(callback: *`function`*): [IClasses](../interfaces/_i_classes_.iclasses.md)
+▸ **forEach**(callback: *`function`*): [IClasses](../interfaces/_i_classes_.iclasses.md)
 
-*Defined in [non-classes.ts:21](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/non-classes.ts#L21)*
+*Defined in [non-classes.ts:21](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/non-classes.ts#L21)*
 
 **Parameters:**
 
@@ -92,7 +92,7 @@ ___
 
 *Implementation of [IClasses](../interfaces/_i_classes_.iclasses.md).[has](../interfaces/_i_classes_.iclasses.md#has)*
 
-*Defined in [non-classes.ts:25](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/non-classes.ts#L25)*
+*Defined in [non-classes.ts:25](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/non-classes.ts#L25)*
 
 **Parameters:**
 
@@ -111,7 +111,7 @@ ___
 
 *Implementation of [IClasses](../interfaces/_i_classes_.iclasses.md).[remove](../interfaces/_i_classes_.iclasses.md#remove)*
 
-*Defined in [non-classes.ts:37](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/non-classes.ts#L37)*
+*Defined in [non-classes.ts:37](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/non-classes.ts#L37)*
 
 **Parameters:**
 
@@ -130,7 +130,7 @@ ___
 
 *Implementation of [IClasses](../interfaces/_i_classes_.iclasses.md).[set](../interfaces/_i_classes_.iclasses.md#set)*
 
-*Defined in [non-classes.ts:41](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/non-classes.ts#L41)*
+*Defined in [non-classes.ts:41](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/non-classes.ts#L41)*
 
 **Parameters:**
 
@@ -147,7 +147,7 @@ ___
 
 ▸ **whenHas**(name: *`string`*, callback: *`function`*): [IClasses](../interfaces/_i_classes_.iclasses.md)
 
-*Defined in [non-classes.ts:29](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/non-classes.ts#L29)*
+*Defined in [non-classes.ts:29](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/non-classes.ts#L29)*
 
 **Parameters:**
 

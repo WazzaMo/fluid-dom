@@ -35,7 +35,7 @@
 
 ⊕ **new LaterOrNow**(now: *`Tnow`*, thePromise: *`Promise`<`Tlater`>*): [LaterOrNow](_later_or_now_.laterornow.md)
 
-*Defined in [later-or-now.ts:28](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L28)*
+*Defined in [later-or-now.ts:28](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L28)*
 
 **Parameters:**
 
@@ -56,7 +56,7 @@ ___
 
 **● immediateValue**: *`Tnow`*
 
-*Defined in [later-or-now.ts:27](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L27)*
+*Defined in [later-or-now.ts:27](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L27)*
 
 ___
 <a id="promise"></a>
@@ -65,7 +65,7 @@ ___
 
 **● promise**: *`Promise`<`Tlater`>*
 
-*Defined in [later-or-now.ts:28](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L28)*
+*Defined in [later-or-now.ts:28](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L28)*
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 ▸ **later**(): [LaterPromise](_later_or_now_.laterpromise.md)<`Tnow`, `Tlater`>
 
-*Defined in [later-or-now.ts:35](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L35)*
+*Defined in [later-or-now.ts:35](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L35)*
 
 **Returns:** [LaterPromise](_later_or_now_.laterpromise.md)<`Tnow`, `Tlater`>
 
@@ -88,7 +88,7 @@ ___
 
 ▸ **now**(): `Tnow`
 
-*Defined in [later-or-now.ts:39](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L39)*
+*Defined in [later-or-now.ts:39](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L39)*
 
 **Returns:** `Tnow`
 

@@ -22,7 +22,7 @@
 
 ▸ **cast**(attr: *[DomAttributes](../classes/_dom_attributes_.domattributes.md)*): [IAttributes](../interfaces/_i_attributes_.iattributes.md)
 
-*Defined in [dom-attributes.ts:10](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-attributes.ts#L10)*
+*Defined in [dom-attributes.ts:10](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-attributes.ts#L10)*
 
 **Parameters:**
 

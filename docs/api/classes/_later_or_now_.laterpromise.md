@@ -34,7 +34,7 @@
 
 ⊕ **new LaterPromise**(_later: *[LaterOrNow](_later_or_now_.laterornow.md)<`Tnow`, `Tlater`>*): [LaterPromise](_later_or_now_.laterpromise.md)
 
-*Defined in [later-or-now.ts:3](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L3)*
+*Defined in [later-or-now.ts:3](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L3)*
 
 **Parameters:**
 
@@ -54,7 +54,7 @@ ___
 
 **● later**: *[LaterOrNow](_later_or_now_.laterornow.md)<`Tnow`, `Tlater`>*
 
-*Defined in [later-or-now.ts:3](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L3)*
+*Defined in [later-or-now.ts:3](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L3)*
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 ▸ **emerges**(action: *`function`*): [LaterOrNow](_later_or_now_.laterornow.md)<`Tnow`, `Tlater`>
 
-*Defined in [later-or-now.ts:9](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L9)*
+*Defined in [later-or-now.ts:9](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L9)*
 
 **Parameters:**
 
@@ -83,7 +83,7 @@ ___
 
 ▸ **whenFails**(errAction: *`function`*): [LaterOrNow](_later_or_now_.laterornow.md)<`Tnow`, `Tlater`>
 
-*Defined in [later-or-now.ts:16](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/later-or-now.ts#L16)*
+*Defined in [later-or-now.ts:16](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/later-or-now.ts#L16)*
 
 **Parameters:**
 

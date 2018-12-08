@@ -22,7 +22,7 @@
 
 **ARRAYBUFFER**:  = "arraybuffer"
 
-*Defined in [http-response-type.ts:9](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response-type.ts#L9)*
+*Defined in [http-response-type.ts:9](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response-type.ts#L9)*
 
 ___
 <a id="blob"></a>
@@ -31,7 +31,7 @@ ___
 
 **BLOB**:  = "blob"
 
-*Defined in [http-response-type.ts:10](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response-type.ts#L10)*
+*Defined in [http-response-type.ts:10](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response-type.ts#L10)*
 
 ___
 <a id="document"></a>
@@ -40,7 +40,7 @@ ___
 
 **DOCUMENT**:  = "document"
 
-*Defined in [http-response-type.ts:11](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response-type.ts#L11)*
+*Defined in [http-response-type.ts:11](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response-type.ts#L11)*
 
 ___
 <a id="json"></a>
@@ -49,7 +49,7 @@ ___
 
 **JSON**:  = "json"
 
-*Defined in [http-response-type.ts:12](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response-type.ts#L12)*
+*Defined in [http-response-type.ts:12](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response-type.ts#L12)*
 
 ___
 <a id="text"></a>
@@ -58,7 +58,7 @@ ___
 
 **TEXT**:  = "text"
 
-*Defined in [http-response-type.ts:8](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response-type.ts#L8)*
+*Defined in [http-response-type.ts:8](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response-type.ts#L8)*
 
 ___
 

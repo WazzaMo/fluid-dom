@@ -21,7 +21,7 @@
 
 **Button**:  = "BUTTON"
 
-*Defined in [constants.ts:19](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/constants.ts#L19)*
+*Defined in [constants.ts:9](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/constants.ts#L9)*
 
 ___
 <a id="div"></a>
@@ -30,7 +30,7 @@ ___
 
 **Div**:  = "DIV"
 
-*Defined in [constants.ts:20](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/constants.ts#L20)*
+*Defined in [constants.ts:10](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/constants.ts#L10)*
 
 ___
 <a id="input"></a>
@@ -39,7 +39,7 @@ ___
 
 **Input**:  = "INPUT"
 
-*Defined in [constants.ts:21](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/constants.ts#L21)*
+*Defined in [constants.ts:11](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/constants.ts#L11)*
 
 ___
 <a id="paragraph"></a>
@@ -48,7 +48,7 @@ ___
 
 **Paragraph**:  = "P"
 
-*Defined in [constants.ts:22](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/constants.ts#L22)*
+*Defined in [constants.ts:12](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/constants.ts#L12)*
 
 ___
 

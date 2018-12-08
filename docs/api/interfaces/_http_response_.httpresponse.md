@@ -26,7 +26,7 @@
 **● body**: * `string` &#124; `Document` &#124; `ArrayBuffer` &#124; `Blob`
 *
 
-*Defined in [http-response.ts:12](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response.ts#L12)*
+*Defined in [http-response.ts:12](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response.ts#L12)*
 
 ___
 <a id="headers"></a>
@@ -35,7 +35,7 @@ ___
 
 **● headers**: *`object`*
 
-*Defined in [http-response.ts:14](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response.ts#L14)*
+*Defined in [http-response.ts:14](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response.ts#L14)*
 
 #### Type declaration
 
@@ -48,7 +48,7 @@ ___
 
 **● status**: *`number`*
 
-*Defined in [http-response.ts:10](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response.ts#L10)*
+*Defined in [http-response.ts:10](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response.ts#L10)*
 
 ___
 <a id="type"></a>
@@ -57,7 +57,7 @@ ___
 
 **● type**: *`string`*
 
-*Defined in [http-response.ts:11](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-response.ts#L11)*
+*Defined in [http-response.ts:11](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-response.ts#L11)*
 
 ___
 

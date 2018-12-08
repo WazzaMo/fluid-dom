@@ -2,6 +2,8 @@
 
 # Class: Option
 
+Represents an uncertain return type. In TypeScript it's possible to return `Type | undefined` but at runtime it can get a bit messy to handle this well. The Option class represents this cleanly and explicitly while making it easy determine whether the value is valid or not and, if valid, provides easy ways to get the value with proper type consistency in TypeScript.
+
 ## Type parameters
 #### T 
 ## Hierarchy
@@ -33,7 +35,7 @@
 
 ⊕ **new Option**(_value?: *[T]()*): [Option](_option_.option.md)
 
-*Defined in [option.ts:4](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/option.ts#L4)*
+*Defined in [option.ts:20](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/option.ts#L20)*
 
 **Parameters:**
 
@@ -54,7 +56,7 @@ ___
 **● value**: * `T` &#124; `null`
 *
 
-*Defined in [option.ts:4](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/option.ts#L4)*
+*Defined in [option.ts:20](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/option.ts#L20)*
 
 ___
 
@@ -66,7 +68,10 @@ ___
 
 getValue(): `T`
 
-*Defined in [option.ts:14](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/option.ts#L14)*
+*Defined in [option.ts:35](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/option.ts#L35)*
+
+Check that there is a value before calling this.
+*__see__*: isValid
 
 **Returns:** `T`
 
@@ -77,7 +82,9 @@ ___
 
 getisValid(): `boolean`
 
-*Defined in [option.ts:18](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/option.ts#L18)*
+*Defined in [option.ts:42](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/option.ts#L42)*
+
+Tests if the value is known.
 
 **Returns:** `boolean`
 

@@ -54,7 +54,6 @@ The implementation IElement for elements in the browser page from the DOM.
 * [getListFromSelector](_dom_element_.domelement.md#getlistfromselector)
 * [getListFromTagName](_dom_element_.domelement.md#getlistfromtagname)
 * [makeFromElement](_dom_element_.domelement.md#makefromelement)
-* [nullElement](_dom_element_.domelement.md#nullelement)
 
 ---
 
@@ -66,7 +65,7 @@ The implementation IElement for elements in the browser page from the DOM.
 
 ⊕ **new DomElement**(element?: * `HTMLElement` &#124; `Element`*): [DomElement](_dom_element_.domelement.md)
 
-*Defined in [dom-element.ts:79](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L79)*
+*Defined in [dom-element.ts:81](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L81)*
 
 **Parameters:**
 
@@ -86,7 +85,7 @@ ___
 
 **● domElement**: *[Option](_option_.option.md)<`HTMLElement`>*
 
-*Defined in [dom-element.ts:79](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L79)*
+*Defined in [dom-element.ts:81](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L81)*
 
 ___
 
@@ -98,7 +97,7 @@ ___
 
 ▸ **alertInvalid**(): `void`
 
-*Defined in [dom-element.ts:85](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L85)*
+*Defined in [dom-element.ts:87](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L87)*
 
 **Returns:** `void`
 
@@ -111,7 +110,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[append](../interfaces/_i_element_.ielement.md#append)*
 
-*Defined in [dom-element.ts:264](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L264)*
+*Defined in [dom-element.ts:257](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L257)*
 
 **Parameters:**
 
@@ -130,7 +129,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[attributes](../interfaces/_i_element_.ielement.md#attributes)*
 
-*Defined in [dom-element.ts:285](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L285)*
+*Defined in [dom-element.ts:278](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L278)*
 
 **Returns:** [IAttributes](../interfaces/_i_attributes_.iattributes.md)
 
@@ -143,7 +142,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[classes](../interfaces/_i_element_.ielement.md#classes)*
 
-*Defined in [dom-element.ts:289](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L289)*
+*Defined in [dom-element.ts:286](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L286)*
 
 **Returns:** [IClasses](../interfaces/_i_classes_.iclasses.md)
 
@@ -156,7 +155,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[exists](../interfaces/_i_element_.ielement.md#exists)*
 
-*Defined in [dom-element.ts:193](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L193)*
+*Defined in [dom-element.ts:186](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L186)*
 
 **Returns:** `boolean`
 
@@ -169,7 +168,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[expect](../interfaces/_i_element_.ielement.md#expect)*
 
-*Defined in [dom-element.ts:172](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L172)*
+*Defined in [dom-element.ts:165](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L165)*
 
 **Parameters:**
 
@@ -188,7 +187,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[findAll](../interfaces/_i_element_.ielement.md#findall)*
 
-*Defined in [dom-element.ts:197](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L197)*
+*Defined in [dom-element.ts:190](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L190)*
 
 **Parameters:**
 
@@ -207,7 +206,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[getId](../interfaces/_i_element_.ielement.md#getid)*
 
-*Defined in [dom-element.ts:185](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L185)*
+*Defined in [dom-element.ts:178](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L178)*
 
 **Returns:**  `string` &#124; `null`
 
@@ -220,7 +219,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[getParent](../interfaces/_i_element_.ielement.md#getparent)*
 
-*Defined in [dom-element.ts:153](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L153)*
+*Defined in [dom-element.ts:146](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L146)*
 
 **Returns:** [IElement](../interfaces/_i_element_.ielement.md)
 
@@ -233,7 +232,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[hasId](../interfaces/_i_element_.ielement.md#hasid)*
 
-*Defined in [dom-element.ts:189](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L189)*
+*Defined in [dom-element.ts:182](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L182)*
 
 **Returns:** `boolean`
 
@@ -246,7 +245,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[html](../interfaces/_i_element_.ielement.md#html)*
 
-*Defined in [dom-element.ts:249](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L249)*
+*Defined in [dom-element.ts:242](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L242)*
 
 **Parameters:**
 
@@ -265,7 +264,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[isValid](../interfaces/_i_element_.ielement.md#isvalid)*
 
-*Defined in [dom-element.ts:149](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L149)*
+*Defined in [dom-element.ts:142](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L142)*
 
 **Returns:** `boolean`
 
@@ -278,7 +277,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[on](../interfaces/_i_element_.ielement.md#on)*
 
-*Defined in [dom-element.ts:296](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L296)*
+*Defined in [dom-element.ts:293](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L293)*
 
 **Parameters:**
 
@@ -297,7 +296,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[prepend](../interfaces/_i_element_.ielement.md#prepend)*
 
-*Defined in [dom-element.ts:270](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L270)*
+*Defined in [dom-element.ts:263](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L263)*
 
 **Parameters:**
 
@@ -316,7 +315,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[remove](../interfaces/_i_element_.ielement.md#remove)*
 
-*Defined in [dom-element.ts:276](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L276)*
+*Defined in [dom-element.ts:269](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L269)*
 
 **Returns:** `undefined`
 
@@ -329,7 +328,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[selectFirst](../interfaces/_i_element_.ielement.md#selectfirst)*
 
-*Defined in [dom-element.ts:207](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L207)*
+*Defined in [dom-element.ts:200](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L200)*
 
 **Parameters:**
 
@@ -348,7 +347,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[selectorPath](../interfaces/_i_element_.ielement.md#selectorpath)*
 
-*Defined in [dom-element.ts:218](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L218)*
+*Defined in [dom-element.ts:211](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L211)*
 
 **Returns:** `string`
 
@@ -361,7 +360,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[tagName](../interfaces/_i_element_.ielement.md#tagname)*
 
-*Defined in [dom-element.ts:226](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L226)*
+*Defined in [dom-element.ts:219](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L219)*
 
 **Returns:** `string`
 
@@ -374,7 +373,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[text](../interfaces/_i_element_.ielement.md#text)*
 
-*Defined in [dom-element.ts:234](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L234)*
+*Defined in [dom-element.ts:227](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L227)*
 
 **Parameters:**
 
@@ -393,7 +392,7 @@ ___
 
 *Implementation of [IElement](../interfaces/_i_element_.ielement.md).[value](../interfaces/_i_element_.ielement.md#value)*
 
-*Defined in [dom-element.ts:310](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L310)*
+*Defined in [dom-element.ts:307](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L307)*
 
 **Returns:**  `string` &#124; `undefined`
 
@@ -404,7 +403,7 @@ ___
 
 ▸ **withChildren**(callback: *`function`*): [IElement](../interfaces/_i_element_.ielement.md)
 
-*Defined in [dom-element.ts:164](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L164)*
+*Defined in [dom-element.ts:157](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L157)*
 
 **Parameters:**
 
@@ -421,7 +420,7 @@ ___
 
 ▸ **getElementFromId**(id: *`string`*): [IElement](../interfaces/_i_element_.ielement.md)
 
-*Defined in [dom-element.ts:121](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L121)*
+*Defined in [dom-element.ts:123](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L123)*
 
 **Parameters:**
 
@@ -438,7 +437,7 @@ ___
 
 ▸ **getElementFromSelector**(selector: *`string`*): [IElement](../interfaces/_i_element_.ielement.md)
 
-*Defined in [dom-element.ts:131](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L131)*
+*Defined in [dom-element.ts:133](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L133)*
 
 Gets the first matching element from a document.
 
@@ -458,7 +457,7 @@ ___
 
 ▸ **getListFromClass**(_class: *`string`*): `Array`<[IElement](../interfaces/_i_element_.ielement.md)>
 
-*Defined in [dom-element.ts:106](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L106)*
+*Defined in [dom-element.ts:108](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L108)*
 
 Finds elements in a document using a class name. Note do not prefix with a period (`.`) - just provide the pure class name.
 
@@ -478,7 +477,7 @@ ___
 
 ▸ **getListFromSelector**(selector: *`string`*): `Array`<[IElement](../interfaces/_i_element_.ielement.md)>
 
-*Defined in [dom-element.ts:94](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L94)*
+*Defined in [dom-element.ts:96](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L96)*
 
 Finds elements in a document using a selector.
 
@@ -498,7 +497,7 @@ ___
 
 ▸ **getListFromTagName**(tagName: *`string`*): `Array`<[IElement](../interfaces/_i_element_.ielement.md)>
 
-*Defined in [dom-element.ts:116](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L116)*
+*Defined in [dom-element.ts:118](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L118)*
 
 Finds elements in a document using a tag-name.
 
@@ -518,7 +517,7 @@ ___
 
 ▸ **makeFromElement**(element: * `Element` &#124; `HTMLElement` &#124; `null`*): [IElement](../interfaces/_i_element_.ielement.md)
 
-*Defined in [dom-element.ts:145](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L145)*
+*Defined in [dom-element.ts:138](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L138)*
 
 **Parameters:**
 
@@ -527,21 +526,6 @@ ___
 | element |  `Element` &#124; `HTMLElement` &#124; `null`|
 
 **Returns:** [IElement](../interfaces/_i_element_.ielement.md)
-
-___
-<a id="nullelement"></a>
-
-### `<Static>` nullElement
-
-▸ **nullElement**(): [IElement](../interfaces/_i_element_.ielement.md)
-
-*Defined in [dom-element.ts:141](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L141)*
-
-Factory method for a non-element object.
-*__see__*: isValid
-
-**Returns:** [IElement](../interfaces/_i_element_.ielement.md)
-an element object where isValid() is always false.
 
 ___
 

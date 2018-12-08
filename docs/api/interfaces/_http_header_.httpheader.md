@@ -23,7 +23,7 @@
 
 **● name**: *`string`*
 
-*Defined in [http-header.ts:8](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-header.ts#L8)*
+*Defined in [http-header.ts:8](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-header.ts#L8)*
 
 ___
 <a id="value"></a>
@@ -32,7 +32,7 @@ ___
 
 **● value**: *`string`*
 
-*Defined in [http-header.ts:9](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-header.ts#L9)*
+*Defined in [http-header.ts:9](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-header.ts#L9)*
 
 ___
 

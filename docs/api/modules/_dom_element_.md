@@ -24,7 +24,7 @@
 
 ▸ **convertHtmlCollection**(collection: * `HTMLCollection` &#124; `NodeListOf`<`Element`>*): `Array`<[IElement](../interfaces/_i_element_.ielement.md)>
 
-*Defined in [dom-element.ts:25](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L25)*
+*Defined in [dom-element.ts:27](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L27)*
 
 **Parameters:**
 
@@ -41,7 +41,7 @@ ___
 
 ▸ **getBySelector**(element: * `HTMLElement` &#124; `Element`*, selector: *`string`*):  `HTMLElement` &#124; `null`
 
-*Defined in [dom-element.ts:57](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L57)*
+*Defined in [dom-element.ts:59](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L59)*
 
 **Parameters:**
 
@@ -59,7 +59,7 @@ ___
 
 ▸ **selectorPath**(element: * `HTMLElement` &#124; `Element`*): `string`
 
-*Defined in [dom-element.ts:39](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/dom-element.ts#L39)*
+*Defined in [dom-element.ts:41](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/dom-element.ts#L41)*
 
 **Parameters:**
 

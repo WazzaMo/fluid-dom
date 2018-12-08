@@ -41,7 +41,7 @@
 
 ⊕ **new HttpPromise**(_http: *[Http](_http_.http.md)*): [HttpPromise](_http_promise_.httppromise.md)
 
-*Defined in [http-promise.ts:25](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L25)*
+*Defined in [http-promise.ts:25](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L25)*
 
 **Parameters:**
 
@@ -61,7 +61,7 @@ ___
 
 **● httpObject**: *[Http](_http_.http.md)*
 
-*Defined in [http-promise.ts:5](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L5)*
+*Defined in [http-promise.ts:5](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L5)*
 
 ___
 <a id="promise"></a>
@@ -70,7 +70,7 @@ ___
 
 **● promise**: *`Promise`<`T`>*
 
-*Defined in [http-promise.ts:7](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L7)*
+*Defined in [http-promise.ts:7](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L7)*
 
 ___
 <a id="result"></a>
@@ -80,7 +80,7 @@ ___
 **● result**: * `T` &#124; `undefined`
 *
 
-*Defined in [http-promise.ts:6](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L6)*
+*Defined in [http-promise.ts:6](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L6)*
 
 ___
 
@@ -92,7 +92,7 @@ ___
 
 ▸ **afterResult**(contextThen: *`function`*): [HttpPromise](_http_promise_.httppromise.md)<`T`>
 
-*Defined in [http-promise.ts:40](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L40)*
+*Defined in [http-promise.ts:40](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L40)*
 
 **Parameters:**
 
@@ -109,7 +109,7 @@ ___
 
 ▸ **catch**(when: *`function`*): [HttpPromise](_http_promise_.httppromise.md)<`T`>
 
-*Defined in [http-promise.ts:58](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L58)*
+*Defined in [http-promise.ts:58](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L58)*
 
 **Parameters:**
 
@@ -126,7 +126,7 @@ ___
 
 ▸ **createPromise**(handler: *`function`*): `void`
 
-*Defined in [http-promise.ts:9](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L9)*
+*Defined in [http-promise.ts:9](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L9)*
 
 **Parameters:**
 
@@ -143,7 +143,7 @@ ___
 
 ▸ **hasPromise**(promise: * `Promise`<`T`> &#124; `undefined`*): `boolean`
 
-*Defined in [http-promise.ts:65](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L65)*
+*Defined in [http-promise.ts:65](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L65)*
 
 **Parameters:**
 
@@ -160,7 +160,7 @@ ___
 
 ▸ **http**(): [Http](_http_.http.md)
 
-*Defined in [http-promise.ts:36](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L36)*
+*Defined in [http-promise.ts:36](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L36)*
 
 **Returns:** [Http](_http_.http.md)
 
@@ -171,7 +171,7 @@ ___
 
 ▸ **isResolved**(): `boolean`
 
-*Defined in [http-promise.ts:32](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L32)*
+*Defined in [http-promise.ts:32](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L32)*
 
 **Returns:** `boolean`
 
@@ -182,7 +182,7 @@ ___
 
 ▸ **next**(_promise: *`Promise`< `T` &#124; `void`>*): [HttpPromise](_http_promise_.httppromise.md)<`T`>
 
-*Defined in [http-promise.ts:69](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L69)*
+*Defined in [http-promise.ts:69](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L69)*
 
 **Parameters:**
 
@@ -199,7 +199,7 @@ ___
 
 ▸ **then**(when: *`function`*): `any`
 
-*Defined in [http-promise.ts:51](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http-promise.ts#L51)*
+*Defined in [http-promise.ts:51](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http-promise.ts#L51)*
 
 **Parameters:**
 

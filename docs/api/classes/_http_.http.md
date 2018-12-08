@@ -51,7 +51,7 @@
 
 ⊕ **new Http**(): [Http](_http_.http.md)
 
-*Defined in [http.ts:25](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L25)*
+*Defined in [http.ts:25](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L25)*
 
 **Returns:** [Http](_http_.http.md)
 
@@ -66,7 +66,7 @@ ___
 **● body**: * `undefined` &#124; `string`
 *
 
-*Defined in [http.ts:22](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L22)*
+*Defined in [http.ts:22](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L22)*
 
 ___
 <a id="hostname"></a>
@@ -75,7 +75,7 @@ ___
 
 **● hostname**: *`string`*
 
-*Defined in [http.ts:19](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L19)*
+*Defined in [http.ts:19](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L19)*
 
 ___
 <a id="method"></a>
@@ -84,7 +84,7 @@ ___
 
 **● method**: *[HttpMethod](../enums/_http_method_.httpmethod.md)*
 
-*Defined in [http.ts:21](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L21)*
+*Defined in [http.ts:21](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L21)*
 
 ___
 <a id="path"></a>
@@ -93,7 +93,7 @@ ___
 
 **● path**: *`string`*
 
-*Defined in [http.ts:20](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L20)*
+*Defined in [http.ts:20](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L20)*
 
 ___
 <a id="port"></a>
@@ -103,7 +103,7 @@ ___
 **● port**: * `undefined` &#124; `number`
 *
 
-*Defined in [http.ts:18](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L18)*
+*Defined in [http.ts:18](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L18)*
 
 ___
 <a id="protocol"></a>
@@ -112,7 +112,7 @@ ___
 
 **● protocol**: *[HttpProtocol](../enums/_http_protocol_.httpprotocol.md)*
 
-*Defined in [http.ts:17](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L17)*
+*Defined in [http.ts:17](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L17)*
 
 ___
 <a id="requestheaders"></a>
@@ -121,7 +121,7 @@ ___
 
 **● requestHeaders**: *`Array`<[HttpHeader](../interfaces/_http_header_.httpheader.md)>*
 
-*Defined in [http.ts:16](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L16)*
+*Defined in [http.ts:16](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L16)*
 
 ___
 <a id="responsetype"></a>
@@ -130,7 +130,7 @@ ___
 
 **● responseType**: *[HttpResponseType](../enums/_http_response_type_.httpresponsetype.md)*
 
-*Defined in [http.ts:24](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L24)*
+*Defined in [http.ts:24](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L24)*
 
 ___
 <a id="timeoutms"></a>
@@ -139,7 +139,7 @@ ___
 
 **● timeoutMS**: *`number`*
 
-*Defined in [http.ts:25](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L25)*
+*Defined in [http.ts:25](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L25)*
 
 ___
 <a id="uploaddata"></a>
@@ -148,7 +148,7 @@ ___
 
 **● uploadData**: *`any`*
 
-*Defined in [http.ts:23](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L23)*
+*Defined in [http.ts:23](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L23)*
 
 ___
 
@@ -160,7 +160,7 @@ ___
 
 ▸ **addAnyHeaders**(xhr: *`XMLHttpRequest`*): `void`
 
-*Defined in [http.ts:169](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L169)*
+*Defined in [http.ts:169](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L169)*
 
 **Parameters:**
 
@@ -177,7 +177,7 @@ ___
 
 ▸ **call**(method: *[HttpMethod](../enums/_http_method_.httpmethod.md)*, path: *`string`*, body?: *`any`*): [HttpPromise](_http_promise_.httppromise.md)<[HttpResponse](../interfaces/_http_response_.httpresponse.md)>
 
-*Defined in [http.ts:77](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L77)*
+*Defined in [http.ts:77](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L77)*
 
 **Parameters:**
 
@@ -196,7 +196,7 @@ ___
 
 ▸ **context**(task: *`function`*): [Http](_http_.http.md)
 
-*Defined in [http.ts:62](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L62)*
+*Defined in [http.ts:62](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L62)*
 
 **Parameters:**
 
@@ -213,7 +213,7 @@ ___
 
 ▸ **createRequestTo**(url: *`string`*): `XMLHttpRequest`
 
-*Defined in [http.ts:105](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L105)*
+*Defined in [http.ts:105](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L105)*
 
 **Parameters:**
 
@@ -230,7 +230,7 @@ ___
 
 ▸ **createResponseObject**(xhr: *`XMLHttpRequest`*): [HttpResponse](../interfaces/_http_response_.httpresponse.md)
 
-*Defined in [http.ts:124](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L124)*
+*Defined in [http.ts:124](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L124)*
 
 **Parameters:**
 
@@ -247,7 +247,7 @@ ___
 
 ▸ **expectedData**(type: *[HttpResponseType](../enums/_http_response_type_.httpresponsetype.md)*): `this`
 
-*Defined in [http.ts:52](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L52)*
+*Defined in [http.ts:52](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L52)*
 
 **Parameters:**
 
@@ -264,7 +264,7 @@ ___
 
 ▸ **header**(name: *`string`*, value: *`string`*): [Http](_http_.http.md)
 
-*Defined in [http.ts:47](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L47)*
+*Defined in [http.ts:47](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L47)*
 
 **Parameters:**
 
@@ -282,7 +282,7 @@ ___
 
 ▸ **host**(protocol: *[HttpProtocol](../enums/_http_protocol_.httpprotocol.md)*, hostname: *`string`*, port?: * `undefined` &#124; `number`*): `this`
 
-*Defined in [http.ts:40](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L40)*
+*Defined in [http.ts:40](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L40)*
 
 **Parameters:**
 
@@ -301,7 +301,7 @@ ___
 
 ▸ **setErrorHandlers**(xhr: *`XMLHttpRequest`*, reject: *`function`*): `void`
 
-*Defined in [http.ts:112](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L112)*
+*Defined in [http.ts:112](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L112)*
 
 **Parameters:**
 
@@ -319,7 +319,7 @@ ___
 
 ▸ **setHandlers**(xhr: *`XMLHttpRequest`*): [HttpPromise](_http_promise_.httppromise.md)<[HttpResponse](../interfaces/_http_response_.httpresponse.md)>
 
-*Defined in [http.ts:177](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L177)*
+*Defined in [http.ts:177](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L177)*
 
 **Parameters:**
 
@@ -336,7 +336,7 @@ ___
 
 ▸ **setOnCompleteHandler**(xhr: *`XMLHttpRequest`*, resolve: *`function`*, reject: *`function`*): `void`
 
-*Defined in [http.ts:153](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L153)*
+*Defined in [http.ts:153](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L153)*
 
 **Parameters:**
 
@@ -355,7 +355,7 @@ ___
 
 ▸ **syncPortAndProtocol**(): `void`
 
-*Defined in [http.ts:97](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L97)*
+*Defined in [http.ts:97](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L97)*
 
 **Returns:** `void`
 
@@ -366,7 +366,7 @@ ___
 
 ▸ **timeoutAt**(duration: *`number`*): [Http](_http_.http.md)
 
-*Defined in [http.ts:57](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/http.ts#L57)*
+*Defined in [http.ts:57](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/http.ts#L57)*
 
 **Parameters:**
 

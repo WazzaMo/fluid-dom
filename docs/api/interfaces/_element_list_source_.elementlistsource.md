@@ -27,7 +27,7 @@
 
 **● children**: *`any`*
 
-*Defined in [element-list-source.ts:13](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/element-list-source.ts#L13)*
+*Defined in [element-list-source.ts:13](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/element-list-source.ts#L13)*
 
 ___
 <a id="class"></a>
@@ -37,7 +37,7 @@ ___
 **● class**: * `undefined` &#124; `string`
 *
 
-*Defined in [element-list-source.ts:12](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/element-list-source.ts#L12)*
+*Defined in [element-list-source.ts:12](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/element-list-source.ts#L12)*
 
 ___
 <a id="mock"></a>
@@ -47,7 +47,7 @@ ___
 **● mock**: * `undefined` &#124; `false` &#124; `true`
 *
 
-*Defined in [element-list-source.ts:15](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/element-list-source.ts#L15)*
+*Defined in [element-list-source.ts:15](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/element-list-source.ts#L15)*
 
 ___
 <a id="parent"></a>
@@ -56,7 +56,7 @@ ___
 
 **● parent**: *[IElement](_i_element_.ielement.md)*
 
-*Defined in [element-list-source.ts:14](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/element-list-source.ts#L14)*
+*Defined in [element-list-source.ts:14](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/element-list-source.ts#L14)*
 
 ___
 <a id="selector"></a>
@@ -66,7 +66,7 @@ ___
 **● selector**: * `undefined` &#124; `string`
 *
 
-*Defined in [element-list-source.ts:10](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/element-list-source.ts#L10)*
+*Defined in [element-list-source.ts:10](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/element-list-source.ts#L10)*
 
 ___
 <a id="tagname"></a>
@@ -76,7 +76,7 @@ ___
 **● tagName**: * `undefined` &#124; `string`
 *
 
-*Defined in [element-list-source.ts:11](https://github.com/WazzaMo/fluid-dom/blob/0ae4ee4/src/element-list-source.ts#L11)*
+*Defined in [element-list-source.ts:11](https://github.com/WazzaMo/fluid-dom/blob/cb271c8/src/element-list-source.ts#L11)*
 
 ___
 
