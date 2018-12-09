@@ -1,4 +1,4 @@
-var dom = new fluid.DOM()
+var dom = new fluid.Doc()
 
 function findElement_id() {
   var test = new spec.Test('findElement_id')

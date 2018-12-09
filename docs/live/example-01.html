@@ -56,7 +56,7 @@
 <script src="./fluid-dom.bundle.js"></script>
 
 <script data-source="setup-dom">
-    var dom = new fluid.DOM()
+    var dom = new fluid.Doc()
 </script>
 <script data-source="replace">
     // -- Replace Demo --
@@ -72,7 +72,7 @@
         var button = attrib_demo.selectFirst('button')
         var hidables = attrib_demo.findAll({selector:'.hidable'})
         button.on({
-            event: dom.events.CLICK,
+            event: 'click',//fluid.Events.CLICK,
             handler: function() {
                 hidables.forEach( function( thing) {
                     if (thing.attributes().has('hidden')) {

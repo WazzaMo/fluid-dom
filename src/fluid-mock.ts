@@ -18,6 +18,13 @@ export { MockSelectorParser } from './mock-selector-parser';
 export { MockElement } from './mock-element';
 export { MockAttributes } from './mock-attributes';
 export { MockClasses } from './mock-classes';
+import { Tag, EventSet, createEventSet } from './constants';
 
 export * from './selector-lexer';
+
+
+/**
+ * List of events for convenience with intelli-sense.
+ */
+export const Events: EventSet = createEventSet();
 

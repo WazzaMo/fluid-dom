@@ -18,7 +18,7 @@ import {
   IFluidDocument
 } from './i-fluid-document';
 
-import { EVENT_LIST, Tag } from './constants';
+import { Tag, EventSet, createEventSet } from './constants';
 
 export { Http } from './http';
 export { HttpMethod } from "./http-method";
@@ -29,7 +29,8 @@ export { HttpResponse } from "./http-response";
 /**
  * List of events for convenience with intelli-sense.
  */
-export const Events = EVENT_LIST;
+export const Events: EventSet = createEventSet();
+
 
 
 class DomFluidDocument implements IFluidDocument {

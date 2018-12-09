@@ -37,3 +37,14 @@ export const EVENT_LIST = [
   'visibilitychange',
   'wheel'
 ];
+
+export type EventSet = {[key: string] : string};
+
+export function createEventSet() : EventSet {
+  let events: EventSet = {};
+  for(var event of EVENT_LIST) {
+    let key = event.toUpperCase();
+    events[key] = event;
+  }
+  return events;
+}
